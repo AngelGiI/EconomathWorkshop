@@ -1,0 +1,229 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 16:08:12 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  Sets
+   2      i plantas de producci贸n / Seattle, San-Diego /
+   3      j mercados              / New-York, Chicago, Topeka/;
+   4   
+   5  Parameters
+   6      a(i) capacidad de la planta i
+   7              / Seattle        350
+   8                San-Diego     600 /
+   9   
+  10      b(j) demanda del mercado j
+  11              / New-York      325
+  12                Chicago       300
+  13                Topeka        275 / ;
+  14   
+  15  Table d(i,j) distancia en miles de millas
+  16                  New-York        Chicago        Topeka
+  17      Seattle        2.5            1.7           1.8
+  18      San-Diego      2.5            1.8           1.4  ;
+  19   
+  20  Scalar f coste por miles de millas /90/ ;
+  21   
+  22  Parameter c(i,j) coste del transporte por plante y mercado;
+  23   
+  24          c(i,j) = f*d(i,j)/1000;
+  25   
+  26  Variables
+  27      x(i,j) Uds del producto que se envian de i a j
+  28      z      coste total del transporte en miles de d贸lares;
+  29   
+  30  positive variable x ;
+  31   
+  32  Equations
+  33      cost        funcion objetivo del problema
+  34      supply(i)   no se supera tope de producci贸n
+  35      demand(j)   se satisface la demanda;
+  36   
+  37      cost .. z =e= sum((i,j), c(i,j)*x(i,j)) ;
+  38      supply(i) .. sum(j, x(i,j)) =l= a(i) ;
+  39      demand(j) .. sum(i, x(i,j)) =g= b(j) ;
+  40   
+  41  Model transport /all/ ;
+  42  solve transport using lp minimizing z ;
+  43  display x.l, x.m ;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 16:08:12 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE transport Using LP From line 42
+
+
+---- cost  =E=  funcion objetivo del problema
+
+cost..  - 0.225*x(Seattle,New-York) - 0.153*x(Seattle,Chicago) - 0.162*x(Seattle,Topeka) - 0.225*x(San-Diego,New-York) - 0.162*x(San-Diego,Chicago) - 0.126*x(San-Diego,Topeka) + z =E= 0 ; (LHS = 0)
+     
+
+---- supply  =L=  no se supera tope de producci贸n
+
+supply(Seattle)..  x(Seattle,New-York) + x(Seattle,Chicago) + x(Seattle,Topeka) =L= 350 ; (LHS = 0)
+     
+supply(San-Diego)..  x(San-Diego,New-York) + x(San-Diego,Chicago) + x(San-Diego,Topeka) =L= 600 ; (LHS = 0)
+     
+
+---- demand  =G=  se satisface la demanda
+
+demand(New-York)..  x(Seattle,New-York) + x(San-Diego,New-York) =G= 325 ; (LHS = 0, INFES = 325 ****)
+     
+demand(Chicago)..  x(Seattle,Chicago) + x(San-Diego,Chicago) =G= 300 ; (LHS = 0, INFES = 300 ****)
+     
+demand(Topeka)..  x(Seattle,Topeka) + x(San-Diego,Topeka) =G= 275 ; (LHS = 0, INFES = 275 ****)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 16:08:12 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE transport Using LP From line 42
+
+
+---- x  Uds del producto que se envian de i a j
+
+x(Seattle,New-York)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -0.225   cost
+        1       supply(Seattle)
+        1       demand(New-York)
+
+x(Seattle,Chicago)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -0.153   cost
+        1       supply(Seattle)
+        1       demand(Chicago)
+
+x(Seattle,Topeka)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -0.162   cost
+        1       supply(Seattle)
+        1       demand(Topeka)
+
+REMAINING 3 ENTRIES SKIPPED
+
+---- z  coste total del transporte en miles de d贸lares
+
+z
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       cost
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 16:08:12 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE transport Using LP From line 42
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS            6
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES            7
+NON ZERO ELEMENTS            19
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 16:08:12 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE transport Using LP From line 42
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   transport           OBJECTIVE  z
+     TYPE    LP                  DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  42
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE              153.6750
+
+ RESOURCE USAGE, LIMIT          0.015 10000000000.000
+ ITERATION COUNT, LIMIT         4    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:          153.675000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU cost                .              .              .             1.0000      
+
+  cost  funcion objetivo del problema
+
+---- EQU supply  no se supera tope de producci贸n
+
+                 LOWER          LEVEL          UPPER         MARGINAL
+
+Seattle          -INF          350.0000       350.0000         EPS         
+San-Diego        -INF          550.0000       600.0000          .          
+
+---- EQU demand  se satisface la demanda
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+New-York       325.0000       325.0000        +INF            0.2250      
+Chicago        300.0000       300.0000        +INF            0.1530      
+Topeka         275.0000       275.0000        +INF            0.1260      
+
+---- VAR x  Uds del producto que se envian de i a j
+
+                          LOWER          LEVEL          UPPER         MARGINAL
+
+Seattle  .New-York          .            50.0000        +INF             .          
+Seattle  .Chicago           .           300.0000        +INF             .          
+Seattle  .Topeka            .              .            +INF            0.0360      
+San-Diego.New-York          .           275.0000        +INF             .          
+San-Diego.Chicago           .              .            +INF            0.0090      
+San-Diego.Topeka            .           275.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z                 -INF          153.6750        +INF             .          
+
+  z  coste total del transporte en miles de d贸lares
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 16:08:12 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+----     43 VARIABLE x.L  Uds del producto que se envian de i a j
+
+             New-York     Chicago      Topeka
+
+Seattle        50.000     300.000
+San-Diego     275.000                 275.000
+
+
+----     43 VARIABLE x.M  Uds del producto que se envian de i a j
+
+              Chicago      Topeka
+
+Seattle                     0.036
+San-Diego       0.009
+
+
+
+EXECUTION TIME       =        0.047 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoA駉\SegundoCuatri\TECO\Programacion\Ejemplo.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoA駉\SegundoCuatri\TECO\Programacion\Ejemplo.lst

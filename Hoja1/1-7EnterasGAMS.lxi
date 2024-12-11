@@ -1,0 +1,25 @@
+B 3 C o m p i l a t i o n
+B 66 Equation Listing    SOLVE aceites Using MIP From line 56
+D 69 fobj
+D 74 balance
+D 85 refV
+D 96 refNV
+D 107 durmin
+D 118 durmax
+B 130 Column Listing      SOLVE aceites Using MIP From line 56
+E 133 x
+E 152 y
+E 180 Alm
+E 202 z
+B 210 Model Statistics    SOLVE aceites Using MIP From line 56
+B 223 Solution Report     SOLVE aceites Using MIP From line 56
+F 266 fobj
+F 268 balance
+F 303 refV
+F 314 refNV
+F 325 durmin
+F 336 durmax
+G 347 x
+G 382 y
+G 417 Alm
+G 454 z

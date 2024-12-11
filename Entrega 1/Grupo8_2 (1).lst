@@ -1,0 +1,842 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 06/15/22 19:31:25 Page 1
+Practica 1: Emergencia en Niger.
+C o m p i l a t i o n
+
+
+   2   
+   3  Sets
+   4      i poblaciones a las que tiene que llegar la ayuda
+   5                                 / Niamey, Gaya, Dosso, Tahoua, Maradi,
+   6                                   Tanout, Agadez, Zinder/
+   7      k tipos de camiones /Tipo1, Tipo2/
+   8      w nï¿½mero de funciones objetivo /w1, w2, w3, w4/
+   9      p(i) /Dosso, Tahoua, Maradi, Tanout/
+  10  ;
+  11   
+  12  Alias (i,j);
+  13   
+  14  Table
+  15      a(i,j) 1 si existe ruta de ciudad i a j
+  16                    Niamey   Gaya  Dosso  Tahoua  Maradi  Tanout  Agadez  Zinder
+  17          Niamey      0       1      1      1       0        0       0       0
+  18          Gaya        1       0      1      0       1        0       0       0
+  19          Dosso       1       1      0      1       1        0       0       0
+  20          Tahoua      1       0      1      0       1        1       1       0
+  21          Maradi      0       1      1      1       0        1       0       1
+  22          Tanout      0       0      0      1       1        0       1       1
+  23          Agadez      0       0      0      1       0        1       0       0
+  24          Zinder      0       0      0      0       1        1       0       0
+  25  ;
+  26   
+  27   
+  28   
+  29  Table
+  30       dist(i,j) distancia en km de pueblo i a j
+  31                      Niamey  Gaya  Dosso  Tahoua  Maradi  Tanout  Agadez  Zinder
+  32          Niamey      9999    286   138     564    9999    9999    9999    9999
+  33          Gaya        286     9999  151     9999   626     9999    9999    9999
+  34          Dosso       138     151   9999    413    523     9999    9999    9999
+  35          Tahoua      564     9999  413     9999   347     486     406     9999
+  36          Maradi      9999    626   523     347    9999    313     9999    235
+  37          Tanout      9999    9999  9999    486    313     9999    300     145
+  38          Agadez      9999    9999  9999    406    9999    300     9999    9999
+  39          Zinder      9999    9999  9999    9999   235     145     9999    9999
+  40  ;
+  41   
+  42  Table
+  43      maxcam(i,k) numero maximo de camiones disponibles tipo k en ciudad i
+  44                   Tipo1   Tipo2
+  45          Niamey    60       20
+  46          Gaya      55       40
+  47          Dosso     10       20
+  48          Tahoua    08       30
+  49          Maradi    05       05
+  50          Tanout    00       00
+  51          Agadez    00       00
+  52          Zinder    00       00
+  53  ;
+  54  Parameters
+  55      cfix(k) coste fijo de mover camion tipo k vacio por cada km
+  56                           / Tipo1     0.10
+  57                             Tipo2     0.15 /
+  58      capcam(k) capacidad maxima camion tipo k
+  59                           / Tipo1     1.5
+  60                             Tipo2     3.0 /
+  61  ;
+  62   
+  63  Scalars
+  64      cton        coste variable de transporte por tonelada por cada km           /  0.025 /
+  65      ayuda       toneladas totales de ayuda disponibles para repartir            /   450  /
+  66      ppto        presupuesto disponible para llevar a cabo la operacion          / 80000  /
+  67      demAgadez   demanda Agadez                                                  /   237  /
+  68  ;
+  69   
+  70  Variables
+  71      X(i,j,k) numero de camiones k que van de i a j
+  72      Y(i,j)   toneladas que van de i a j
+  73      F_Cost   Coste total
+  74      Z        objetivo
+  75  ;
+  76  Integer Variable X;
+  77  Positive Variable Y, F_Cost;
+  78  Binary Variable d,sigma;
+  79   
+  80   
+  81  Equations
+  82      fobj_coste  Coste total
+  83   
+  84      mincost         minimizar el coste total
+  85      costemax        cota superior coste
+  86      demanda         cota demanda
+  87      camiones(i,k)   cota superior camiones disponibles
+  88      cammax(i,j)   controla que no se manden mas toneladas que camiones mandados
+  89      demandaAgadez   demanda de Agadez
+  90      agsgsgsgghrt
+  91      rutascont(p)  rutas continuas
+  92      ruta1
+  93      ruta2
+  94      j1
+  95      j2
+  96  ;
+  97   
+  98      fobj_coste .. Z =E= F_Cost;
+  99   
+ 100      mincost          .. F_Cost =E= 2*sum((i,j,k), dist(i,j)*X(i,j,k)*cfix(k)) + sum((i,j), dist(i,j)*Y(i,j)*cton);
+ 101      costemax         .. F_Cost =L= ppto;
+ 102      demanda          .. sum(j, Y('Niamey',j)+ Y('Gaya',j)) =E= ayuda;
+ 103      camiones(i,k)    .. sum(j, X(i,j,k)) =L= maxcam(i,k)+sum(j, X(j,i,k));
+ 104      cammax(i,j)      .. Y(i,j) =L= sum(k, X(i,j,k)*capcam(k));
+ 105      demandaAgadez    .. sum(i, Y(i,'Agadez')) =L= demAgadez;
+ 106      agsgsgsgghrt     .. sum(i, Y(i,'Agadez')) + sum(i, Y(i,'Zinder')) =E= ayuda;
+ 107      rutascont(p)     .. sum(i, Y(i,p))-sum(j, Y(p,j)) =E= 0;
+ 108      ruta1(i,j,k)     .. X(i,j,k)=E=a(i,j)*X(i,j,k);
+ 109      ruta2(i,j)       .. Y(i,j)=E=a(i,j)*Y(i,j);
+ 110      j1(i,j)$(ord(i)>ord(j))    .. Y(i,j)=L=ayuda*sigma;
+ 111      j2(i,j)$(ord(i)>ord(j))    .. Y(j,i)=L=ayuda*(1-sigma);
+ 112  Model transporte /fobj_coste, mincost,costemax, demanda,camiones,j1,j2,agsgsgsgghrt ,cammax, demandaAgadez,rutascont/;
+ 113  solve transporte using mip minimizing Z ;
+ 114  display Z.l,X.l, Y.l;
+ 115   
+ 116   
+
+
+COMPILATION TIME     =        0.015 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 06/15/22 19:31:25 Page 2
+Practica 1: Emergencia en Niger.
+Equation Listing    SOLVE transporte Using MIP From line 113
+
+
+---- fobj_coste  =E=  Coste total
+
+fobj_coste..  - F_Cost + Z =E= 0 ; (LHS = 0)
+     
+
+---- mincost  =E=  minimizar el coste total
+
+mincost..  - 1999.8*X(Niamey,Niamey,Tipo1) - 2999.7*X(Niamey,Niamey,Tipo2) - 57.2*X(Niamey,Gaya,Tipo1) - 85.8*X(Niamey,Gaya,Tipo2) - 27.6*X(Niamey,Dosso,Tipo1) - 41.4*X(Niamey,Dosso,Tipo2) - 112.8*X(Niamey,Tahoua,Tipo1) - 169.2*X(Niamey,Tahoua,Tipo2) - 1999.8*X(Niamey,Maradi,Tipo1) - 2999.7*X(Niamey,Maradi,Tipo2) - 1999.8*X(Niamey,Tanout,Tipo1) - 2999.7*X(Niamey,Tanout,Tipo2) - 1999.8*X(Niamey,Agadez,Tipo1) - 2999.7*X(Niamey,Agadez,Tipo2) - 1999.8*X(Niamey,Zinder,Tipo1) - 2999.7*X(Niamey,Zinder,Tipo2) - 57.2*X(Gaya,Niamey,Tipo1) - 85.8*X(Gaya,Niamey,Tipo2) - 1999.8*X(Gaya,Gaya,Tipo1) - 2999.7*X(Gaya,Gaya,Tipo2) - 30.2*X(Gaya,Dosso,Tipo1) - 45.3*X(Gaya,Dosso,Tipo2) - 1999.8*X(Gaya,Tahoua,Tipo1) - 2999.7*X(Gaya,Tahoua,Tipo2) - 125.2*X(Gaya,Maradi,Tipo1) - 187.8*X(Gaya,Maradi,Tipo2) - 1999.8*X(Gaya,Tanout,Tipo1) - 2999.7*X(Gaya,Tanout,Tipo2) - 1999.8*X(Gaya,Agadez,Tipo1) - 2999.7*X(Gaya,Agadez,Tipo2) - 1999.8*X(Gaya,Zinder,Tipo1) - 2999.7*X(Gaya,Zinder,Tipo2) - 27.6*X(Dosso,Niamey,Tipo1) - 41.4*X(Dosso,Niamey,Tipo2) - 30.2*X(Dosso,Gaya,Tipo1) - 45.3*X(Dosso,Gaya,Tipo2) - 1999.8*X(Dosso,Dosso,Tipo1) - 2999.7*X(Dosso,Dosso,Tipo2) - 82.6*X(Dosso,Tahoua,Tipo1) - 123.9*X(Dosso,Tahoua,Tipo2) - 104.6*X(Dosso,Maradi,Tipo1) - 156.9*X(Dosso,Maradi,Tipo2) - 1999.8*X(Dosso,Tanout,Tipo1) - 2999.7*X(Dosso,Tanout,Tipo2) - 1999.8*X(Dosso,Agadez,Tipo1) - 2999.7*X(Dosso,Agadez,Tipo2) - 1999.8*X(Dosso,Zinder,Tipo1) - 2999.7*X(Dosso,Zinder,Tipo2) - 112.8*X(Tahoua,Niamey,Tipo1) - 169.2*X(Tahoua,Niamey,Tipo2) - 1999.8*X(Tahoua,Gaya,Tipo1) - 2999.7*X(Tahoua,Gaya,Tipo2) - 82.6*X(Tahoua,Dosso,Tipo1) - 123.9*X(Tahoua,Dosso,Tipo2) - 1999.8*X(Tahoua,Tahoua,Tipo1) - 2999.7*X(Tahoua,Tahoua,Tipo2) - 69.4*X(Tahoua,Maradi,Tipo1) - 104.1*X(Tahoua,Maradi,Tipo2) - 97.2*X(Tahoua,Tanout,Tipo1) - 145.8*X(Tahoua,Tanout,Tipo2) - 81.2*X(Tahoua,Agadez,Tipo1) - 121.8*X(Tahoua,Agadez,Tipo2) - 1999.8*X(Tahoua,Zinder,Tipo1) - 2999.7*X(Tahoua,Zinder,Tipo2) - 1999.8*X(Maradi,Niamey,Tipo1) - 2999.7*X(Maradi,Niamey,Tipo2) - 125.2*X(Maradi,Gaya,Tipo1) - 187.8*X(Maradi,Gaya,Tipo2) - 104.6*X(Maradi,Dosso,Tipo1) - 156.9*X(Maradi,Dosso,Tipo2) - 69.4*X(Maradi,Tahoua,Tipo1) - 104.1*X(Maradi,Tahoua,Tipo2) - 1999.8*X(Maradi,Maradi,Tipo1) - 2999.7*X(Maradi,Maradi,Tipo2) - 62.6*X(Maradi,Tanout,Tipo1) - 93.9*X(Maradi,Tanout,Tipo2) - 1999.8*X(Maradi,Agadez,Tipo1) - 2999.7*X(Maradi,Agadez,Tipo2) - 47*X(Maradi,Zinder,Tipo1) - 70.5*X(Maradi,Zinder,Tipo2) - 1999.8*X(Tanout,Niamey,Tipo1) - 2999.7*X(Tanout,Niamey,Tipo2) - 1999.8*X(Tanout,Gaya,Tipo1) - 2999.7*X(Tanout,Gaya,Tipo2) - 1999.8*X(Tanout,Dosso,Tipo1) - 2999.7*X(Tanout,Dosso,Tipo2) - 97.2*X(Tanout,Tahoua,Tipo1) - 145.8*X(Tanout,Tahoua,Tipo2) - 62.6*X(Tanout,Maradi,Tipo1) - 93.9*X(Tanout,Maradi,Tipo2) - 1999.8*X(Tanout,Tanout,Tipo1) - 2999.7*X(Tanout,Tanout,Tipo2) - 60*X(Tanout,Agadez,Tipo1) - 90*X(Tanout,Agadez,Tipo2) - 29*X(Tanout,Zinder,Tipo1) - 43.5*X(Tanout,Zinder,Tipo2) - 1999.8*X(Agadez,Niamey,Tipo1) - 2999.7*X(Agadez,Niamey,Tipo2) - 1999.8*X(Agadez,Gaya,Tipo1) - 2999.7*X(Agadez,Gaya,Tipo2) - 1999.8*X(Agadez,Dosso,Tipo1) - 2999.7*X(Agadez,Dosso,Tipo2) - 81.2*X(Agadez,Tahoua,Tipo1) - 121.8*X(Agadez,Tahoua,Tipo2) - 1999.8*X(Agadez,Maradi,Tipo1) - 2999.7*X(Agadez,Maradi,Tipo2) - 60*X(Agadez,Tanout,Tipo1) - 90*X(Agadez,Tanout,Tipo2) - 1999.8*X(Agadez,Agadez,Tipo1) - 2999.7*X(Agadez,Agadez,Tipo2) - 1999.8*X(Agadez,Zinder,Tipo1) - 2999.7*X(Agadez,Zinder,Tipo2) - 1999.8*X(Zinder,Niamey,Tipo1) - 2999.7*X(Zinder,Niamey,Tipo2) - 1999.8*X(Zinder,Gaya,Tipo1) - 2999.7*X(Zinder,Gaya,Tipo2) - 1999.8*X(Zinder,Dosso,Tipo1) - 2999.7*X(Zinder,Dosso,Tipo2) - 1999.8*X(Zinder,Tahoua,Tipo1) - 2999.7*X(Zinder,Tahoua,Tipo2) - 47*X(Zinder,Maradi,Tipo1) - 70.5*X(Zinder,Maradi,Tipo2) - 29*X(Zinder,Tanout,Tipo1) - 43.5*X(Zinder,Tanout,Tipo2) - 1999.8*X(Zinder,Agadez,Tipo1) - 2999.7*X(Zinder,Agadez,Tipo2) - 1999.8*X(Zinder,Zinder,Tipo1) - 2999.7*X(Zinder,Zinder,Tipo2) - 249.975*Y(Niamey,Niamey) - 7.15*Y(Niamey,Gaya) - 3.45*Y(Niamey,Dosso) - 14.1*Y(Niamey,Tahoua) - 249.975*Y(Niamey,Maradi) - 249.975*Y(Niamey,Tanout) - 249.975*Y(Niamey,Agadez) - 249.975*Y(Niamey,Zinder) - 7.15*Y(Gaya,Niamey) - 249.975*Y(Gaya,Gaya) - 3.775*Y(Gaya,Dosso) - 249.975*Y(Gaya,Tahoua) - 15.65*Y(Gaya,Maradi) - 249.975*Y(Gaya,Tanout) - 249.975*Y(Gaya,Agadez) - 249.975*Y(Gaya,Zinder) - 3.45*Y(Dosso,Niamey) - 3.775*Y(Dosso,Gaya) - 249.975*Y(Dosso,Dosso) - 10.325*Y(Dosso,Tahoua) - 13.075*Y(Dosso,Maradi) - 249.975*Y(Dosso,Tanout) - 249.975*Y(Dosso,Agadez) - 249.975*Y(Dosso,Zinder) - 14.1*Y(Tahoua,Niamey) - 249.975*Y(Tahoua,Gaya) - 10.325*Y(Tahoua,Dosso) - 249.975*Y(Tahoua,Tahoua) - 8.675*Y(Tahoua,Maradi) - 12.15*Y(Tahoua,Tanout) - 10.15*Y(Tahoua,Agadez) - 249.975*Y(Tahoua,Zinder) - 249.975*Y(Maradi,Niamey) - 15.65*Y(Maradi,Gaya) - 13.075*Y(Maradi,Dosso) - 8.675*Y(Maradi,Tahoua) - 249.975*Y(Maradi,Maradi) - 7.825*Y(Maradi,Tanout) - 249.975*Y(Maradi,Agadez) - 5.875*Y(Maradi,Zinder) - 249.975*Y(Tanout,Niamey) - 249.975*Y(Tanout,Gaya) - 249.975*Y(Tanout,Dosso) - 12.15*Y(Tanout,Tahoua) - 7.825*Y(Tanout,Maradi) - 249.975*Y(Tanout,Tanout) - 7.5*Y(Tanout,Agadez) - 3.625*Y(Tanout,Zinder) - 249.975*Y(Agadez,Niamey) - 249.975*Y(Agadez,Gaya) - 249.975*Y(Agadez,Dosso) - 10.15*Y(Agadez,Tahoua) - 249.975*Y(Agadez,Maradi) - 7.5*Y(Agadez,Tanout) - 249.975*Y(Agadez,Agadez) - 249.975*Y(Agadez,Zinder) - 249.975*Y(Zinder,Niamey) - 249.975*Y(Zinder,Gaya) - 249.975*Y(Zinder,Dosso) - 249.975*Y(Zinder,Tahoua) - 5.875*Y(Zinder,Maradi) - 3.625*Y(Zinder,Tanout) - 249.975*Y(Zinder,Agadez) - 249.975*Y(Zinder,Zinder) + F_Cost =E= 0 ; (LHS = 0)
+     
+
+---- costemax  =L=  cota superior coste
+
+costemax..  F_Cost =L= 80000 ; (LHS = 0)
+     
+
+---- demanda  =E=  cota demanda
+
+demanda..  Y(Niamey,Niamey) + Y(Niamey,Gaya) + Y(Niamey,Dosso) + Y(Niamey,Tahoua) + Y(Niamey,Maradi) + Y(Niamey,Tanout) + Y(Niamey,Agadez) + Y(Niamey,Zinder) + Y(Gaya,Niamey) + Y(Gaya,Gaya) + Y(Gaya,Dosso) + Y(Gaya,Tahoua) + Y(Gaya,Maradi) + Y(Gaya,Tanout) + Y(Gaya,Agadez) + Y(Gaya,Zinder) =E= 450 ; (LHS = 0, INFES = 450 ****)
+     
+
+---- camiones  =L=  cota superior camiones disponibles
+
+camiones(Niamey,Tipo1)..  X(Niamey,Gaya,Tipo1) + X(Niamey,Dosso,Tipo1) + X(Niamey,Tahoua,Tipo1) + X(Niamey,Maradi,Tipo1) + X(Niamey,Tanout,Tipo1) + X(Niamey,Agadez,Tipo1) + X(Niamey,Zinder,Tipo1) - X(Gaya,Niamey,Tipo1) - X(Dosso,Niamey,Tipo1) - X(Tahoua,Niamey,Tipo1) - X(Maradi,Niamey,Tipo1) - X(Tanout,Niamey,Tipo1) - X(Agadez,Niamey,Tipo1) - X(Zinder,Niamey,Tipo1) =L= 60 ; (LHS = 0)
+     
+camiones(Niamey,Tipo2)..  X(Niamey,Gaya,Tipo2) + X(Niamey,Dosso,Tipo2) + X(Niamey,Tahoua,Tipo2) + X(Niamey,Maradi,Tipo2) + X(Niamey,Tanout,Tipo2) + X(Niamey,Agadez,Tipo2) + X(Niamey,Zinder,Tipo2) - X(Gaya,Niamey,Tipo2) - X(Dosso,Niamey,Tipo2) - X(Tahoua,Niamey,Tipo2) - X(Maradi,Niamey,Tipo2) - X(Tanout,Niamey,Tipo2) - X(Agadez,Niamey,Tipo2) - X(Zinder,Niamey,Tipo2) =L= 20 ; (LHS = 0)
+     
+camiones(Gaya,Tipo1)..  - X(Niamey,Gaya,Tipo1) + X(Gaya,Niamey,Tipo1) + X(Gaya,Dosso,Tipo1) + X(Gaya,Tahoua,Tipo1) + X(Gaya,Maradi,Tipo1) + X(Gaya,Tanout,Tipo1) + X(Gaya,Agadez,Tipo1) + X(Gaya,Zinder,Tipo1) - X(Dosso,Gaya,Tipo1) - X(Tahoua,Gaya,Tipo1) - X(Maradi,Gaya,Tipo1) - X(Tanout,Gaya,Tipo1) - X(Agadez,Gaya,Tipo1) - X(Zinder,Gaya,Tipo1) =L= 55 ; (LHS = 0)
+     
+REMAINING 13 ENTRIES SKIPPED
+
+
+---- j1  =L=  
+
+j1(Gaya,Niamey)..  Y(Gaya,Niamey) - 450*sigma =L= 0 ; (LHS = 0)
+     
+j1(Dosso,Niamey)..  Y(Dosso,Niamey) - 450*sigma =L= 0 ; (LHS = 0)
+     
+j1(Dosso,Gaya)..  Y(Dosso,Gaya) - 450*sigma =L= 0 ; (LHS = 0)
+     
+REMAINING 25 ENTRIES SKIPPED
+
+
+---- j2  =L=  
+
+j2(Gaya,Niamey)..  Y(Niamey,Gaya) + 450*sigma =L= 450 ; (LHS = 0)
+     
+j2(Dosso,Niamey)..  Y(Niamey,Dosso) + 450*sigma =L= 450 ; (LHS = 0)
+     
+j2(Dosso,Gaya)..  Y(Gaya,Dosso) + 450*sigma =L= 450 ; (LHS = 0)
+     
+REMAINING 25 ENTRIES SKIPPED
+
+
+---- agsgsgsgghrt  =E=  
+
+agsgsgsgghrt..  Y(Niamey,Agadez) + Y(Niamey,Zinder) + Y(Gaya,Agadez) + Y(Gaya,Zinder) + Y(Dosso,Agadez) + Y(Dosso,Zinder) + Y(Tahoua,Agadez) + Y(Tahoua,Zinder) + Y(Maradi,Agadez) + Y(Maradi,Zinder) + Y(Tanout,Agadez) + Y(Tanout,Zinder) + Y(Agadez,Agadez) + Y(Agadez,Zinder) + Y(Zinder,Agadez) + Y(Zinder,Zinder) =E= 450 ; (LHS = 0, INFES = 450 ****)
+     
+
+---- cammax  =L=  controla que no se manden mas toneladas que camiones mandados
+
+cammax(Niamey,Niamey)..  - 1.5*X(Niamey,Niamey,Tipo1) - 3*X(Niamey,Niamey,Tipo2) + Y(Niamey,Niamey) =L= 0 ; (LHS = 0)
+     
+cammax(Niamey,Gaya)..  - 1.5*X(Niamey,Gaya,Tipo1) - 3*X(Niamey,Gaya,Tipo2) + Y(Niamey,Gaya) =L= 0 ; (LHS = 0)
+     
+cammax(Niamey,Dosso)..  - 1.5*X(Niamey,Dosso,Tipo1) - 3*X(Niamey,Dosso,Tipo2) + Y(Niamey,Dosso) =L= 0 ; (LHS = 0)
+     
+REMAINING 61 ENTRIES SKIPPED
+
+
+---- demandaAgadez  =L=  demanda de Agadez
+
+demandaAgadez..  Y(Niamey,Agadez) + Y(Gaya,Agadez) + Y(Dosso,Agadez) + Y(Tahoua,Agadez) + Y(Maradi,Agadez) + Y(Tanout,Agadez) + Y(Agadez,Agadez) + Y(Zinder,Agadez) =L= 237 ; (LHS = 0)
+     
+
+---- rutascont  =E=  rutas continuas
+
+rutascont(Dosso)..  Y(Niamey,Dosso) + Y(Gaya,Dosso) - Y(Dosso,Niamey) - Y(Dosso,Gaya) - Y(Dosso,Tahoua) - Y(Dosso,Maradi) - Y(Dosso,Tanout) - Y(Dosso,Agadez) - Y(Dosso,Zinder) + Y(Tahoua,Dosso) + Y(Maradi,Dosso) + Y(Tanout,Dosso) + Y(Agadez,Dosso) + Y(Zinder,Dosso) =E= 0 ; (LHS = 0)
+     
+rutascont(Tahoua)..  Y(Niamey,Tahoua) + Y(Gaya,Tahoua) + Y(Dosso,Tahoua) - Y(Tahoua,Niamey) - Y(Tahoua,Gaya) - Y(Tahoua,Dosso) - Y(Tahoua,Maradi) - Y(Tahoua,Tanout) - Y(Tahoua,Agadez) - Y(Tahoua,Zinder) + Y(Maradi,Tahoua) + Y(Tanout,Tahoua) + Y(Agadez,Tahoua) + Y(Zinder,Tahoua) =E= 0 ; (LHS = 0)
+     
+rutascont(Maradi)..  Y(Niamey,Maradi) + Y(Gaya,Maradi) + Y(Dosso,Maradi) + Y(Tahoua,Maradi) - Y(Maradi,Niamey) - Y(Maradi,Gaya) - Y(Maradi,Dosso) - Y(Maradi,Tahoua) - Y(Maradi,Tanout) - Y(Maradi,Agadez) - Y(Maradi,Zinder) + Y(Tanout,Maradi) + Y(Agadez,Maradi) + Y(Zinder,Maradi) =E= 0 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 06/15/22 19:31:25 Page 3
+Practica 1: Emergencia en Niger.
+Column Listing      SOLVE transporte Using MIP From line 113
+
+
+---- X  numero de camiones k que van de i a j
+
+X(Niamey,Niamey,Tipo1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+    -1999.8     mincost
+       -1.5     cammax(Niamey,Niamey)
+
+X(Niamey,Niamey,Tipo2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+    -2999.7     mincost
+       -3       cammax(Niamey,Niamey)
+
+X(Niamey,Gaya,Tipo1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -57.2     mincost
+        1       camiones(Niamey,Tipo1)
+       -1       camiones(Gaya,Tipo1)
+       -1.5     cammax(Niamey,Gaya)
+
+REMAINING 125 ENTRIES SKIPPED
+
+---- Y  toneladas que van de i a j
+
+Y(Niamey,Niamey)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+     -249.975   mincost
+        1       demanda
+        1       cammax(Niamey,Niamey)
+
+Y(Niamey,Gaya)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -7.15    mincost
+        1       demanda
+        1       j2(Gaya,Niamey)
+        1       cammax(Niamey,Gaya)
+
+Y(Niamey,Dosso)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -3.45    mincost
+        1       demanda
+        1       j2(Dosso,Niamey)
+        1       cammax(Niamey,Dosso)
+        1       rutascont(Dosso)
+
+REMAINING 61 ENTRIES SKIPPED
+
+---- F_Cost  Coste total
+
+F_Cost
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       fobj_coste
+        1       mincost
+        1       costemax
+
+
+---- Z  objetivo
+
+Z
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobj_coste
+
+
+---- sigma  
+
+sigma
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     -450       j1(Gaya,Niamey)
+     -450       j1(Dosso,Niamey)
+     -450       j1(Dosso,Gaya)
+     -450       j1(Tahoua,Niamey)
+     -450       j1(Tahoua,Gaya)
+     -450       j1(Tahoua,Dosso)
+     -450       j1(Maradi,Niamey)
+     -450       j1(Maradi,Gaya)
+     -450       j1(Maradi,Dosso)
+     -450       j1(Maradi,Tahoua)
+     -450       j1(Tanout,Niamey)
+     -450       j1(Tanout,Gaya)
+     -450       j1(Tanout,Dosso)
+     -450       j1(Tanout,Tahoua)
+     -450       j1(Tanout,Maradi)
+     -450       j1(Agadez,Niamey)
+     -450       j1(Agadez,Gaya)
+     -450       j1(Agadez,Dosso)
+     -450       j1(Agadez,Tahoua)
+     -450       j1(Agadez,Maradi)
+     -450       j1(Agadez,Tanout)
+     -450       j1(Zinder,Niamey)
+     -450       j1(Zinder,Gaya)
+     -450       j1(Zinder,Dosso)
+     -450       j1(Zinder,Tahoua)
+     -450       j1(Zinder,Maradi)
+     -450       j1(Zinder,Tanout)
+     -450       j1(Zinder,Agadez)
+      450       j2(Gaya,Niamey)
+      450       j2(Dosso,Niamey)
+      450       j2(Dosso,Gaya)
+      450       j2(Tahoua,Niamey)
+      450       j2(Tahoua,Gaya)
+      450       j2(Tahoua,Dosso)
+      450       j2(Maradi,Niamey)
+      450       j2(Maradi,Gaya)
+      450       j2(Maradi,Dosso)
+      450       j2(Maradi,Tahoua)
+      450       j2(Tanout,Niamey)
+      450       j2(Tanout,Gaya)
+      450       j2(Tanout,Dosso)
+      450       j2(Tanout,Tahoua)
+      450       j2(Tanout,Maradi)
+      450       j2(Agadez,Niamey)
+      450       j2(Agadez,Gaya)
+      450       j2(Agadez,Dosso)
+      450       j2(Agadez,Tahoua)
+      450       j2(Agadez,Maradi)
+      450       j2(Agadez,Tanout)
+      450       j2(Zinder,Niamey)
+      450       j2(Zinder,Gaya)
+      450       j2(Zinder,Dosso)
+      450       j2(Zinder,Tahoua)
+      450       j2(Zinder,Maradi)
+      450       j2(Zinder,Tanout)
+      450       j2(Zinder,Agadez)
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 06/15/22 19:31:25 Page 4
+Practica 1: Emergencia en Niger.
+Model Statistics    SOLVE transporte Using MIP From line 113
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS          11     SINGLE EQUATIONS          146
+BLOCKS OF VARIABLES           5     SINGLE VARIABLES          195
+NON ZERO ELEMENTS           820     DISCRETE VARIABLES        129
+
+
+GENERATION TIME      =        0.063 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 06/15/22 19:31:25 Page 5
+Practica 1: Emergencia en Niger.
+Solution Report     SOLVE transporte Using MIP From line 113
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   transporte          OBJECTIVE  Z
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  113
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE            56583.7375
+
+ RESOURCE USAGE, LIMIT          0.094 10000000000.000
+ ITERATION COUNT, LIMIT        46    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.54 Mb (peak 0.54 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.01 Mb (peak 0.03 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.05sec (det. 3.59 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.17 ticks)
+
+
+Proven optimal solution
+MIP Solution:        56583.737500    (46 iterations, 0 nodes)
+Final Solve:         56583.737500    (0 iterations)
+
+Best possible:       56583.737500
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobj_coste          .              .              .             1.0000      
+---- EQU mincost             .              .              .             1.0000      
+---- EQU costemax          -INF        56583.7375     80000.0000          .          
+---- EQU demanda          450.0000       450.0000       450.0000        16.5250      
+
+  fobj_coste  Coste total
+  mincost  minimizar el coste total
+  costemax  cota superior coste
+  demanda  cota demanda
+
+---- EQU camiones  cota superior camiones disponibles
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+Niamey.Tipo1        -INF           59.0000        60.0000          .          
+Niamey.Tipo2        -INF           20.0000        20.0000          .          
+Gaya  .Tipo1        -INF           55.0000        55.0000          .          
+Gaya  .Tipo2        -INF           40.0000        40.0000          .          
+Dosso .Tipo1        -INF           10.0000        10.0000          .          
+Dosso .Tipo2        -INF           20.0000        20.0000          .          
+Tahoua.Tipo1        -INF          -44.0000         8.0000          .          
+Tahoua.Tipo2        -INF           30.0000        30.0000          .          
+Maradi.Tipo1        -INF          -10.0000         5.0000          .          
+Maradi.Tipo2        -INF            5.0000         5.0000          .          
+Tanout.Tipo1        -INF             .              .              .          
+Tanout.Tipo2        -INF             .              .              .          
+Agadez.Tipo1        -INF             .              .              .          
+Agadez.Tipo2        -INF          -22.0000          .              .          
+Zinder.Tipo1        -INF          -70.0000          .              .          
+Zinder.Tipo2        -INF          -93.0000          .              .          
+
+---- EQU j1  
+
+                     LOWER          LEVEL          UPPER         MARGINAL
+
+Gaya  .Niamey        -INF             .              .            -9.3750      
+Dosso .Niamey        -INF             .              .            -9.6250      
+Dosso .Gaya          -INF             .              .            -9.3000      
+Tahoua.Niamey        -INF             .              .              .          
+Tahoua.Gaya          -INF             .              .              .          
+Tahoua.Dosso         -INF             .              .              .          
+Maradi.Niamey        -INF             .              .              .          
+Maradi.Gaya          -INF             .              .              .          
+Maradi.Dosso         -INF             .              .              .          
+Maradi.Tahoua        -INF             .              .              .          
+Tanout.Niamey        -INF             .              .              .          
+Tanout.Gaya          -INF             .              .              .          
+Tanout.Dosso         -INF             .              .              .          
+Tanout.Tahoua        -INF             .              .              .          
+Tanout.Maradi        -INF             .              .              .          
+Agadez.Niamey        -INF             .              .              .          
+Agadez.Gaya          -INF             .              .              .          
+Agadez.Dosso         -INF             .              .              .          
+Agadez.Tahoua        -INF             .              .              .          
+Agadez.Maradi        -INF             .              .              .          
+Agadez.Tanout        -INF             .              .              .          
+Zinder.Niamey        -INF             .              .              .          
+Zinder.Gaya          -INF             .              .              .          
+Zinder.Dosso         -INF             .              .              .          
+Zinder.Tahoua        -INF             .              .              .          
+Zinder.Maradi        -INF             .              .              .          
+Zinder.Tanout        -INF             .              .              .          
+Zinder.Agadez        -INF             .              .              .          
+
+---- EQU j2  
+
+                     LOWER          LEVEL          UPPER         MARGINAL
+
+Gaya  .Niamey        -INF             .           450.0000          .          
+Dosso .Niamey        -INF          148.5000       450.0000          .          
+Dosso .Gaya          -INF             .           450.0000          .          
+Tahoua.Niamey        -INF             .           450.0000          .          
+Tahoua.Gaya          -INF             .           450.0000          .          
+Tahoua.Dosso         -INF           66.0000       450.0000          .          
+Maradi.Niamey        -INF             .           450.0000          .          
+Maradi.Gaya          -INF          301.5000       450.0000          .          
+Maradi.Dosso         -INF           82.5000       450.0000          .          
+Maradi.Tahoua        -INF             .           450.0000          .          
+Tanout.Niamey        -INF             .           450.0000          .          
+Tanout.Gaya          -INF             .           450.0000          .          
+Tanout.Dosso         -INF             .           450.0000          .          
+Tanout.Tahoua        -INF             .           450.0000          .          
+Tanout.Maradi        -INF             .           450.0000          .          
+Agadez.Niamey        -INF             .           450.0000          .          
+Agadez.Gaya          -INF             .           450.0000          .          
+Agadez.Dosso         -INF             .           450.0000          .          
+Agadez.Tahoua        -INF           66.0000       450.0000          .          
+Agadez.Maradi        -INF             .           450.0000          .          
+Agadez.Tanout        -INF             .           450.0000          .          
+Zinder.Niamey        -INF             .           450.0000          .          
+Zinder.Gaya          -INF             .           450.0000          .          
+Zinder.Dosso         -INF             .           450.0000          .          
+Zinder.Tahoua        -INF             .           450.0000          .          
+Zinder.Maradi        -INF          384.0000       450.0000          .          
+Zinder.Tanout        -INF             .           450.0000          .          
+Zinder.Agadez        -INF             .           450.0000          .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU agsgsgsgg~       450.0000       450.0000       450.0000        10.1500      
+
+---- EQU cammax  controla que no se manden mas toneladas que camiones mandados
+
+                     LOWER          LEVEL          UPPER         MARGINAL
+
+Niamey.Niamey        -INF             .              .              .          
+Niamey.Gaya          -INF             .              .            -9.3750      
+Niamey.Dosso         -INF             .              .              .          
+Niamey.Tahoua        -INF             .              .            -2.4250      
+Niamey.Maradi        -INF             .              .              .          
+Niamey.Tanout        -INF             .              .              .          
+Niamey.Agadez        -INF             .              .              .          
+Niamey.Zinder        -INF             .              .              .          
+Gaya  .Niamey        -INF             .              .              .          
+Gaya  .Gaya          -INF             .              .              .          
+Gaya  .Dosso         -INF             .              .              .          
+Gaya  .Tahoua        -INF             .              .              .          
+Gaya  .Maradi        -INF             .              .            -0.8750      
+Gaya  .Tanout        -INF             .              .              .          
+Gaya  .Agadez        -INF             .              .              .          
+Gaya  .Zinder        -INF             .              .              .          
+Dosso .Niamey        -INF             .              .              .          
+Dosso .Gaya          -INF          -99.0000          .              .          
+Dosso .Dosso         -INF             .              .              .          
+Dosso .Tahoua        -INF             .              .            -2.7500      
+Dosso .Maradi        -INF             .              .              .          
+Dosso .Tanout        -INF             .              .              .          
+Dosso .Agadez        -INF             .              .              .          
+Dosso .Zinder        -INF             .              .              .          
+Tahoua.Niamey        -INF             .              .              .          
+Tahoua.Gaya          -INF             .              .              .          
+Tahoua.Dosso         -INF          -24.0000          .              .          
+Tahoua.Tahoua        -INF             .              .              .          
+Tahoua.Maradi        -INF             .              .              .          
+Tahoua.Tanout        -INF             .              .              .          
+Tahoua.Agadez        -INF             .              .              .          
+Tahoua.Zinder        -INF             .              .              .          
+Maradi.Niamey        -INF             .              .              .          
+Maradi.Gaya          -INF             .              .              .          
+Maradi.Dosso         -INF             .              .              .          
+Maradi.Tahoua        -INF             .              .              .          
+Maradi.Maradi        -INF             .              .              .          
+Maradi.Tanout        -INF             .              .              .          
+Maradi.Agadez        -INF             .              .              .          
+Maradi.Zinder        -INF             .              .            -4.2750      
+Tanout.Niamey        -INF             .              .              .          
+Tanout.Gaya          -INF             .              .              .          
+Tanout.Dosso         -INF             .              .              .          
+Tanout.Tahoua        -INF             .              .              .          
+Tanout.Maradi        -INF             .              .              .          
+Tanout.Tanout        -INF             .              .              .          
+Tanout.Agadez        -INF             .              .            -2.6500      
+Tanout.Zinder        -INF             .              .            -6.5250      
+Agadez.Niamey        -INF             .              .              .          
+Agadez.Gaya          -INF             .              .              .          
+Agadez.Dosso         -INF             .              .              .          
+Agadez.Tahoua        -INF             .              .              .          
+Agadez.Maradi        -INF             .              .              .          
+Agadez.Tanout        -INF             .              .              .          
+Agadez.Agadez        -INF             .              .              .          
+Agadez.Zinder        -INF             .              .              .          
+Zinder.Niamey        -INF             .              .              .          
+Zinder.Gaya          -INF             .              .              .          
+Zinder.Dosso         -INF             .              .              .          
+Zinder.Tahoua        -INF             .              .              .          
+Zinder.Maradi        -INF             .              .              .          
+Zinder.Tanout        -INF             .              .              .          
+Zinder.Agadez        -INF             .              .              .          
+Zinder.Zinder        -INF             .              .              .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU demandaAg~        -INF           66.0000       237.0000          .          
+
+  demandaAgadez  demanda de Agadez
+
+---- EQU rutascont  rutas continuas
+
+              LOWER          LEVEL          UPPER         MARGINAL
+
+Dosso           .              .              .           -13.0750      
+Tahoua          .              .              .              .          
+Maradi          .              .              .              .          
+Tanout          .              .              .              .          
+
+---- VAR X  numero de camiones k que van de i a j
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+Niamey.Niamey.Tipo1          .              .            +INF         1999.8000      
+Niamey.Niamey.Tipo2          .              .            +INF         2999.7000      
+Niamey.Gaya  .Tipo1          .              .            +INF           43.1375      
+Niamey.Gaya  .Tipo2          .              .            +INF           57.6750      
+Niamey.Dosso .Tipo1          .            59.0000        +INF           27.6000      
+Niamey.Dosso .Tipo2          .            20.0000        +INF           41.4000      
+Niamey.Tahoua.Tipo1          .              .            +INF          109.1625      
+Niamey.Tahoua.Tipo2          .              .            +INF          161.9250      
+Niamey.Maradi.Tipo1          .              .            +INF         1999.8000      
+Niamey.Maradi.Tipo2          .              .            +INF         2999.7000      
+Niamey.Tanout.Tipo1          .              .            +INF         1999.8000      
+Niamey.Tanout.Tipo2          .              .            +INF         2999.7000      
+Niamey.Agadez.Tipo1          .              .            +INF         1999.8000      
+Niamey.Agadez.Tipo2          .              .            +INF         2999.7000      
+Niamey.Zinder.Tipo1          .              .            +INF         1999.8000      
+Niamey.Zinder.Tipo2          .              .            +INF         2999.7000      
+Gaya  .Niamey.Tipo1          .              .            +INF           57.2000      
+Gaya  .Niamey.Tipo2          .              .            +INF           85.8000      
+Gaya  .Gaya  .Tipo1          .              .            +INF         1999.8000      
+Gaya  .Gaya  .Tipo2          .              .            +INF         2999.7000      
+Gaya  .Dosso .Tipo1          .              .            +INF           30.2000      
+Gaya  .Dosso .Tipo2          .              .            +INF           45.3000      
+Gaya  .Tahoua.Tipo1          .              .            +INF         1999.8000      
+Gaya  .Tahoua.Tipo2          .              .            +INF         2999.7000      
+Gaya  .Maradi.Tipo1          .            55.0000        +INF          123.8875      
+Gaya  .Maradi.Tipo2          .            73.0000        +INF          185.1750      
+Gaya  .Tanout.Tipo1          .              .            +INF         1999.8000      
+Gaya  .Tanout.Tipo2          .              .            +INF         2999.7000      
+Gaya  .Agadez.Tipo1          .              .            +INF         1999.8000      
+Gaya  .Agadez.Tipo2          .              .            +INF         2999.7000      
+Gaya  .Zinder.Tipo1          .              .            +INF         1999.8000      
+Gaya  .Zinder.Tipo2          .              .            +INF         2999.7000      
+Dosso .Niamey.Tipo1          .              .            +INF           27.6000      
+Dosso .Niamey.Tipo2          .              .            +INF           41.4000      
+Dosso .Gaya  .Tipo1          .              .            +INF           30.2000      
+Dosso .Gaya  .Tipo2          .            33.0000        +INF           45.3000      
+Dosso .Dosso .Tipo1          .              .            +INF         1999.8000      
+Dosso .Dosso .Tipo2          .              .            +INF         2999.7000      
+Dosso .Tahoua.Tipo1          .            44.0000        +INF           78.4750      
+Dosso .Tahoua.Tipo2          .              .            +INF          115.6500      
+Dosso .Maradi.Tipo1          .            25.0000        +INF          104.6000      
+Dosso .Maradi.Tipo2          .            15.0000        +INF          156.9000      
+Dosso .Tanout.Tipo1          .              .            +INF         1999.8000      
+Dosso .Tanout.Tipo2          .              .            +INF         2999.7000      
+Dosso .Agadez.Tipo1          .              .            +INF         1999.8000      
+Dosso .Agadez.Tipo2          .              .            +INF         2999.7000      
+Dosso .Zinder.Tipo1          .              .            +INF         1999.8000      
+Dosso .Zinder.Tipo2          .              .            +INF         2999.7000      
+Tahoua.Niamey.Tipo1          .              .            +INF          112.8000      
+Tahoua.Niamey.Tipo2          .              .            +INF          169.2000      
+Tahoua.Gaya  .Tipo1          .              .            +INF         1999.8000      
+Tahoua.Gaya  .Tipo2          .              .            +INF         2999.7000      
+Tahoua.Dosso .Tipo1          .              .            +INF           82.6000      
+Tahoua.Dosso .Tipo2          .             8.0000        +INF          123.9000      
+Tahoua.Tahoua.Tipo1          .              .            +INF         1999.8000      
+Tahoua.Tahoua.Tipo2          .              .            +INF         2999.7000      
+Tahoua.Maradi.Tipo1          .              .            +INF           69.4000      
+Tahoua.Maradi.Tipo2          .              .            +INF          104.1000      
+Tahoua.Tanout.Tipo1          .              .            +INF           97.2000      
+Tahoua.Tanout.Tipo2          .              .            +INF          145.8000      
+Tahoua.Agadez.Tipo1          .              .            +INF           81.2000      
+Tahoua.Agadez.Tipo2          .            22.0000        +INF          121.8000      
+Tahoua.Zinder.Tipo1          .              .            +INF         1999.8000      
+Tahoua.Zinder.Tipo2          .              .            +INF         2999.7000      
+Maradi.Niamey.Tipo1          .              .            +INF         1999.8000      
+Maradi.Niamey.Tipo2          .              .            +INF         2999.7000      
+Maradi.Gaya  .Tipo1          .              .            +INF          125.2000      
+Maradi.Gaya  .Tipo2          .              .            +INF          187.8000      
+Maradi.Dosso .Tipo1          .              .            +INF          104.6000      
+Maradi.Dosso .Tipo2          .              .            +INF          156.9000      
+Maradi.Tahoua.Tipo1          .              .            +INF           69.4000      
+Maradi.Tahoua.Tipo2          .              .            +INF          104.1000      
+Maradi.Maradi.Tipo1          .              .            +INF         1999.8000      
+Maradi.Maradi.Tipo2          .              .            +INF         2999.7000      
+Maradi.Tanout.Tipo1          .              .            +INF           62.6000      
+Maradi.Tanout.Tipo2          .              .            +INF           93.9000      
+Maradi.Agadez.Tipo1          .              .            +INF         1999.8000      
+Maradi.Agadez.Tipo2          .              .            +INF         2999.7000      
+Maradi.Zinder.Tipo1          .            70.0000        +INF           40.5875      
+Maradi.Zinder.Tipo2          .            93.0000        +INF           57.6750      
+Tanout.Niamey.Tipo1          .              .            +INF         1999.8000      
+Tanout.Niamey.Tipo2          .              .            +INF         2999.7000      
+Tanout.Gaya  .Tipo1          .              .            +INF         1999.8000      
+Tanout.Gaya  .Tipo2          .              .            +INF         2999.7000      
+Tanout.Dosso .Tipo1          .              .            +INF         1999.8000      
+Tanout.Dosso .Tipo2          .              .            +INF         2999.7000      
+Tanout.Tahoua.Tipo1          .              .            +INF           97.2000      
+Tanout.Tahoua.Tipo2          .              .            +INF          145.8000      
+Tanout.Maradi.Tipo1          .              .            +INF           62.6000      
+Tanout.Maradi.Tipo2          .              .            +INF           93.9000      
+Tanout.Tanout.Tipo1          .              .            +INF         1999.8000      
+Tanout.Tanout.Tipo2          .              .            +INF         2999.7000      
+Tanout.Agadez.Tipo1          .              .            +INF           56.0250      
+Tanout.Agadez.Tipo2          .              .            +INF           82.0500      
+Tanout.Zinder.Tipo1          .              .            +INF           19.2125      
+Tanout.Zinder.Tipo2          .              .            +INF           23.9250      
+Agadez.Niamey.Tipo1          .              .            +INF         1999.8000      
+Agadez.Niamey.Tipo2          .              .            +INF         2999.7000      
+Agadez.Gaya  .Tipo1          .              .            +INF         1999.8000      
+Agadez.Gaya  .Tipo2          .              .            +INF         2999.7000      
+Agadez.Dosso .Tipo1          .              .            +INF         1999.8000      
+Agadez.Dosso .Tipo2          .              .            +INF         2999.7000      
+Agadez.Tahoua.Tipo1          .              .            +INF           81.2000      
+Agadez.Tahoua.Tipo2          .              .            +INF          121.8000      
+Agadez.Maradi.Tipo1          .              .            +INF         1999.8000      
+Agadez.Maradi.Tipo2          .              .            +INF         2999.7000      
+Agadez.Tanout.Tipo1          .              .            +INF           60.0000      
+Agadez.Tanout.Tipo2          .              .            +INF           90.0000      
+Agadez.Agadez.Tipo1          .              .            +INF         1999.8000      
+Agadez.Agadez.Tipo2          .              .            +INF         2999.7000      
+Agadez.Zinder.Tipo1          .              .            +INF         1999.8000      
+Agadez.Zinder.Tipo2          .              .            +INF         2999.7000      
+Zinder.Niamey.Tipo1          .              .            +INF         1999.8000      
+Zinder.Niamey.Tipo2          .              .            +INF         2999.7000      
+Zinder.Gaya  .Tipo1          .              .            +INF         1999.8000      
+Zinder.Gaya  .Tipo2          .              .            +INF         2999.7000      
+Zinder.Dosso .Tipo1          .              .            +INF         1999.8000      
+Zinder.Dosso .Tipo2          .              .            +INF         2999.7000      
+Zinder.Tahoua.Tipo1          .              .            +INF         1999.8000      
+Zinder.Tahoua.Tipo2          .              .            +INF         2999.7000      
+Zinder.Maradi.Tipo1          .              .            +INF           47.0000      
+Zinder.Maradi.Tipo2          .              .            +INF           70.5000      
+Zinder.Tanout.Tipo1          .              .            +INF           29.0000      
+Zinder.Tanout.Tipo2          .              .            +INF           43.5000      
+Zinder.Agadez.Tipo1          .              .            +INF         1999.8000      
+Zinder.Agadez.Tipo2          .              .            +INF         2999.7000      
+Zinder.Zinder.Tipo1          .              .            +INF         1999.8000      
+Zinder.Zinder.Tipo2          .              .            +INF         2999.7000      
+
+---- VAR Y  toneladas que van de i a j
+
+                     LOWER          LEVEL          UPPER         MARGINAL
+
+Niamey.Niamey          .              .            +INF          233.4500      
+Niamey.Gaya            .              .            +INF             .          
+Niamey.Dosso           .           148.5000        +INF             .          
+Niamey.Tahoua          .              .            +INF             .          
+Niamey.Maradi          .              .            +INF          233.4500      
+Niamey.Tanout          .              .            +INF          233.4500      
+Niamey.Agadez          .              .            +INF          223.3000      
+Niamey.Zinder          .              .            +INF          223.3000      
+Gaya  .Niamey          .              .            +INF             .          
+Gaya  .Gaya            .              .            +INF          233.4500      
+Gaya  .Dosso           .              .            +INF            0.3250      
+Gaya  .Tahoua          .              .            +INF          233.4500      
+Gaya  .Maradi          .           301.5000        +INF             .          
+Gaya  .Tanout          .              .            +INF          233.4500      
+Gaya  .Agadez          .              .            +INF          223.3000      
+Gaya  .Zinder          .              .            +INF          223.3000      
+Dosso .Niamey          .              .            +INF             .          
+Dosso .Gaya            .              .            +INF             .          
+Dosso .Dosso           .              .            +INF          249.9750      
+Dosso .Tahoua          .            66.0000        +INF             .          
+Dosso .Maradi          .            82.5000        +INF             .          
+Dosso .Tanout          .              .            +INF          236.9000      
+Dosso .Agadez          .              .            +INF          226.7500      
+Dosso .Zinder          .              .            +INF          226.7500      
+Tahoua.Niamey          .              .            +INF           14.1000      
+Tahoua.Gaya            .              .            +INF          249.9750      
+Tahoua.Dosso           .              .            +INF           23.4000      
+Tahoua.Tahoua          .              .            +INF          249.9750      
+Tahoua.Maradi          .              .            +INF            8.6750      
+Tahoua.Tanout          .              .            +INF           12.1500      
+Tahoua.Agadez          .            66.0000        +INF             .          
+Tahoua.Zinder          .              .            +INF          239.8250      
+Maradi.Niamey          .              .            +INF          249.9750      
+Maradi.Gaya            .              .            +INF           15.6500      
+Maradi.Dosso           .              .            +INF           26.1500      
+Maradi.Tahoua          .              .            +INF            8.6750      
+Maradi.Maradi          .              .            +INF          249.9750      
+Maradi.Tanout          .              .            +INF            7.8250      
+Maradi.Agadez          .              .            +INF          239.8250      
+Maradi.Zinder          .           384.0000        +INF             .          
+Tanout.Niamey          .              .            +INF          249.9750      
+Tanout.Gaya            .              .            +INF          249.9750      
+Tanout.Dosso           .              .            +INF          263.0500      
+Tanout.Tahoua          .              .            +INF           12.1500      
+Tanout.Maradi          .              .            +INF            7.8250      
+Tanout.Tanout          .              .            +INF          249.9750      
+Tanout.Agadez          .              .            +INF             .          
+Tanout.Zinder          .              .            +INF             .          
+Agadez.Niamey          .              .            +INF          249.9750      
+Agadez.Gaya            .              .            +INF          249.9750      
+Agadez.Dosso           .              .            +INF          263.0500      
+Agadez.Tahoua          .              .            +INF           10.1500      
+Agadez.Maradi          .              .            +INF          249.9750      
+Agadez.Tanout          .              .            +INF            7.5000      
+Agadez.Agadez          .              .            +INF          239.8250      
+Agadez.Zinder          .              .            +INF          239.8250      
+Zinder.Niamey          .              .            +INF          249.9750      
+Zinder.Gaya            .              .            +INF          249.9750      
+Zinder.Dosso           .              .            +INF          263.0500      
+Zinder.Tahoua          .              .            +INF          249.9750      
+Zinder.Maradi          .              .            +INF            5.8750      
+Zinder.Tanout          .              .            +INF            3.6250      
+Zinder.Agadez          .              .            +INF          239.8250      
+Zinder.Zinder          .              .            +INF          239.8250      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR F_Cost              .         56583.7375        +INF             .          
+---- VAR Z                 -INF        56583.7375        +INF             .          
+---- VAR sigma               .              .             1.0000    -12735.0000      
+
+  F_Cost  Coste total
+  Z  objetivo
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 06/15/22 19:31:25 Page 6
+Practica 1: Emergencia en Niger.
+E x e c u t i o n
+
+
+----    114 VARIABLE Z.L                   =    56583.737  objetivo
+
+----    114 VARIABLE X.L  numero de camiones k que van de i a j
+
+                    Tipo1       Tipo2
+
+Niamey.Dosso       59.000      20.000
+Gaya  .Maradi      55.000      73.000
+Dosso .Gaya                    33.000
+Dosso .Tahoua      44.000
+Dosso .Maradi      25.000      15.000
+Tahoua.Dosso                    8.000
+Tahoua.Agadez                  22.000
+Maradi.Zinder      70.000      93.000
+
+
+----    114 VARIABLE Y.L  toneladas que van de i a j
+
+             Dosso      Tahoua      Maradi      Agadez      Zinder
+
+Niamey     148.500
+Gaya                               301.500
+Dosso                   66.000      82.500
+Tahoua                                          66.000
+Maradi                                                     384.000
+
+
+
+EXECUTION TIME       =        0.282 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G220615|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL069601
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Entrega 1\Grupo8_2 (1).gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Entrega 1\Grupo8_2 (1).lst

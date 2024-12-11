@@ -1,0 +1,41 @@
+B 3 C o m p i l a t i o n
+B 126 Equation Listing    SOLVE transporte Using MIP From line 113
+D 129 fobj_coste
+D 134 mincost
+D 139 costemax
+D 144 demanda
+D 149 camiones
+D 160 j1
+D 171 j2
+D 182 agsgsgsgghrt
+D 187 cammax
+D 198 demandaAgadez
+D 203 rutascont
+B 215 Column Listing      SOLVE transporte Using MIP From line 113
+E 218 X
+E 239 Y
+E 264 F_Cost
+E 273 Z
+E 280 sigma
+B 343 Model Statistics    SOLVE transporte Using MIP From line 113
+B 356 Solution Report     SOLVE transporte Using MIP From line 113
+F 399 fobj_coste
+F 400 mincost
+F 401 costemax
+F 402 demanda
+F 409 camiones
+F 430 j1
+F 463 j2
+F 498 agsgsgsgghrt
+F 500 cammax
+F 571 demandaAgadez
+F 575 rutascont
+G 584 X
+G 717 Y
+G 788 F_Cost
+G 789 Z
+G 790 sigma
+B 801 E x e c u t i o n
+I 803 Z
+I 804 X
+I 818 Y

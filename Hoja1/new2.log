@@ -1,0 +1,19 @@
+--- Job new2.gms Start 05/04/22 18:24:36 34.3.0 rac355f3 WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\34\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\new2.gms
+    PageSize 0
+    ScrDir C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\225a\
+    SysDir C:\GAMS\34\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+*** License has expired 70 days ago
+*** More than 30 days since expiration, sorry...
+*** Status: Terminated due to a licensing error
+***         License file: C:\GAMS\34\gamslice.txt
+***         Inspect listing file for more information.
+--- Job new2.gms Stop 05/04/22 18:24:36 elapsed 0:00:00.006

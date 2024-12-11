@@ -1,0 +1,704 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 1
+Hoja 1 problema 10
+C o m p i l a t i o n
+
+
+   2   
+   3  sets
+   4  i puntos /1*18/;
+   5   
+   6  parameters
+   7  x(i) abscisas de los puntos observados
+   8     /     1       0
+   9           2       0.5
+  10           3       1
+  11           4       1.5
+  12           5       2
+  13           6       2.5
+  14           7       3
+  15           8       3.5
+  16           9       4
+  17           10      4.5
+  18           11      5
+  19           12      5.5
+  20           13      6
+  21           14      7
+  22           15      8
+  23           16      9
+  24           17      10
+  25           18      15       /
+  26   
+  27  y(i) ordenadas de los puntos observados
+  28      /    1       1
+  29           2       0.9
+  30           3       0.7
+  31           4       1.5
+  32           5       1.9
+  33           6       2.4
+  34           7       3.2
+  35           8       2.0
+  36           9       2.7
+  37           10      3.5
+  38           11      1
+  39           12      4
+  40           13      3.6
+  41           14      2.7
+  42           15      6.5
+  43           16      7.3
+  44           17      8.1
+  45           18      13.6      /    ;
+  46   
+  47  variables
+  48      a, b coeficientes de la recta de regesion
+  49      za   objetivo del apartado a
+  50      zb   objetivo del apartado b
+  51      T    distancia de las observaciones a la recta;
+  52   
+  53  Positive variables
+  54      D(i) distancia 'por debajo' de la recta
+  55      E(i) distancia 'por encima' de la recta;
+  56   
+  57  Equations
+  58      fobja     funcion objetivo del apartado a
+  59      obser(i)  observacion i
+  60      fobjb     funcion objetivo del apartado b
+  61      debajo(i) valores por debajo (de la recta de regresion)
+  62      encima(i) valores por encima;
+  63   
+  64      fobja.. za =E= sum(i, D(i)+E(i));
+  65      obser(i).. y(i) =E= a + b*x(i) + D(i) - E(i);
+  66      fobjb.. zb =E= T;
+  67      debajo(i).. T =G= D(i);
+  68      encima(i).. T =G= E(i);
+  69   
+  70  model regresion /fobja, obser/;
+  71  solve regresion using LP minimizing za;
+  72  model distancia /fobjb, debajo, encima, obser/;
+  73  solve distancia using LP minimizing zb;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 2
+Hoja 1 problema 10
+Equation Listing    SOLVE regresion Using LP From line 71
+
+
+---- fobja  =E=  funcion objetivo del apartado a
+
+fobja..  za - D(1) - D(2) - D(3) - D(4) - D(5) - D(6) - D(7) - D(8) - D(9) - D(10) - D(11) - D(12) - D(13) - D(14) - D(15) - D(16) - D(17) - D(18) - E(1) - E(2) - E(3) - E(4) - E(5) - E(6) - E(7) - E(8) - E(9) - E(10) - E(11) - E(12) - E(13) - E(14) - E(15) - E(16) - E(17) - E(18) =E= 0 ; (LHS = 0)
+     
+
+---- obser  =E=  observacion i
+
+obser(1)..  - a - D(1) + E(1) =E= -1 ; (LHS = 0, INFES = 1 ****)
+     
+obser(2)..  - a - 0.5*b - D(2) + E(2) =E= -0.9 ; (LHS = 0, INFES = 0.9 ****)
+     
+obser(3)..  - a - b - D(3) + E(3) =E= -0.7 ; (LHS = 0, INFES = 0.7 ****)
+     
+REMAINING 15 ENTRIES SKIPPED
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 3
+Hoja 1 problema 10
+Column Listing      SOLVE regresion Using LP From line 71
+
+
+---- a  
+
+a
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -1       obser(1)
+       -1       obser(2)
+       -1       obser(3)
+       -1       obser(4)
+       -1       obser(5)
+       -1       obser(6)
+       -1       obser(7)
+       -1       obser(8)
+       -1       obser(9)
+       -1       obser(10)
+       -1       obser(11)
+       -1       obser(12)
+       -1       obser(13)
+       -1       obser(14)
+       -1       obser(15)
+       -1       obser(16)
+       -1       obser(17)
+       -1       obser(18)
+
+
+---- b  coeficientes de la recta de regesion
+
+b
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -0.5     obser(2)
+       -1       obser(3)
+       -1.5     obser(4)
+       -2       obser(5)
+       -2.5     obser(6)
+       -3       obser(7)
+       -3.5     obser(8)
+       -4       obser(9)
+       -4.5     obser(10)
+       -5       obser(11)
+       -5.5     obser(12)
+       -6       obser(13)
+       -7       obser(14)
+       -8       obser(15)
+       -9       obser(16)
+      -10       obser(17)
+      -15       obser(18)
+
+
+---- za  objetivo del apartado a
+
+za
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobja
+
+
+---- D  distancia 'por debajo' de la recta
+
+D(1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       fobja
+       -1       obser(1)
+
+D(2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       fobja
+       -1       obser(2)
+
+D(3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       fobja
+       -1       obser(3)
+
+REMAINING 15 ENTRIES SKIPPED
+
+---- E  distancia 'por encima' de la recta
+
+E(1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       fobja
+        1       obser(1)
+
+E(2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       fobja
+        1       obser(2)
+
+E(3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       fobja
+        1       obser(3)
+
+REMAINING 15 ENTRIES SKIPPED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 4
+Hoja 1 problema 10
+Model Statistics    SOLVE regresion Using LP From line 71
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           2     SINGLE EQUATIONS           19
+BLOCKS OF VARIABLES           5     SINGLE VARIABLES           39
+NON ZERO ELEMENTS           108
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 5
+Hoja 1 problema 10
+Solution Report     SOLVE regresion Using LP From line 71
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   regresion           OBJECTIVE  za
+     TYPE    LP                  DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  71
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE               13.9692
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT        17    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.08 ticks)
+
+
+Optimal solution found
+Objective:           13.969231
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobja               .              .              .             1.0000      
+
+  fobja  funcion objetivo del apartado a
+
+---- EQU obser  observacion i
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1         -1.0000        -1.0000        -1.0000        -1.0000      
+2         -0.9000        -0.9000        -0.9000        -1.0000      
+3         -0.7000        -0.7000        -0.7000         1.0000      
+4         -1.5000        -1.5000        -1.5000        -0.8462      
+5         -1.9000        -1.9000        -1.9000        -1.0000      
+6         -2.4000        -2.4000        -2.4000        -1.0000      
+7         -3.2000        -3.2000        -3.2000        -1.0000      
+8         -2.0000        -2.0000        -2.0000         1.0000      
+9         -2.7000        -2.7000        -2.7000         1.0000      
+10        -3.5000        -3.5000        -3.5000         1.0000      
+11        -1.0000        -1.0000        -1.0000         1.0000      
+12        -4.0000        -4.0000        -4.0000         1.0000      
+13        -3.6000        -3.6000        -3.6000         1.0000      
+14        -2.7000        -2.7000        -2.7000         1.0000      
+15        -6.5000        -6.5000        -6.5000         0.8462      
+16        -7.3000        -7.3000        -7.3000        -1.0000      
+17        -8.1000        -8.1000        -8.1000        -1.0000      
+18       -13.6000       -13.6000       -13.6000        -1.0000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR a                 -INF            0.3462        +INF             .          
+---- VAR b                 -INF            0.7692        +INF             .          
+---- VAR za                -INF           13.9692        +INF             .          
+
+  b  coeficientes de la recta de regesion
+  za  objetivo del apartado a
+
+---- VAR D  distancia 'por debajo' de la recta
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1           .             0.6538        +INF             .          
+2           .             0.1692        +INF             .          
+3           .              .            +INF            2.0000      
+4           .              .            +INF            0.1538      
+5           .             0.0154        +INF             .          
+6           .             0.1308        +INF             .          
+7           .             0.5462        +INF             .          
+8           .              .            +INF            2.0000      
+9           .              .            +INF            2.0000      
+10          .              .            +INF            2.0000      
+11          .              .            +INF            2.0000      
+12          .              .            +INF            2.0000      
+13          .              .            +INF            2.0000      
+14          .              .            +INF            2.0000      
+15          .              .            +INF            1.8462      
+16          .             0.0308        +INF             .          
+17          .             0.0615        +INF             .          
+18          .             1.7154        +INF             .          
+
+---- VAR E  distancia 'por encima' de la recta
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1           .              .            +INF            2.0000      
+2           .              .            +INF            2.0000      
+3           .             0.4154        +INF             .          
+4           .              .            +INF            1.8462      
+5           .              .            +INF            2.0000      
+6           .              .            +INF            2.0000      
+7           .              .            +INF            2.0000      
+8           .             1.0385        +INF             .          
+9           .             0.7231        +INF             .          
+10          .             0.3077        +INF             .          
+11          .             3.1923        +INF             .          
+12          .             0.5769        +INF             .          
+13          .             1.3615        +INF             .          
+14          .             3.0308        +INF             .          
+15          .              .            +INF            0.1538      
+16          .              .            +INF            2.0000      
+17          .              .            +INF            2.0000      
+18          .              .            +INF            2.0000      
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 6
+Hoja 1 problema 10
+Equation Listing    SOLVE distancia Using LP From line 73
+
+
+---- fobjb  =E=  funcion objetivo del apartado b
+
+fobjb..  zb - T =E= 0 ; (LHS = 0)
+     
+
+---- debajo  =G=  valores por debajo (de la recta de regresion)
+
+debajo(1)..  T - D(1) =G= 0 ; (LHS = -0.653846153846154, INFES = 0.653846153846154 ****)
+     
+debajo(2)..  T - D(2) =G= 0 ; (LHS = -0.169230769230769, INFES = 0.169230769230769 ****)
+     
+debajo(3)..  T - D(3) =G= 0 ; (LHS = 0)
+     
+REMAINING 15 ENTRIES SKIPPED
+
+
+---- encima  =G=  valores por encima
+
+encima(1)..  T - E(1) =G= 0 ; (LHS = 0)
+     
+encima(2)..  T - E(2) =G= 0 ; (LHS = 0)
+     
+encima(3)..  T - E(3) =G= 0 ; (LHS = -0.415384615384615, INFES = 0.415384615384615 ****)
+     
+REMAINING 15 ENTRIES SKIPPED
+
+
+---- obser  =E=  observacion i
+
+obser(1)..  - a - D(1) + E(1) =E= -1 ; (LHS = -1)
+     
+obser(2)..  - a - 0.5*b - D(2) + E(2) =E= -0.9 ; (LHS = -0.9)
+     
+obser(3)..  - a - b - D(3) + E(3) =E= -0.7 ; (LHS = -0.7)
+     
+REMAINING 15 ENTRIES SKIPPED
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 7
+Hoja 1 problema 10
+Column Listing      SOLVE distancia Using LP From line 73
+
+
+---- a  
+
+a
+                (.LO, .L, .UP, .M = -INF, 0.346153846153846, +INF, 0)
+       -1       obser(1)
+       -1       obser(2)
+       -1       obser(3)
+       -1       obser(4)
+       -1       obser(5)
+       -1       obser(6)
+       -1       obser(7)
+       -1       obser(8)
+       -1       obser(9)
+       -1       obser(10)
+       -1       obser(11)
+       -1       obser(12)
+       -1       obser(13)
+       -1       obser(14)
+       -1       obser(15)
+       -1       obser(16)
+       -1       obser(17)
+       -1       obser(18)
+
+
+---- b  coeficientes de la recta de regesion
+
+b
+                (.LO, .L, .UP, .M = -INF, 0.769230769230769, +INF, 0)
+       -0.5     obser(2)
+       -1       obser(3)
+       -1.5     obser(4)
+       -2       obser(5)
+       -2.5     obser(6)
+       -3       obser(7)
+       -3.5     obser(8)
+       -4       obser(9)
+       -4.5     obser(10)
+       -5       obser(11)
+       -5.5     obser(12)
+       -6       obser(13)
+       -7       obser(14)
+       -8       obser(15)
+       -9       obser(16)
+      -10       obser(17)
+      -15       obser(18)
+
+
+---- zb  objetivo del apartado b
+
+zb
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobjb
+
+
+---- T  distancia de las observaciones a la recta
+
+T
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -1       fobjb
+        1       debajo(1)
+        1       debajo(2)
+        1       debajo(3)
+        1       debajo(4)
+        1       debajo(5)
+        1       debajo(6)
+        1       debajo(7)
+        1       debajo(8)
+        1       debajo(9)
+        1       debajo(10)
+        1       debajo(11)
+        1       debajo(12)
+        1       debajo(13)
+        1       debajo(14)
+        1       debajo(15)
+        1       debajo(16)
+        1       debajo(17)
+        1       debajo(18)
+        1       encima(1)
+        1       encima(2)
+        1       encima(3)
+        1       encima(4)
+        1       encima(5)
+        1       encima(6)
+        1       encima(7)
+        1       encima(8)
+        1       encima(9)
+        1       encima(10)
+        1       encima(11)
+        1       encima(12)
+        1       encima(13)
+        1       encima(14)
+        1       encima(15)
+        1       encima(16)
+        1       encima(17)
+        1       encima(18)
+
+
+---- D  distancia 'por debajo' de la recta
+
+D(1)
+                (.LO, .L, .UP, .M = 0, 0.653846153846154, +INF, 0)
+       -1       debajo(1)
+       -1       obser(1)
+
+D(2)
+                (.LO, .L, .UP, .M = 0, 0.169230769230769, +INF, 0)
+       -1       debajo(2)
+       -1       obser(2)
+
+D(3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 2)
+       -1       debajo(3)
+       -1       obser(3)
+
+REMAINING 15 ENTRIES SKIPPED
+
+---- E  distancia 'por encima' de la recta
+
+E(1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 2)
+       -1       encima(1)
+        1       obser(1)
+
+E(2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 2)
+       -1       encima(2)
+        1       obser(2)
+
+E(3)
+                (.LO, .L, .UP, .M = 0, 0.415384615384615, +INF, 0)
+       -1       encima(3)
+        1       obser(3)
+
+REMAINING 15 ENTRIES SKIPPED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 8
+Hoja 1 problema 10
+Model Statistics    SOLVE distancia Using LP From line 73
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           4     SINGLE EQUATIONS           55
+BLOCKS OF VARIABLES           6     SINGLE VARIABLES           40
+NON ZERO ELEMENTS           145
+
+
+GENERATION TIME      =        0.078 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/09/21 16:03:05 Page 9
+Hoja 1 problema 10
+Solution Report     SOLVE distancia Using LP From line 73
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   distancia           OBJECTIVE  zb
+     TYPE    LP                  DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  73
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                2.1000
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT        22    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.51 Mb (peak 0.51 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.01 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.26 ticks)
+
+
+Optimal solution found
+Objective:            2.100000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjb               .              .              .             1.0000      
+
+  fobjb  funcion objetivo del apartado b
+
+---- EQU debajo  valores por debajo (de la recta de regresion)
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1           .              .            +INF            0.3333      
+2           .             0.5200        +INF             .          
+3           .              .            +INF            EPS         
+4           .              .            +INF            EPS         
+5           .              .            +INF            EPS         
+6           .              .            +INF            EPS         
+7           .              .            +INF            EPS         
+8           .              .            +INF            EPS         
+9           .              .            +INF            EPS         
+10          .              .            +INF            EPS         
+11          .             2.1000        +INF             .          
+12          .              .            +INF            EPS         
+13          .             0.3400        +INF             .          
+14          .             2.0800        +INF             .          
+15          .              .            +INF            EPS         
+16          .              .            +INF            EPS         
+17          .              .            +INF            EPS         
+18          .              .            +INF            0.1667      
+
+---- EQU encima  valores por encima
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1           .             2.1000        +INF             .          
+2           .             2.1000        +INF             .          
+3           .             0.9600        +INF             .          
+4           .             1.3400        +INF             .          
+5           .             1.3200        +INF             .          
+6           .             1.4000        +INF             .          
+7           .             1.7800        +INF             .          
+8           .             0.1600        +INF             .          
+9           .             0.4400        +INF             .          
+10          .             0.8200        +INF             .          
+11          .              .            +INF            0.5000      
+12          .             0.4800        +INF             .          
+13          .              .            +INF            EPS         
+14          .              .            +INF            EPS         
+15          .             0.8800        +INF             .          
+16          .             0.8400        +INF             .          
+17          .             0.8000        +INF             .          
+18          .             2.1000        +INF             .          
+
+---- EQU obser  observacion i
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1         -1.0000        -1.0000        -1.0000        -0.3333      
+2         -0.9000        -0.9000        -0.9000         EPS         
+3         -0.7000        -0.7000        -0.7000         EPS         
+4         -1.5000        -1.5000        -1.5000         EPS         
+5         -1.9000        -1.9000        -1.9000         EPS         
+6         -2.4000        -2.4000        -2.4000         EPS         
+7         -3.2000        -3.2000        -3.2000         EPS         
+8         -2.0000        -2.0000        -2.0000         EPS         
+9         -2.7000        -2.7000        -2.7000         EPS         
+10        -3.5000        -3.5000        -3.5000         EPS         
+11        -1.0000        -1.0000        -1.0000         0.5000      
+12        -4.0000        -4.0000        -4.0000         EPS         
+13        -3.6000        -3.6000        -3.6000         EPS         
+14        -2.7000        -2.7000        -2.7000         EPS         
+15        -6.5000        -6.5000        -6.5000         EPS         
+16        -7.3000        -7.3000        -7.3000         EPS         
+17        -8.1000        -8.1000        -8.1000         EPS         
+18       -13.6000       -13.6000       -13.6000        -0.1667      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR a                 -INF           -1.1000        +INF             .          
+---- VAR b                 -INF            0.8400        +INF             .          
+---- VAR zb                -INF            2.1000        +INF             .          
+---- VAR T                 -INF            2.1000        +INF             .          
+
+  b  coeficientes de la recta de regesion
+  zb  objetivo del apartado b
+  T  distancia de las observaciones a la recta
+
+---- VAR D  distancia 'por debajo' de la recta
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1           .             2.1000        +INF             .          
+2           .             1.5800        +INF             .          
+3           .             2.1000        +INF             .          
+4           .             2.1000        +INF             .          
+5           .             2.1000        +INF             .          
+6           .             2.1000        +INF             .          
+7           .             2.1000        +INF             .          
+8           .             2.1000        +INF             .          
+9           .             2.1000        +INF             .          
+10          .             2.1000        +INF             .          
+11          .              .            +INF            0.5000      
+12          .             2.1000        +INF             .          
+13          .             1.7600        +INF             .          
+14          .             0.0200        +INF             .          
+15          .             2.1000        +INF             .          
+16          .             2.1000        +INF             .          
+17          .             2.1000        +INF             .          
+18          .             2.1000        +INF             .          
+
+---- VAR E  distancia 'por encima' de la recta
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1           .              .            +INF            0.3333      
+2           .              .            +INF            EPS         
+3           .             1.1400        +INF             .          
+4           .             0.7600        +INF             .          
+5           .             0.7800        +INF             .          
+6           .             0.7000        +INF             .          
+7           .             0.3200        +INF             .          
+8           .             1.9400        +INF             .          
+9           .             1.6600        +INF             .          
+10          .             1.2800        +INF             .          
+11          .             2.1000        +INF             .          
+12          .             1.6200        +INF             .          
+13          .             2.1000        +INF             .          
+14          .             2.1000        +INF             .          
+15          .             1.2200        +INF             .          
+16          .             1.2600        +INF             .          
+17          .             1.3000        +INF             .          
+18          .              .            +INF            0.1667      
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.157 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\1-10GAMS.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\1-10GAMS.lst

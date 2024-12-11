@@ -1,0 +1,119 @@
+--- Job 1-7EnterasGAMS.gms Start 03/16/21 15:32:37 34.3.0 rac355f3 WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\34\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-7EnterasGAMS.gms
+    PageSize 0
+    ScrDir C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\225a\
+    SysDir C:\GAMS\34\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+          Universidad Complutense de Madrid, Spain                 DL033492
+          C:\GAMS\34\gamslice.txt
+          anggil@ucm.es, Angel Amando Gil Alamo                            
+          Demo license for demonstration and instructional purposes only
+GAMS 34.3.0   Copyright (C) 1987-2021 GAMS Development. All rights reserved
+--- Starting compilation
+--- 1-7EnterasGAMS.gms(56) 3 Mb
+--- Starting execution: elapsed 0:00:00.005
+--- 1-7EnterasGAMS.gms(38) 4 Mb
+--- Generating MIP model aceites
+--- 1-7EnterasGAMS.gms(56) 4 Mb
+---   55 rows  91 columns  296 non-zeroes
+---   90 discrete-columns
+--- Executing CPLEX (Solvelink=2): elapsed 0:00:00.026
+
+IBM ILOG CPLEX   34.3.0 rac355f3 Released Feb 25, 2021 WEI x86 64bit/MS Window
+
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.51 Mb (peak 0.52 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.01 Mb)
+--- Starting Cplex
+
+Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+CPXPARAM_Advance                                 0
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+Generic callback                                 0x50
+Found incumbent of value -2850.000000 after 0.00 sec. (0.00 ticks)
+Tried aggregator 4 times.
+MIP Presolve eliminated 0 rows and 5 columns.
+MIP Presolve added 5 rows and 5 columns.
+MIP Presolve modified 30 coefficients.
+Aggregator did 9 substitutions.
+Reduced MIP has 50 rows, 82 columns, and 183 nonzeros.
+Reduced MIP has 0 binaries, 82 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.25 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+MIP Presolve eliminated 9 rows and 10 columns.
+MIP Presolve added 5 rows and 5 columns.
+Reduced MIP has 46 rows, 77 columns, and 170 nonzeros.
+Reduced MIP has 0 binaries, 77 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.11 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Tried aggregator 1 time.
+LP Presolve eliminated 5 rows and 5 columns.
+Reduced LP has 41 rows, 72 columns, and 155 nonzeros.
+Presolve time = 0.00 sec. (0.03 ticks)
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =         55500.000000
+Initializing dual steep norms . . .
+Root relaxation solution time = 0.00 sec. (0.16 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                        -2850.0000    70000.0000              --- 
+Found incumbent of value -2850.000000 after 0.02 sec. (1.56 ticks)
+      0     0     9789.2857     3    -2850.0000     9789.2857       44  443.48%
+*     0+    0                         9789.2000     9789.2857             0.00%
+Found incumbent of value 9789.200000 after 0.02 sec. (1.64 ticks)
+
+Root node processing (before b&c):
+  Real time             =    0.02 sec. (1.64 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    0.02 sec. (1.64 ticks)
+
+--- MIP status (102): integer optimal, tolerance.
+--- Cplex Time: 0.02sec (det. 1.64 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+CPXPARAM_Advance                                 2
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+Tried aggregator 1 time.
+LP Presolve eliminated 54 rows and 91 columns.
+All rows and columns eliminated.
+Presolve time = 0.00 sec. (0.03 ticks)
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.05 ticks)
+
+
+Solution satisfies tolerances
+MIP Solution:         9789.200000    (44 iterations, 0 nodes)
+Final Solve:          9789.200000    (0 iterations)
+
+Best possible:        9789.285714
+Absolute gap:            0.085714
+Relative gap:            0.000009
+
+--- Reading solution for model aceites
+*** Status: Normal completion
+--- Job 1-7EnterasGAMS.gms Stop 03/16/21 15:32:37 elapsed 0:00:00.075

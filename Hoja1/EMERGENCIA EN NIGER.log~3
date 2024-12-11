@@ -1,0 +1,86 @@
+
+--- Job EMERGENCIA EN NIGER.gms Start 04/12/21 12:52:00 34.3.0 rac355f3 WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\34\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input "C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms"
+    PageSize 0
+    ScrDir C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\225a\
+    SysDir C:\GAMS\34\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+          Universidad Complutense de Madrid, Spain                 DL033492
+          C:\GAMS\34\gamslice.txt
+          anggil@ucm.es, Angel Amando Gil Alamo                            
+          Demo license for demonstration and instructional purposes only
+GAMS 34.3.0   Copyright (C) 1987-2021 GAMS Development. All rights reserved
+--- Starting compilation
+--- EMERGENCIA EN NIGER.gms(82) 3 Mb 1 Error
+*** Error  36 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    '=' or '..' or ':=' or '$=' operator expected
+    rest of statement ignored
+--- EMERGENCIA EN NIGER.gms(96) 3 Mb 2 Errors
+*** Error 257 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Solve statement not checked because of previous errors
+--- EMERGENCIA EN NIGER.gms(97) 3 Mb 4 Errors
+*** Error 141 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+*** Error 141 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+--- EMERGENCIA EN NIGER.gms(100) 3 Mb 5 Errors
+*** Error 257 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Solve statement not checked because of previous errors
+--- EMERGENCIA EN NIGER.gms(101) 3 Mb 7 Errors
+*** Error 141 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+*** Error 141 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+--- EMERGENCIA EN NIGER.gms(104) 3 Mb 8 Errors
+*** Error 257 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Solve statement not checked because of previous errors
+--- EMERGENCIA EN NIGER.gms(105) 3 Mb 10 Errors
+*** Error 141 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+*** Error 141 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+--- EMERGENCIA EN NIGER.gms(108) 3 Mb 11 Errors
+*** Error 257 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Solve statement not checked because of previous errors
+--- EMERGENCIA EN NIGER.gms(109) 3 Mb 12 Errors
+*** Error 141 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+    Symbol declared but no values have been assigned. Check for missing
+       data definition, assignment, data loading or implicit assignment
+       via a solve statement.
+       A wild shot: You may have spurious commas in the explanatory
+       text of a declaration. Check symbol reference list.
+--- EMERGENCIA EN NIGER.gms(111) 3 Mb 12 Errors
+*** Status: Compilation error(s)
+--- Job EMERGENCIA EN NIGER.gms Stop 04/12/21 12:52:00 elapsed 0:00:00.006

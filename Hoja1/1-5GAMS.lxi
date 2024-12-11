@@ -1,0 +1,17 @@
+B 3 C o m p i l a t i o n
+B 46 Equation Listing    SOLVE almacenaje Using MIP From line 35
+D 49 cost
+D 54 almacen
+D 65 balance
+B 77 Column Listing      SOLVE almacenaje Using MIP From line 35
+E 80 x
+E 99 y
+E 124 z
+B 132 Model Statistics    SOLVE almacenaje Using MIP From line 35
+B 145 Solution Report     SOLVE almacenaje Using MIP From line 35
+F 188 cost
+F 192 almacen
+F 201 balance
+G 210 x
+G 219 y
+G 230 z

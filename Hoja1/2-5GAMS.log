@@ -1,0 +1,192 @@
+--- Job 2-5GAMS.gms Start 03/31/21 19:19:11 34.3.0 rac355f3 WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\34\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\2-5GAMS.gms
+    PageSize 0
+    ScrDir C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\225a\
+    SysDir C:\GAMS\34\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+          Universidad Complutense de Madrid, Spain                 DL033492
+          C:\GAMS\34\gamslice.txt
+          anggil@ucm.es, Angel Amando Gil Alamo                            
+          Demo license for demonstration and instructional purposes only
+GAMS 34.3.0   Copyright (C) 1987-2021 GAMS Development. All rights reserved
+--- Starting compilation
+--- 2-5GAMS.gms(72) 3 Mb
+--- Starting execution: elapsed 0:00:00.004
+--- 2-5GAMS.gms(32) 4 Mb
+--- Generating LP model apartadoa
+--- 2-5GAMS.gms(66) 4 Mb
+---   6 rows  5 columns  13 non-zeroes
+--- Executing CPLEX (Solvelink=2): elapsed 0:00:00.019
+
+IBM ILOG CPLEX   34.3.0 rac355f3 Released Feb 25, 2021 WEI x86 64bit/MS Window
+
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+CPXPARAM_Advance                                 0
+CPXPARAM_Simplex_Display                         2
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+Tried aggregator 1 time.
+LP Presolve eliminated 4 rows and 1 columns.
+Reduced LP has 1 rows, 4 columns, and 4 nonzeros.
+Presolve time = 0.00 sec. (0.00 ticks)
+
+Iteration      Dual Objective            In Variable           Out Variable
+     1         2543333.333333                   x(2)          htotala slack
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:      2543333.333333
+
+--- Reading solution for model apartadoa
+--- Executing after solve: elapsed 0:00:00.041
+--- Generating LP model apartadob
+--- 2-5GAMS.gms(69) 4 Mb
+---   6 rows  6 columns  15 non-zeroes
+--- Executing CPLEX (Solvelink=2): elapsed 0:00:00.049
+
+IBM ILOG CPLEX   34.3.0 rac355f3 Released Feb 25, 2021 WEI x86 64bit/MS Window
+
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+CPXPARAM_Advance                                 2
+CPXPARAM_Simplex_Display                         2
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+Tried aggregator 1 time.
+LP Presolve eliminated 4 rows and 1 columns.
+Reduced LP has 1 rows, 5 columns, and 5 nonzeros.
+Presolve time = 0.00 sec. (0.00 ticks)
+
+Iteration           Objective            In Variable           Out Variable
+     1         2663333.333333                      h    goes to upper bound
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:      2663333.333333
+
+--- Reading solution for model apartadob
+--- Executing after solve: elapsed 0:00:00.067
+--- Generating MIP model apartadoc
+--- 2-5GAMS.gms(72) 4 Mb
+---   6 rows  6 columns  15 non-zeroes
+---   1 discrete-columns
+--- Executing CPLEX (Solvelink=2): elapsed 0:00:00.074
+
+IBM ILOG CPLEX   34.3.0 rac355f3 Released Feb 25, 2021 WEI x86 64bit/MS Window
+
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+CPXPARAM_Advance                                 2
+CPXPARAM_Simplex_Display                         2
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+Generic callback                                 0x50
+Found incumbent of value 0.000000 after 0.00 sec. (0.00 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 2 rows and 1 columns.
+Reduced MIP has 3 rows, 5 columns, and 8 nonzeros.
+Reduced MIP has 1 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.00 ticks)
+Probing time = 0.00 sec. (0.00 ticks)
+Tried aggregator 1 time.
+Reduced MIP has 3 rows, 5 columns, and 8 nonzeros.
+Reduced MIP has 1 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.00 ticks)
+Probing time = 0.00 sec. (0.00 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Tried aggregator 1 time.
+Aggregator did 1 substitutions.
+Reduced LP has 2 rows, 4 columns, and 6 nonzeros.
+Presolve time = 0.00 sec. (0.00 ticks)
+
+Iteration      Dual Objective            In Variable           Out Variable
+     1         2543333.333333                   x(2)          htotala slack
+     2         2470000.000000                   x(3)          incomp1 slack
+Initializing dual steep norms . . .
+Root relaxation solution time = 0.00 sec. (0.01 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                            0.0000  3403333.3333              --- 
+Found incumbent of value 0.000000 after 0.00 sec. (0.02 ticks)
+*     0     0      integral     0  2470000.0000  2470000.0000        2    0.00%
+Elapsed time = 0.00 sec. (0.02 ticks, tree = 0.00 MB, solutions = 2)
+Found incumbent of value 2470000.000000 after 0.00 sec. (0.02 ticks)
+
+Root node processing (before b&c):
+  Real time             =    0.00 sec. (0.02 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    0.00 sec. (0.02 ticks)
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.02 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+CPXPARAM_Advance                                 2
+CPXPARAM_Simplex_Display                         2
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+Tried aggregator 1 time.
+LP Presolve eliminated 4 rows and 3 columns.
+Reduced LP has 1 rows, 3 columns, and 3 nonzeros.
+Presolve time = 0.00 sec. (0.00 ticks)
+
+Iteration      Dual Objective            In Variable           Out Variable
+     1         2470000.000000                   x(3)          htotala slack
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Proven optimal solution
+MIP Solution:      2470000.000000    (2 iterations, 0 nodes)
+Final Solve:       2470000.000000    (1 iterations)
+
+Best possible:     2470000.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Reading solution for model apartadoc
+*** Status: Normal completion
+--- Job 2-5GAMS.gms Stop 03/31/21 19:19:11 elapsed 0:00:00.108

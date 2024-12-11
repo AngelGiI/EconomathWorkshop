@@ -1,0 +1,43 @@
+B 3 C o m p i l a t i o n
+B 83 Equation Listing    SOLVE regresion Using LP From line 71
+D 86 fobja
+D 91 obser
+B 103 Column Listing      SOLVE regresion Using LP From line 71
+E 106 a
+E 130 b
+E 153 za
+E 160 D
+E 179 E
+B 199 Model Statistics    SOLVE regresion Using LP From line 71
+B 212 Solution Report     SOLVE regresion Using LP From line 71
+F 244 fobja
+F 248 obser
+G 273 a
+G 274 b
+G 275 za
+G 280 D
+G 303 E
+B 332 Equation Listing    SOLVE distancia Using LP From line 73
+D 335 fobjb
+D 340 debajo
+D 351 encima
+D 362 obser
+B 374 Column Listing      SOLVE distancia Using LP From line 73
+E 377 a
+E 401 b
+E 424 zb
+E 431 T
+E 474 D
+E 493 E
+B 513 Model Statistics    SOLVE distancia Using LP From line 73
+B 526 Solution Report     SOLVE distancia Using LP From line 73
+F 558 fobjb
+F 562 debajo
+F 585 encima
+F 608 obser
+G 633 a
+G 634 b
+G 635 zb
+G 636 T
+G 642 D
+G 665 E

@@ -1,0 +1,33 @@
+B 3 C o m p i l a t i o n
+B 61 Equation Listing    SOLVE aceites Using MIP From line 50
+D 64 fbeneficio
+D 69 balini
+D 80 bal
+D 91 fin
+D 102 maxv
+D 113 maxnv
+D 124 mindur
+D 135 maxdur
+B 147 Column Listing      SOLVE aceites Using MIP From line 50
+E 150 x
+E 169 al
+E 191 ref
+E 219 beneficio
+B 227 Model Statistics    SOLVE aceites Using MIP From line 50
+B 240 Solution Report     SOLVE aceites Using MIP From line 50
+F 283 fbeneficio
+F 287 balini
+F 297 bal
+F 327 fin
+F 337 maxv
+F 348 maxnv
+F 359 mindur
+F 370 maxdur
+G 381 x
+G 416 al
+G 451 ref
+G 488 beneficio
+B 499 E x e c u t i o n
+I 499 ref
+I 510 x
+I 520 al

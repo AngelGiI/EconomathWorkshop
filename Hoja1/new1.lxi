@@ -1,0 +1,53 @@
+B 3 C o m p i l a t i o n
+B 82 Equation Listing    SOLVE apartadoa Using LP From line 66
+D 85 fobja
+D 90 max
+D 101 htotala
+B 107 Column Listing      SOLVE apartadoa Using LP From line 66
+E 110 x
+E 132 za
+B 140 Model Statistics    SOLVE apartadoa Using LP From line 66
+B 153 Solution Report     SOLVE apartadoa Using LP From line 66
+F 185 fobja
+F 189 max
+F 200 htotala
+G 204 x
+G 215 za
+B 225 Equation Listing    SOLVE apartadob Using LP From line 69
+D 228 fobjb
+D 233 max
+D 244 maxh
+D 249 htotalb
+B 255 Column Listing      SOLVE apartadob Using LP From line 69
+E 258 x
+E 280 h
+E 289 zb
+B 297 Model Statistics    SOLVE apartadob Using LP From line 69
+B 310 Solution Report     SOLVE apartadob Using LP From line 69
+F 342 fobjb
+F 346 max
+F 357 maxh
+F 358 htotalb
+G 363 x
+G 374 h
+G 375 zb
+B 386 Equation Listing    SOLVE apartadoc Using MIP From line 72
+D 389 fobja
+D 394 htotala
+D 399 maxc
+D 406 incomp1
+D 411 incomp2
+B 417 Column Listing      SOLVE apartadoc Using MIP From line 72
+E 420 x
+E 442 za
+E 449 incompatibles
+B 458 Model Statistics    SOLVE apartadoc Using MIP From line 72
+B 471 Solution Report     SOLVE apartadoc Using MIP From line 72
+F 514 fobja
+F 515 htotala
+F 520 maxc
+F 529 incomp1
+F 530 incomp2
+G 532 x
+G 543 za
+G 544 incompatibles

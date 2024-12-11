@@ -1,0 +1,544 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/15/21 15:31:36 Page 1
+Hoja 1 problema 7
+C o m p i l a t i o n
+
+
+   2  sets
+   3  i tipos de aceite /V1,V2,N1,N2,N3/
+   4  V(i) aceites vegetales /V1,V2/
+   5  N(i) aceites no vegetales /N1*N3/
+   6  j meses /1*6/ ;
+   7   
+   8  table prec(i,j) precios de cada tipo de aceite i en el mes j (euros por litro)
+   9                 1          2         3         4          5            6
+  10            V1  1.10       1.30      1.10      1.20       1.00         0.90
+  11            V2  1.20       1.30      1.40      1.10       1.20         1.00
+  12            N1  1.30       1.10      1.30      1.20       1.50         1.40
+  13            N2  1.10       0.90      1.00      1.20       1.10         0.80
+  14            N3  1.15       1.15      0.95      1.20       1.05         1.35;
+  15  parameter
+  16  dur(i) indice de dureza /V1 8.8,V2 16.1,N1 2.0,N2 4.2,N3 5.0/;
+  17  scalar
+  18  prev precio de venta aceite refinado (euros por litro) /1.5/
+  19  costal coste almacenamiento (euros por litro) /0.05/
+  20  limal limite de almacenamiento por aceite y mes (litros) /10000/;
+  21  integer variables
+  22  x(i,j) litros adquiridos del tipo i en el mes j
+  23  al(i,j) litros almacenados del tipo i en el mes j
+  24  ref(i,j) litros refinados - vendidos del tipo i en el mes j;
+  25   
+  26  variable
+  27  beneficio beneficio obtenido;
+  28   
+  29  al.up(i,j)=limal;
+  30  equations
+  31  fbeneficio beneficio
+  32  balini(i) balance inicial
+  33  bal(i,j) balance
+  34  fin(i) litros finales
+  35  maxv(j) maximo aceite vegetal
+  36  maxnv(j) maximo aceite no vegetal
+  37  mindur(j) cota minima dureza
+  38  maxdur(j) cota maxima dureza;
+  39   
+  40  fbeneficio.. beneficio=E=sum((i,j),(prev*ref(i,j)-prec(i,j)*x(i,j)-costal*al(i,j)));
+  41  balini(i)..ref(i,'1')=E=x(i,'1')+500-al(i,'1');
+  42  bal(i,j)$(ord(j)>1)..ref(i,j)=E=al(i,j-1)+x(i,j)-al(i,j);
+  43  fin(i).. al(i,'6') =E= 500;
+  44  maxv(j).. sum(v,ref(v,j))=L=2000;
+  45  maxnv(j)..sum(n, ref(n,j))=L=2500;
+  46  mindur(j).. 3*sum(i,ref(i,j))- sum(i,dur(i)*ref(i,j)) =L= 0;
+  47  maxdur(j)..sum(i,ref(i,j)*dur(i))-6*sum(i,ref(i,j)) =L= 0;
+  48  options optcr = 0;
+  49  model aceites /all/;
+  50  solve aceites using MIP maximizing beneficio;
+  51  display ref.l,x.l,al.l;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/15/21 15:31:36 Page 2
+Hoja 1 problema 7
+Equation Listing    SOLVE aceites Using MIP From line 50
+
+
+---- fbeneficio  =E=  beneficio
+
+fbeneficio..  1.1*x(V1,1) + 1.3*x(V1,2) + 1.1*x(V1,3) + 1.2*x(V1,4) + x(V1,5) + 0.9*x(V1,6) + 1.2*x(V2,1) + 1.3*x(V2,2) + 1.4*x(V2,3) + 1.1*x(V2,4) + 1.2*x(V2,5) + x(V2,6) + 1.3*x(N1,1) + 1.1*x(N1,2) + 1.3*x(N1,3) + 1.2*x(N1,4) + 1.5*x(N1,5) + 1.4*x(N1,6) + 1.1*x(N2,1) + 0.9*x(N2,2) + x(N2,3) + 1.2*x(N2,4) + 1.1*x(N2,5) + 0.8*x(N2,6) + 1.15*x(N3,1) + 1.15*x(N3,2) + 0.95*x(N3,3) + 1.2*x(N3,4) + 1.05*x(N3,5) + 1.35*x(N3,6) + 0.05*al(V1,1) + 0.05*al(V1,2) + 0.05*al(V1,3) + 0.05*al(V1,4) + 0.05*al(V1,5) + 0.05*al(V1,6) + 0.05*al(V2,1) + 0.05*al(V2,2) + 0.05*al(V2,3) + 0.05*al(V2,4) + 0.05*al(V2,5) + 0.05*al(V2,6) + 0.05*al(N1,1) + 0.05*al(N1,2) + 0.05*al(N1,3) + 0.05*al(N1,4) + 0.05*al(N1,5) + 0.05*al(N1,6) + 0.05*al(N2,1) + 0.05*al(N2,2) + 0.05*al(N2,3) + 0.05*al(N2,4) + 0.05*al(N2,5) + 0.05*al(N2,6) + 0.05*al(N3,1) + 0.05*al(N3,2) + 0.05*al(N3,3) + 0.05*al(N3,4) + 0.05*al(N3,5) + 0.05*al(N3,6) - 1.5*ref(V1,1) - 1.5*ref(V1,2) - 1.5*ref(V1,3) - 1.5*ref(V1,4) - 1.5*ref(V1,5) - 1.5*ref(V1,6) - 1.5*ref(V2,1) - 1.5*ref(V2,2) - 1.5*ref(V2,3) - 1.5*ref(V2,4) - 1.5*ref(V2,5) - 1.5*ref(V2,6) - 1.5*ref(N1,1) - 1.5*ref(N1,2) - 1.5*ref(N1,3) - 1.5*ref(N1,4) - 1.5*ref(N1,5) - 1.5*ref(N1,6) - 1.5*ref(N2,1) - 1.5*ref(N2,2) - 1.5*ref(N2,3) - 1.5*ref(N2,4) - 1.5*ref(N2,5) - 1.5*ref(N2,6) - 1.5*ref(N3,1) - 1.5*ref(N3,2) - 1.5*ref(N3,3) - 1.5*ref(N3,4) - 1.5*ref(N3,5) - 1.5*ref(N3,6) + beneficio =E= 0 ; (LHS = 0)
+     
+
+---- balini  =E=  balance inicial
+
+balini(V1)..  - x(V1,1) + al(V1,1) + ref(V1,1) =E= 500 ; (LHS = 0, INFES = 500 ****)
+     
+balini(V2)..  - x(V2,1) + al(V2,1) + ref(V2,1) =E= 500 ; (LHS = 0, INFES = 500 ****)
+     
+balini(N1)..  - x(N1,1) + al(N1,1) + ref(N1,1) =E= 500 ; (LHS = 0, INFES = 500 ****)
+     
+REMAINING 2 ENTRIES SKIPPED
+
+
+---- bal  =E=  balance
+
+bal(V1,2)..  - x(V1,2) - al(V1,1) + al(V1,2) + ref(V1,2) =E= 0 ; (LHS = 0)
+     
+bal(V1,3)..  - x(V1,3) - al(V1,2) + al(V1,3) + ref(V1,3) =E= 0 ; (LHS = 0)
+     
+bal(V1,4)..  - x(V1,4) - al(V1,3) + al(V1,4) + ref(V1,4) =E= 0 ; (LHS = 0)
+     
+REMAINING 22 ENTRIES SKIPPED
+
+
+---- fin  =E=  litros finales
+
+fin(V1)..  al(V1,6) =E= 500 ; (LHS = 0, INFES = 500 ****)
+     
+fin(V2)..  al(V2,6) =E= 500 ; (LHS = 0, INFES = 500 ****)
+     
+fin(N1)..  al(N1,6) =E= 500 ; (LHS = 0, INFES = 500 ****)
+     
+REMAINING 2 ENTRIES SKIPPED
+
+
+---- maxv  =L=  maximo aceite vegetal
+
+maxv(1)..  ref(V1,1) + ref(V2,1) =L= 2000 ; (LHS = 0)
+     
+maxv(2)..  ref(V1,2) + ref(V2,2) =L= 2000 ; (LHS = 0)
+     
+maxv(3)..  ref(V1,3) + ref(V2,3) =L= 2000 ; (LHS = 0)
+     
+REMAINING 3 ENTRIES SKIPPED
+
+
+---- maxnv  =L=  maximo aceite no vegetal
+
+maxnv(1)..  ref(N1,1) + ref(N2,1) + ref(N3,1) =L= 2500 ; (LHS = 0)
+     
+maxnv(2)..  ref(N1,2) + ref(N2,2) + ref(N3,2) =L= 2500 ; (LHS = 0)
+     
+maxnv(3)..  ref(N1,3) + ref(N2,3) + ref(N3,3) =L= 2500 ; (LHS = 0)
+     
+REMAINING 3 ENTRIES SKIPPED
+
+
+---- mindur  =L=  cota minima dureza
+
+mindur(1)..  - 5.8*ref(V1,1) - 13.1*ref(V2,1) + ref(N1,1) - 1.2*ref(N2,1) - 2*ref(N3,1) =L= 0 ; (LHS = 0)
+     
+mindur(2)..  - 5.8*ref(V1,2) - 13.1*ref(V2,2) + ref(N1,2) - 1.2*ref(N2,2) - 2*ref(N3,2) =L= 0 ; (LHS = 0)
+     
+mindur(3)..  - 5.8*ref(V1,3) - 13.1*ref(V2,3) + ref(N1,3) - 1.2*ref(N2,3) - 2*ref(N3,3) =L= 0 ; (LHS = 0)
+     
+REMAINING 3 ENTRIES SKIPPED
+
+
+---- maxdur  =L=  cota maxima dureza
+
+maxdur(1)..  2.8*ref(V1,1) + 10.1*ref(V2,1) - 4*ref(N1,1) - 1.8*ref(N2,1) - ref(N3,1) =L= 0 ; (LHS = 0)
+     
+maxdur(2)..  2.8*ref(V1,2) + 10.1*ref(V2,2) - 4*ref(N1,2) - 1.8*ref(N2,2) - ref(N3,2) =L= 0 ; (LHS = 0)
+     
+maxdur(3)..  2.8*ref(V1,3) + 10.1*ref(V2,3) - 4*ref(N1,3) - 1.8*ref(N2,3) - ref(N3,3) =L= 0 ; (LHS = 0)
+     
+REMAINING 3 ENTRIES SKIPPED
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/15/21 15:31:36 Page 3
+Hoja 1 problema 7
+Column Listing      SOLVE aceites Using MIP From line 50
+
+
+---- x  litros adquiridos del tipo i en el mes j
+
+x(V1,1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1.1     fbeneficio
+       -1       balini(V1)
+
+x(V1,2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1.3     fbeneficio
+       -1       bal(V1,2)
+
+x(V1,3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1.1     fbeneficio
+       -1       bal(V1,3)
+
+REMAINING 27 ENTRIES SKIPPED
+
+---- al  litros almacenados del tipo i en el mes j
+
+al(V1,1)
+                (.LO, .L, .UP, .M = 0, 0, 10000, 0)
+        0.05    fbeneficio
+        1       balini(V1)
+       -1       bal(V1,2)
+
+al(V1,2)
+                (.LO, .L, .UP, .M = 0, 0, 10000, 0)
+        0.05    fbeneficio
+        1       bal(V1,2)
+       -1       bal(V1,3)
+
+al(V1,3)
+                (.LO, .L, .UP, .M = 0, 0, 10000, 0)
+        0.05    fbeneficio
+        1       bal(V1,3)
+       -1       bal(V1,4)
+
+REMAINING 27 ENTRIES SKIPPED
+
+---- ref  litros refinados - vendidos del tipo i en el mes j
+
+ref(V1,1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1.5     fbeneficio
+        1       balini(V1)
+        1       maxv(1)
+       -5.8     mindur(1)
+        2.8     maxdur(1)
+
+ref(V1,2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1.5     fbeneficio
+        1       bal(V1,2)
+        1       maxv(2)
+       -5.8     mindur(2)
+        2.8     maxdur(2)
+
+ref(V1,3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1.5     fbeneficio
+        1       bal(V1,3)
+        1       maxv(3)
+       -5.8     mindur(3)
+        2.8     maxdur(3)
+
+REMAINING 27 ENTRIES SKIPPED
+
+---- beneficio  beneficio obtenido
+
+beneficio
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fbeneficio
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/15/21 15:31:36 Page 4
+Hoja 1 problema 7
+Model Statistics    SOLVE aceites Using MIP From line 50
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           8     SINGLE EQUATIONS           60
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           91
+NON ZERO ELEMENTS           301     DISCRETE VARIABLES         90
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/15/21 15:31:36 Page 5
+Hoja 1 problema 7
+Solution Report     SOLVE aceites Using MIP From line 50
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   aceites             OBJECTIVE  beneficio
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  50
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE            12427.8000
+
+ RESOURCE USAGE, LIMIT          0.016 10000000000.000
+ ITERATION COUNT, LIMIT        86    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.52 Mb (peak 0.52 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.01 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 4.64 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.06 ticks)
+
+
+Proven optimal solution
+MIP Solution:        12427.800000    (86 iterations, 1 nodes)
+Final Solve:         12427.800000    (0 iterations)
+
+Best possible:       12427.800000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fbeneficio          .              .              .             1.0000      
+
+  fbeneficio  beneficio
+
+---- EQU balini  balance inicial
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+V1       500.0000       500.0000       500.0000          .          
+V2       500.0000       500.0000       500.0000          .          
+N1       500.0000       500.0000       500.0000          .          
+N2       500.0000       500.0000       500.0000          .          
+N3       500.0000       500.0000       500.0000          .          
+
+---- EQU bal  balance
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+V1.2          .              .              .              .          
+V1.3          .              .              .              .          
+V1.4          .              .              .              .          
+V1.5          .              .              .              .          
+V1.6          .              .              .              .          
+V2.2          .              .              .              .          
+V2.3          .              .              .              .          
+V2.4          .              .              .              .          
+V2.5          .              .              .              .          
+V2.6          .              .              .              .          
+N1.2          .              .              .              .          
+N1.3          .              .              .              .          
+N1.4          .              .              .              .          
+N1.5          .              .              .              .          
+N1.6          .              .              .              .          
+N2.2          .              .              .              .          
+N2.3          .              .              .              .          
+N2.4          .              .              .              .          
+N2.5          .              .              .              .          
+N2.6          .              .              .              .          
+N3.2          .              .              .              .          
+N3.3          .              .              .              .          
+N3.4          .              .              .              .          
+N3.5          .              .              .              .          
+N3.6          .              .              .              .          
+
+---- EQU fin  litros finales
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+V1       500.0000       500.0000       500.0000          .          
+V2       500.0000       500.0000       500.0000          .          
+N1       500.0000       500.0000       500.0000          .          
+N2       500.0000       500.0000       500.0000          .          
+N3       500.0000       500.0000       500.0000          .          
+
+---- EQU maxv  maximo aceite vegetal
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1        -INF         2000.0000      2000.0000          .          
+2        -INF         2000.0000      2000.0000          .          
+3        -INF         2000.0000      2000.0000          .          
+4        -INF         2000.0000      2000.0000          .          
+5        -INF         2000.0000      2000.0000          .          
+6        -INF         1607.0000      2000.0000          .          
+
+---- EQU maxnv  maximo aceite no vegetal
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1        -INF         2500.0000      2500.0000          .          
+2        -INF         2500.0000      2500.0000          .          
+3        -INF         2500.0000      2500.0000          .          
+4        -INF         2500.0000      2500.0000          .          
+5        -INF         2500.0000      2500.0000          .          
+6        -INF         2500.0000      2500.0000          .          
+
+---- EQU mindur  cota minima dureza
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1        -INF       -13499.6000          .              .          
+2        -INF       -13500.0000          .              .          
+3        -INF       -13500.0000          .              .          
+4        -INF       -13500.0000          .              .          
+5        -INF       -13500.0000          .              .          
+6        -INF       -12320.6000          .              .          
+
+---- EQU maxdur  cota maxima dureza
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1        -INF           -0.4000          .              .          
+2        -INF             .              .              .          
+3        -INF             .              .              .          
+4        -INF             .              .              .          
+5        -INF             .              .              .          
+6        -INF           -0.4000          .              .          
+
+---- VAR x  litros adquiridos del tipo i en el mes j
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+V1.1          .          3500.0000        +INF           -1.1000      
+V1.2          .              .            +INF           -1.3000      
+V1.3          .          4000.0000        +INF           -1.1000      
+V1.4          .              .            +INF           -1.2000      
+V1.5          .          2000.0000        +INF           -1.0000      
+V1.6          .          2107.0000        +INF           -0.9000      
+V2.1          .              .            +INF           -1.2000      
+V2.2          .              .            +INF           -1.3000      
+V2.3          .              .            +INF           -1.4000      
+V2.4          .              .            +INF           -1.1000      
+V2.5          .              .            +INF           -1.2000      
+V2.6          .              .            +INF           -1.0000      
+N1.1          .           182.0000        +INF           -1.3000      
+N1.2          .          1000.0000        +INF           -1.1000      
+N1.3          .              .            +INF           -1.3000      
+N1.4          .          1500.0000        +INF           -1.2000      
+N1.5          .              .            +INF           -1.5000      
+N1.6          .              .            +INF           -1.4000      
+N2.1          .           818.0000        +INF           -1.1000      
+N2.2          .          8000.0000        +INF           -0.9000      
+N2.3          .              .            +INF           -1.0000      
+N2.4          .              .            +INF           -1.2000      
+N2.5          .              .            +INF           -1.1000      
+N2.6          .          3000.0000        +INF           -0.8000      
+N3.1          .              .            +INF           -1.1500      
+N3.2          .              .            +INF           -1.1500      
+N3.3          .              .            +INF           -0.9500      
+N3.4          .              .            +INF           -1.2000      
+N3.5          .           500.0000        +INF           -1.0500      
+N3.6          .              .            +INF           -1.3500      
+
+---- VAR al  litros almacenados del tipo i en el mes j
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+V1.1          .          2000.0000     10000.0000        -0.0500      
+V1.2          .              .         10000.0000        -0.0500      
+V1.3          .          2000.0000     10000.0000        -0.0500      
+V1.4          .              .         10000.0000        -0.0500      
+V1.5          .              .         10000.0000        -0.0500      
+V1.6          .           500.0000     10000.0000        -0.0500      
+V2.1          .           500.0000     10000.0000        -0.0500      
+V2.2          .           500.0000     10000.0000        -0.0500      
+V2.3          .           500.0000     10000.0000        -0.0500      
+V2.4          .           500.0000     10000.0000        -0.0500      
+V2.5          .           500.0000     10000.0000        -0.0500      
+V2.6          .           500.0000     10000.0000        -0.0500      
+N1.1          .              .         10000.0000        -0.0500      
+N1.2          .           500.0000     10000.0000        -0.0500      
+N1.3          .              .         10000.0000        -0.0500      
+N1.4          .          1000.0000     10000.0000        -0.0500      
+N1.5          .           500.0000     10000.0000        -0.0500      
+N1.6          .           500.0000     10000.0000        -0.0500      
+N2.1          .              .         10000.0000        -0.0500      
+N2.2          .          6000.0000     10000.0000        -0.0500      
+N2.3          .          4000.0000     10000.0000        -0.0500      
+N2.4          .          2000.0000     10000.0000        -0.0500      
+N2.5          .              .         10000.0000        -0.0500      
+N2.6          .           500.0000     10000.0000        -0.0500      
+N3.1          .              .         10000.0000        -0.0500      
+N3.2          .              .         10000.0000        -0.0500      
+N3.3          .              .         10000.0000        -0.0500      
+N3.4          .              .         10000.0000        -0.0500      
+N3.5          .           500.0000     10000.0000        -0.0500      
+N3.6          .           500.0000     10000.0000        -0.0500      
+
+---- VAR ref  litros refinados - vendidos del tipo i en el mes j
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+V1.1          .          2000.0000        +INF            1.5000      
+V1.2          .          2000.0000        +INF            1.5000      
+V1.3          .          2000.0000        +INF            1.5000      
+V1.4          .          2000.0000        +INF            1.5000      
+V1.5          .          2000.0000        +INF            1.5000      
+V1.6          .          1607.0000        +INF            1.5000      
+V2.1          .              .            +INF            1.5000      
+V2.2          .              .            +INF            1.5000      
+V2.3          .              .            +INF            1.5000      
+V2.4          .              .            +INF            1.5000      
+V2.5          .              .            +INF            1.5000      
+V2.6          .              .            +INF            1.5000      
+N1.1          .           682.0000        +INF            1.5000      
+N1.2          .           500.0000        +INF            1.5000      
+N1.3          .           500.0000        +INF            1.5000      
+N1.4          .           500.0000        +INF            1.5000      
+N1.5          .           500.0000        +INF            1.5000      
+N1.6          .              .            +INF            1.5000      
+N2.1          .          1318.0000        +INF            1.5000      
+N2.2          .          2000.0000        +INF            1.5000      
+N2.3          .          2000.0000        +INF            1.5000      
+N2.4          .          2000.0000        +INF            1.5000      
+N2.5          .          2000.0000        +INF            1.5000      
+N2.6          .          2500.0000        +INF            1.5000      
+N3.1          .           500.0000        +INF            1.5000      
+N3.2          .              .            +INF            1.5000      
+N3.3          .              .            +INF            1.5000      
+N3.4          .              .            +INF            1.5000      
+N3.5          .              .            +INF            1.5000      
+N3.6          .              .            +INF            1.5000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR beneficio         -INF        12427.8000        +INF             .          
+
+  beneficio  beneficio obtenido
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+                             2  PROJECTED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/15/21 15:31:36 Page 6
+Hoja 1 problema 7
+E x e c u t i o n
+
+
+----     51 VARIABLE ref.L  litros refinados - vendidos del tipo i en el mes j
+
+             1           2           3           4           5           6
+
+V1    2000.000    2000.000    2000.000    2000.000    2000.000    1607.000
+N1     682.000     500.000     500.000     500.000     500.000
+N2    1318.000    2000.000    2000.000    2000.000    2000.000    2500.000
+N3     500.000
+
+
+----     51 VARIABLE x.L  litros adquiridos del tipo i en el mes j
+
+             1           2           3           4           5           6
+
+V1    3500.000                4000.000                2000.000    2107.000
+N1     182.000    1000.000                1500.000
+N2     818.000    8000.000                                        3000.000
+N3                                                     500.000
+
+
+----     51 VARIABLE al.L  litros almacenados del tipo i en el mes j
+
+             1           2           3           4           5           6
+
+V1    2000.000                2000.000                             500.000
+V2     500.000     500.000     500.000     500.000     500.000     500.000
+N1                 500.000                1000.000     500.000     500.000
+N2                6000.000    4000.000    2000.000                 500.000
+N3                                                     500.000     500.000
+
+
+
+EXECUTION TIME       =        0.047 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\hojateco 1-7.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\hojateco 1-7.lst

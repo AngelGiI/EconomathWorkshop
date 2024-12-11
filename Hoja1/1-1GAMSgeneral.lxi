@@ -1,0 +1,17 @@
+B 3 C o m p i l a t i o n
+B 40 Equation Listing    SOLVE mezcla Using LP From line 30
+D 43 fobj
+D 48 adA
+D 53 adC
+D 58 Total
+B 64 Column Listing      SOLVE mezcla Using LP From line 30
+E 67 gas
+E 92 obj
+B 100 Model Statistics    SOLVE mezcla Using LP From line 30
+B 113 Solution Report     SOLVE mezcla Using LP From line 30
+F 145 fobj
+F 146 adA
+F 147 adC
+F 148 Total
+G 155 gas
+G 166 obj

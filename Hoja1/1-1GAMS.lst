@@ -1,0 +1,194 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 15:21:49 Page 1
+Hoja 1 problema 1
+C o m p i l a t i o n
+
+
+   2   
+   3  variables
+   4  gas1 proporciï¿½n de gas1 en la mezcla
+   5  gas2 proporciï¿½n de gas2 en la mezcla
+   6  gas3 proporciï¿½n de gas3 en la mezcla
+   7  gas4 proporciï¿½n de gas4 en la mezcla
+   8  obj objetivo;
+   9   
+  10  positive variables gas1,gas2,gas3,gas4;
+  11  equations
+  12   
+  13  fobj coste de la mezcla
+  14  adA porcentaje aditivo A
+  15  adC porcentaje aditivo C
+  16  Total total de la mezcla;
+  17   
+  18  fobj.. obj =E= 43*gas1+31*gas2+47*gas3+37*gas4;
+  19  adA.. 80*gas1+30*gas2+70*gas3+40*gas4 =G= 60;
+  20  adC.. 10*gas1+40*gas2+20*gas3+10*gas4 =L= 30;
+  21  total.. gas1+gas2+gas3+gas4 =E= 1;
+  22   
+  23  model mezcla /fobj,adA,adC, total/;
+  24  solve mezcla using LP minimizing obj;
+
+
+COMPILATION TIME     =        0.000 SECONDS      2 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 15:21:49 Page 2
+Hoja 1 problema 1
+Equation Listing    SOLVE mezcla Using LP From line 24
+
+
+---- fobj  =E=  coste de la mezcla
+
+fobj..  - 43*gas1 - 31*gas2 - 47*gas3 - 37*gas4 + obj =E= 0 ; (LHS = 0)
+     
+
+---- adA  =G=  porcentaje aditivo A
+
+adA..  80*gas1 + 30*gas2 + 70*gas3 + 40*gas4 =G= 60 ; (LHS = 0, INFES = 60 ****)
+     
+
+---- adC  =L=  porcentaje aditivo C
+
+adC..  10*gas1 + 40*gas2 + 20*gas3 + 10*gas4 =L= 30 ; (LHS = 0)
+     
+
+---- Total  =E=  total de la mezcla
+
+Total..  gas1 + gas2 + gas3 + gas4 =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 15:21:49 Page 3
+Hoja 1 problema 1
+Column Listing      SOLVE mezcla Using LP From line 24
+
+
+---- gas1  proporciï¿½n de gas1 en la mezcla
+
+gas1
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -43       fobj
+       80       adA
+       10       adC
+        1       Total
+
+
+---- gas2  proporciï¿½n de gas2 en la mezcla
+
+gas2
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -31       fobj
+       30       adA
+       40       adC
+        1       Total
+
+
+---- gas3  proporciï¿½n de gas3 en la mezcla
+
+gas3
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -47       fobj
+       70       adA
+       20       adC
+        1       Total
+
+
+---- gas4  proporciï¿½n de gas4 en la mezcla
+
+gas4
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -37       fobj
+       40       adA
+       10       adC
+        1       Total
+
+
+---- obj  objetivo
+
+obj
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobj
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 15:21:49 Page 4
+Hoja 1 problema 1
+Model Statistics    SOLVE mezcla Using LP From line 24
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           4     SINGLE EQUATIONS            4
+BLOCKS OF VARIABLES           5     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            17
+
+
+GENERATION TIME      =        0.078 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/01/21 15:21:49 Page 5
+Hoja 1 problema 1
+Solution Report     SOLVE mezcla Using LP From line 24
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   mezcla              OBJECTIVE  obj
+     TYPE    LP                  DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  24
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE               38.2000
+
+ RESOURCE USAGE, LIMIT          1.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:           38.200000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobj                .              .              .             1.0000      
+---- EQU adA               60.0000        60.0000        +INF            0.2400      
+---- EQU adC               -INF           22.0000        30.0000          .          
+---- EQU Total              1.0000         1.0000         1.0000        23.8000      
+
+  fobj  coste de la mezcla
+  adA  porcentaje aditivo A
+  adC  porcentaje aditivo C
+  Total  total de la mezcla
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR gas1                .             0.6000        +INF             .          
+---- VAR gas2                .             0.4000        +INF             .          
+---- VAR gas3                .              .            +INF            6.4000      
+---- VAR gas4                .              .            +INF            3.6000      
+---- VAR obj               -INF           38.2000        +INF             .          
+
+  gas1  proporciï¿½n de gas1 en la mezcla
+  gas2  proporciï¿½n de gas2 en la mezcla
+  gas3  proporciï¿½n de gas3 en la mezcla
+  gas4  proporciï¿½n de gas4 en la mezcla
+  obj  objetivo
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        1.156 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\1-1GAMS.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\1-1GAMS.lst

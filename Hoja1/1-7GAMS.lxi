@@ -1,0 +1,25 @@
+B 3 C o m p i l a t i o n
+B 66 Equation Listing    SOLVE aceites Using LP From line 56
+D 69 fobj
+D 74 balance
+D 85 refV
+D 96 refNV
+D 107 durmin
+D 118 durmax
+B 130 Column Listing      SOLVE aceites Using LP From line 56
+E 133 x
+E 152 y
+E 180 Alm
+E 202 z
+B 210 Model Statistics    SOLVE aceites Using LP From line 56
+B 223 Solution Report     SOLVE aceites Using LP From line 56
+F 255 fobj
+F 257 balance
+F 292 refV
+F 303 refNV
+F 314 durmin
+F 325 durmax
+G 336 x
+G 371 y
+G 406 Alm
+G 443 z

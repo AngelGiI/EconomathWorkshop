@@ -1,0 +1,425 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/17/21 20:25:53 Page 1
+Practica 1: Emergencia en Niger.
+C o m p i l a t i o n
+
+
+   2   
+   3  Sets
+   4      i poblaciones a las que tiene que llegar la ayuda (i)
+   5                                 / In-Gall, Aderbissinat, Tessaoua,
+   6                                   Dakoro,  Tatokou,      Bakatchiraba,
+   7                                   Mayahi,  Koundoumaoua, Sabon-Kafi   /
+   8      j centros de reparto (j)  / Tanaut,  Agadez,  Zinder,  Maradi   /
+   9      w nï¿½mero de funciones objetivo /w1, w2, w3, w4/
+  10  ;
+  11   
+  12  Alias (i,i1);
+  13   
+  14  Table
+  15      dist(i,j) distancia (en km) de la poblacion objetivo al centro de reparto
+  16                          Tanaut   Agadez  Zinder  Maradi
+  17          In-Gall           396     119     541     625
+  18          Aderbissinat      147     161     286     454
+  19          Tessaoua          191     492     114     122
+  20          Dakoro            244     562     300     124
+  21          Tatokou            43     258     188     355
+  22          Bakatchiraba        8     306     152     320
+  23          Mayahi            252     553     156      95
+  24          Koundoumaoua      197     490      71     183
+  25          Sabon-Kafi         43     336     102     269
+  26  ;
+  27   
+  28  Parameters
+  29      dem(i) toneladas de ayuda demandada por cada centro afectado
+  30                        / In-Gall         156
+  31                          Aderbissinat     81
+  32                          Tessaoua        129
+  33                          Dakoro          213
+  34                          Tatokou          39
+  35                          Bakatchiraba     30
+  36                          Mayahi          273
+  37                          Koundoumaoua     30
+  38                          Sabon-Kafi       18 /
+  39   
+  40      c(j) coste de gestion por tonelada de ayuda en cada centro de reparto
+  41                           / Tanaut     70
+  42                             Agadez     50
+  43                             Zinder     30
+  44                             Maradi     90 /
+  45   
+  46      fe(w) Valor ï¿½ptimo de F_OBJ(w) del conjunto de soluciones
+  47      fa(w) Peor valor de F_OBJ(w) del conjunto de soluciones eficientes
+  48      fb(w) Peor valor de F_OBJ(w) del conjunto de soluciones eficientes
+  49      fc(w) Peor valor de F_OBJ(w) del conjunto de soluciones eficientes
+  50      fd(w) Peor valor de F_OBJ(w) del conjunto de soluciones eficientes
+  51  ;
+  52   
+  53  Scalars
+  54      cfix        coste fijo de habilitar y poner en marcha un centro de reparto  /  1000 /
+  55      ayuda       toneladas totales de ayuda disponibles para repartir            /   850 /
+  56      ppto        presupuesto disponible para llevar a cabo la operacion          / 40000 /
+  57      cemax       numero maximo de centros de reparto que se pueden establecer    /     3 /
+  58      dmax        distancia maxima a la que se puede llevar ayuda                 /   200 /
+  59      demmin      porcentaje minimo de la demanda global satisfecha               /   0.6 /
+  60  ;
+  61   
+  62  variables
+  63      t(i,i1)     maximo de las diferencias de las proporciones
+  64      ze          valor objetivo del apartado e
+  65      zf          valor objetivo del apartado f
+  66      zg          valor objetivo del apartado g
+  67      zh          valor objetivo del apartado h
+  68  ;
+  69   
+  70  positive variable
+  71      x(i,j) toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+  72      F_Dem   Demanda no satisfecha
+  73      F_Cost  Coste total
+  74      F_Dist  Distancia cubierta por la carga
+  75      F_Equi  Proporcion de reparto equitativo
+  76  ;
+  77   
+  78  binary variable
+  79      construir(j) vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+  80      disy(i,j)    vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+  81      beta(i,j)    vale 1 si se manda de ce a obj y 0 en caso contrario
+  82  ;
+  83   
+  84  Equations
+  85      fobj_dem    Demanda no satisfecha
+  86      fobj_coste  Coste total
+  87      fobj_dist   Distancia cubierta por la carga
+  88      fobj_equi   Proporcion de reparto equitativo
+  89   
+  90      a          limite de presupuesto
+  91      disp       disponibilidad de ayuda
+  92      b1         maximo de  centros establecidos
+  93      b2(i,j)    solo enviaremos ayuda desde centros establecidos
+  94      b3(i)      demanda maxima de la poblacion i
+  95      c1(i,j)    no se puede acudir a poblaciones demasiado lejanas
+  96      c2(i,j)    relajacion
+  97      d          hay que suplir un minimo de la demanda global
+  98      e          fobj para minimizar la demanda no satisfecha
+  99      f          fobj para minimizar el coste total de la operacion
+ 100      g          fobj para minimizar la distancia cubierta por la carga de ce a obj
+ 101      g1(i,j)    relacionar variable X y beta
+ 102      h          fobj para realizar un reparto equitativo entre poblaciones objetivo
+ 103      h1(i,i1)   cositas
+ 104  ;
+ 105   
+ 106      fobj_dem   .. ze =E= F_Dem;
+ 107      fobj_coste .. zf =E= F_Cost;
+ 108      fobj_dist  .. zg =E= F_Dist;
+ 109      fobj_equi  .. zh =E= F_Equi;
+ 110   
+ 111      a..          sum((i,j), x(i,j)*c(j)) + sum(j, cfix*construir(j)) =L= ppto;
+ 112      disp..       sum((i,j), x(i,j)) =L= ayuda;
+ 113      b1..         sum(j, construir(j)) =L= cemax;
+ 114      b2(i,j)..    construir(j)*dem(i) =G= x(i,j);
+ 115      b3(i)..      dem(i) =G= sum(j,x(i,j));
+ 116      c1(i,j)..    dist(i,j) - dmax =L= dist(i,j)*disy(i,j);
+ 117      c2(i,j)..    x(i,j) =L= dem(i)*(1 - disy(i,j));
+ 118      d..          sum((i,j), x(i,j)) =G= sum(i, dem(i))*demmin;
+ 119      e..          F_dem =E= sum(i, dem(i)) - sum((i,j), x(i,j));
+ 120      f..          F_Cost =E= sum((i,j), x(i,j)*c(j)) + sum(j, construir(j)*cfix);
+ 121      g..          F_Dist =E= sum((i,j), dist(i,j)*x(i,j));
+ 122      g1(i,j)..    x(i,j) =L= dem(i)*beta(i,j);
+ 123      h..    F_Equi =E= t(i,i1) ;
+****                           $149,149
+**** 149  Uncontrolled set entered as constant
+ 124      h1(i,i1)$(ord(i)<>ord(i1)).. t(i,i1) =G= (dem(i)-sum(j, x(i,j)))/dem(i) - (dem(i1)-sum(j, x(i1,j)))/dem(i1);
+ 125   
+ 126  model apartadoe /fobj_dem,a,disp,b1,b2,b3,c1,c2,d,e,f,g,g1,h,h1/;
+ 127  solve apartadoe using mip minimizing ze ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 128  display ze.l,x.l;
+****             $141$141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+ 129  fe('w1') = F_Dem.l;
+****                   $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+ 130   
+ 131  model apartadof /fobj_coste,a,disp,b1,b2,b3,c1,c2,d,e,f,g,g1,h,h1/;
+ 132  solve apartadof using mip minimizing zf ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 133  display zf.l,x.l,construir.l;
+****             $141            $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+ 134  fe('w2') = F_Cost.l;
+****                    $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+ 135   
+ 136  model apartadog /fobj_dist,a,disp,b1,b2,b3,c1,c2,d,e,f,g,g1,h,h1/;
+ 137  solve apartadog using mip minimizing zg ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 138  display zg.l,x.l,beta.l;
+****             $141       $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+ 139  fe('w3') = F_Dist.l;
+****                    $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+ 140   
+ 141  model apartadoh /fobj_equi,a,disp,b1,b2,b3,c1,c2,d,e,f,g,g1,h,h1/;
+ 142  solve apartadoh using mip minimizing zh ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 143  display zh.l,x.l,t.l;
+****             $141    $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+ 144  fe('w4') = F_Equi.l;
+****                    $141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+ 145   
+ 146  *$ontext
+ 147  *Matriz de Pagos
+ 148  *Primera Fila
+ 149  F_Dem.fx = fe('w1');
+ 150  fa('w1') = fe('w1');
+ 151  solve apartadof using mip minimizing zf ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 152  display F_Cost.l;
+ 153  fa('w2') = F_Cost.l;
+ 154   
+ 155  solve apartadog using mip minimizing zg ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 156  display F_Dist.l;
+ 157  fa('w3') =F_Dist.l;
+ 158   
+ 159  solve apartadoh using mip minimizing zh ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 160  display F_Equi.l;
+ 161  fa('w4') =F_Equi.l;
+ 162  display fa;
+ 163  F_Dem.lo=-Inf; F_Dem.up=Inf;
+ 164   
+ 165  *Segunda Fila
+ 166  F_Cost.fx = fe('w2');
+ 167  fb('w2') = fe('w2');
+ 168  solve apartadoe using mip minimizing ze ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 169  display F_Dem.l;
+ 170  fb('w1') = F_Dem.l;
+ 171   
+ 172  solve apartadog using mip minimizing zg ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 173  display F_Dist.l;
+ 174  fb('w3') =F_Dist.l;
+ 175   
+ 176  solve apartadoh using mip minimizing zh ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 177  display F_Equi.l;
+ 178  fb('w4') =F_Equi.l;
+ 179  display fb;
+ 180  F_Cost.lo=-Inf; F_Cost.up=Inf;
+ 181   
+ 182  *Tercera Fila
+ 183  F_Dist.fx = fe('w3');
+ 184  fc('w3') = fe('w3');
+ 185  solve apartadoe using mip minimizing ze ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 186  display F_Dem.l;
+ 187  fc('w1') = F_Dem.l;
+ 188   
+ 189  solve apartadof using mip minimizing zf ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 190  display F_Cost.l;
+ 191  fc('w2') =F_Cost.l;
+ 192   
+ 193  solve apartadoh using mip minimizing zh ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 194  display F_Equi.l;
+ 195  fc('w4') =F_Equi.l;
+ 196  display fc,x.l;
+ 197  F_Dist.lo=-Inf; F_Dist.up=Inf;
+ 198   
+ 199  *Cuarta Fila
+ 200  F_Equi.fx = fe('w4');
+ 201  fd('w4') = fe('w4');
+ 202  solve apartadoe using mip minimizing ze ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 203  display F_Dem.l;
+ 204  fd('w1') = F_Dem.l;
+ 205   
+ 206  solve apartadof using mip minimizing zf ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 207  display F_Cost.l;
+ 208  fd('w2') =F_Cost.l;
+ 209   
+ 210  solve apartadog using mip minimizing zg ;
+****                                          $257
+**** 257  Solve statement not checked because of previous errors
+ 211  display F_Dist.l;
+ 212  fd('w3') =F_Dist.l;
+ 213  display fa,fb,fc,fd;
+ 214  F_Equi.lo=-Inf; F_Equi.up=Inf;
+ 215  *$offtext
+ 216   
+      *Frontera de Pareto
+      file salida /D:\Uni\Carrera\4ï¿½UCM\TECO\PracticaNiger\Pareto_dc.txt/;
+      put salida;
+       
+      Parameter ep,f1,f2;
+      Scalar ep1, ep2, ep3;
+      ep=fc('w2')-fb('w2');
+      Equation eps1,eps2,eps3;
+      eps1 .. F_Cost =l= ep1;
+       
+      model pareto_dc /fobj_dem,a,disp,b1,b2,b3,c1,c2,d,e,f,g,g1,h,h1,eps1/;
+       
+      put '      FDem      FCost' /;
+      set ind /1*50/;
+      loop(ind,
+      ep1 = fc('w2') - 0.02*ord(ind)*ep;
+      Solve pareto_dc using MIP minimizing ze;
+      f1 = F_Dem.l;
+      f2 = F_Cost.l;
+      put f1 f2 /;
+      );
+      putclose;
+       
+      file salida2 /D:\Uni\Carrera\4ï¿½UCM\TECO\PracticaNiger\Pareto_dd.txt/;
+      put salida2;
+       
+      ep=fa('w3')-fc('w3');
+      eps2 .. F_Dist =l= ep2;
+       
+      model pareto_dd /fobj_dem,a,disp,b1,b2,b3,c1,c2,d,e,f,g,g1,h,h1,eps2/;
+       
+      put '      FDem      FDist' /;
+      set ind2 /1*50/;
+      loop(ind2,
+      ep2 = fa('w3') - 0.02*ord(ind2)*ep;
+      Solve pareto_dd using MIP minimizing ze;
+      f1 = F_Dem.l;
+      f2 = F_Dist.l;
+      put f1 f2 /;
+      );
+      putclose;
+       
+      file salida3 /D:\Uni\Carrera\4ï¿½UCM\TECO\PracticaNiger\Pareto_de.txt/;
+      put salida3;
+       
+      ep=fa('w4')-fd('w4');
+      eps3 .. F_Equi =l= ep3;
+       
+      model pareto_de /fobj_dem,a,disp,b1,b2,b3,c1,c2,d,e,f,g,g1,h,h1,eps3/;
+       
+      put '      FDem           FEqui' /;
+      set ind3 /1*50/;
+      loop(ind3,
+      ep3 = fa('w4') - 0.02*ord(ind3)*ep;
+      Solve pareto_de using MIP minimizing ze;
+      f1 = F_Dem.l;
+      f2 = F_Equi.l;
+      put f1 f2 /;
+      );
+      putclose;
+ 279  *display fa,fb,fc,fd;
+ 280   
+ 281  *Programaciï¿½n por metas
+ 282  Parameters
+ 283  fm(w) metas para la funciï¿½n w
+ 284  */w1 119.000, w2 38880.000, w3 115218.333, w4 0.427/
+ 285  */w1 50.000, w2 38880.000, w3 115218.333, w4 0.427/
+ 286  /w1 119, w2 20000, w3 115218.333, w4 1/
+ 287  ;
+ 288   
+ 289  Variables
+ 290  zm       objetivo metas
+ 291  F_Obj(w) conjunto de funciones objetivos
+ 292  N(w)     Defecto de soluciï¿½n obtenida respecto a soluciï¿½n deseada
+ 293  P(w)     Exceso de soluciï¿½n obtenida respecto a soluciï¿½n deseada
+ 294   
+ 295  Positive Variables F_Obj, N, P
+ 296  ;
+ 297   
+ 298  Equations
+ 299  meta solucion metas
+ 300  defec(w) Calculo de desviaciones de la meta
+ 301  defd  Definir demanda no satisfecha
+ 302  defc  Definir coste
+ 303  defdi Definir distancia de carga
+ 304  defe  Definir equitatividad
+ 305  ;
+ 306   
+ 307  meta  ..    zm=E=sum(w,N(w)/fm(w) + P(w)/fm(w));
+ 308  defec(w) .. F_Obj(w) =e= fm(w) - N(w) + P(w);
+ 309  defd  ..    F_Obj('w1') =e= F_Dem;
+ 310  defc  ..    F_Obj('w2') =e= F_Cost;
+ 311  defdi ..    F_Obj('w3') =e= F_Dist;
+ 312  defe  ..    F_Obj('w4') =e= F_Equi;
+ 313   
+ 314  model metas /meta,a,disp,b1,b2,b3,c1,c2,d,e,f,g,g1,h,h1,defec,defd,defc,defdi,defe/;
+ 315  solve metas using mip minimizing zm ;
+****                                      $257
+**** 257  Solve statement not checked because of previous errors
+ 316  display zm.l,F_Obj.l,fm,N.l,P.l;
+****             $141    $141   $141$141
+**** 141  Symbol declared but no values have been assigned. Check for missing
+****         data definition, assignment, data loading or implicit assignment
+****         via a solve statement.
+****         A wild shot: You may have spurious commas in the explanatory
+****         text of a declaration. Check symbol reference list.
+
+**** 35 ERROR(S)   0 WARNING(S)
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Grupo8.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Grupo8.lst
+
+**** USER ERROR(S) ENCOUNTERED

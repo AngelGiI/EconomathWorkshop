@@ -1,0 +1,233 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/06/21 18:39:07 Page 1
+Hoja 1 problema 9
+C o m p i l a t i o n
+
+
+   2   
+   3  Set
+   4      i tipo de coche /Compacto, Mediano, Largo/;
+   5   
+   6  Parameters
+   7      Acero(i) coste en toneladas de producir el tipo i
+   8              /Compacto    1.5, Mediano      3, Largo         5/
+   9      Trabajo(i) coste en hora de trabajo de producir el tipo i
+  10              /Compacto     30, Mediano     25, Largo        40/
+  11      Beneficio(i) beneficio en euros de producir el tipo i
+  12              /Compacto   2000, Mediano    3000, Largo     4000/;
+  13   
+  14  Binary variables
+  15      Produc(i) 1 si producimos el tipo i   0 en caso contrario;
+  16   
+  17  Integer variables
+  18      uds(i) numero de unidades del tipo i producidas;
+  19   
+  20  Variable
+  21      z beneficio;
+  22   
+  23  Equations
+  24      fobj beneficio esperado
+  25      ac   acero empleado
+  26      tr   horas de trabajo empleadas
+  27      producimos(i) decidimos si merece la pena producir el tipo i;
+  28   
+  29      fobj.. z =E= sum(i, Beneficio(i)*uds(i));
+  30      ac.. sum(i, Acero(i)*uds(i)) =L= 6000;
+  31      tr.. sum(i, Trabajo(i)*uds(i)) =L= 60000;
+  32      producimos(i).. uds(i) =G= 10000*Produc(i)
+  33   
+  34  model concesionario /all/;
+  35  solve concesionario using MIP maximizing z;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/06/21 18:39:07 Page 2
+Hoja 1 problema 9
+Equation Listing    SOLVE concesionario Using MIP From line 35
+
+
+---- fobj  =E=  beneficio esperado
+
+fobj..  - 2000*uds(Compacto) - 3000*uds(Mediano) - 4000*uds(Largo) + z =E= 0 ; (LHS = 0)
+     
+
+---- ac  =L=  acero empleado
+
+ac..  1.5*uds(Compacto) + 3*uds(Mediano) + 5*uds(Largo) =L= 6000 ; (LHS = 0)
+     
+
+---- tr  =L=  horas de trabajo empleadas
+
+tr..  30*uds(Compacto) + 25*uds(Mediano) + 40*uds(Largo) =L= 60000 ; (LHS = 0)
+     
+
+---- producimos  =G=  decidimos si merece la pena producir el tipo i
+
+producimos(Compacto)..  - 10000*Produc(Compacto) + uds(Compacto) =G= 0 ; (LHS = 0)
+     
+producimos(Mediano)..  - 10000*Produc(Mediano) + uds(Mediano) =G= 0 ; (LHS = 0)
+     
+producimos(Largo)..  - 10000*Produc(Largo) + uds(Largo) =G= 0 ; (LHS = 0)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/06/21 18:39:07 Page 3
+Hoja 1 problema 9
+Column Listing      SOLVE concesionario Using MIP From line 35
+
+
+---- Produc  1 si producimos el tipo i   0 en caso contrario
+
+Produc(Compacto)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+   -10000       producimos(Compacto)
+
+Produc(Mediano)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+   -10000       producimos(Mediano)
+
+Produc(Largo)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+   -10000       producimos(Largo)
+
+
+---- uds  numero de unidades del tipo i producidas
+
+uds(Compacto)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+    -2000       fobj
+        1.5     ac
+       30       tr
+        1       producimos(Compacto)
+
+uds(Mediano)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+    -3000       fobj
+        3       ac
+       25       tr
+        1       producimos(Mediano)
+
+uds(Largo)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+    -4000       fobj
+        5       ac
+       40       tr
+        1       producimos(Largo)
+
+
+---- z  beneficio
+
+z
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobj
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/06/21 18:39:07 Page 4
+Hoja 1 problema 9
+Model Statistics    SOLVE concesionario Using MIP From line 35
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           4     SINGLE EQUATIONS            6
+BLOCKS OF VARIABLES           3     SINGLE VARIABLES            7
+NON ZERO ELEMENTS            16     DISCRETE VARIABLES          6
+
+
+GENERATION TIME      =        0.015 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/06/21 18:39:07 Page 5
+Hoja 1 problema 9
+Solution Report     SOLVE concesionario Using MIP From line 35
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   concesionario       OBJECTIVE  z
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  35
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE          6285000.0000
+
+ RESOURCE USAGE, LIMIT          0.015 10000000000.000
+ ITERATION COUNT, LIMIT         3    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.02sec (det. 0.02 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:      6285000.000000    (3 iterations, 0 nodes)
+Final Solve:       6285000.000000    (0 iterations)
+
+Best possible:     6285000.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobj                .              .              .             1.0000      
+---- EQU ac                -INF         6000.0000      6000.0000          .          
+---- EQU tr                -INF        59975.0000     60000.0000          .          
+
+  fobj  beneficio esperado
+  ac  acero empleado
+  tr  horas de trabajo empleadas
+
+---- EQU producimos  decidimos si merece la pena producir el tipo i
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+Compacto          .           570.0000        +INF             .          
+Mediano           .          1715.0000        +INF             .          
+Largo             .              .            +INF             .          
+
+---- VAR Produc  1 si producimos el tipo i   0 en caso contrario
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+Compacto          .              .             1.0000         EPS         
+Mediano           .              .             1.0000         EPS         
+Largo             .              .             1.0000         EPS         
+
+---- VAR uds  numero de unidades del tipo i producidas
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+Compacto          .           570.0000        +INF         2000.0000      
+Mediano           .          1715.0000        +INF         3000.0000      
+Largo             .              .            +INF         4000.0000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z                 -INF      6285000.0000        +INF             .          
+
+  z  beneficio
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.046 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\1-9GAMS.lst

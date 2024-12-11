@@ -1,0 +1,2627 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 1
+Practica 1: Emergencia en Niger.
+C o m p i l a t i o n
+
+
+   2   
+   3  Sets
+   4      obj poblaciones a las que tiene que llegar la ayuda (i)
+   5                                 / In-Gall, Aderbissinat, Tessaoua,
+   6                                   Dakoro,  Tatokou,      Bakatchiraba,
+   7                                   Mayahi,  Koundoumaoua, Sabon-Kafi   /
+   8      ce centros de reparto (j)  / Tanaut,  Zinder,  Agadez,  Maradi   /;
+   9   
+  10  Alias (obj,obj1);
+  11   
+  12  Table
+  13      dist(obj,ce) distancia (en km) de la poblacion objetivo al centro de reparto
+  14                          Tanaut  Zinder  Agadez  Maradi
+  15          In-Gall           396     119     541     625
+  16          Aderbissinat      147     161     286     454
+  17          Tessaoua          191     492     114     122
+  18          Dakoro            244     562     300     124
+  19          Tatokou            43     258     188     355
+  20          Bakatchiraba        8     306     152     320
+  21          Mayahi            252     553     156      95
+  22          Koundoumaoua      197     490      71     183
+  23          Sabon-Kafi         43     336     102     269 ;
+  24   
+  25  Parameters
+  26      dem(obj) toneladas de ayuda demandada por cada centro afectado
+  27                        / In-Gall         156
+  28                          Aderbissinat     81
+  29                          Tessaoua        129
+  30                          Dakoro          213
+  31                          Tatokou          39
+  32                          Bakatchiraba     30
+  33                          Mayahi          273
+  34                          Koundoumaoua     30
+  35                          Sabon-Kafi       18 /
+  36   
+  37      c(ce) coste de gesti√≥n por tonelada de ayuda en cada centro de reparto
+  38                           / Tanaut     70
+  39                             Zinder     50
+  40                             Agadez     30
+  41                             Maradi     90 / ;
+  42   
+  43  Scalars
+  44      cfix        coste fijo de habilitar y poner en marcha un centro de reparto  /  1000 /
+  45      ayuda       toneladas totales de ayuda disponibles para repartir            /   850 /
+  46      ppto        presupuesto disponible para llevar a cabo la operacion          / 40000 /
+  47      cemax       numero maximo de centros de reparto que se pueden establecer    /     3 /
+  48      dmax        distancia maxima a la que se puede llevar ayuda                 /   200 /
+  49      demmin      porcentaje minimo de la demanda global satisfecha               /   0.6 /;
+  50   
+  51  variables
+  52      t(obj,obj1)
+  53      ze        valor objetivo del apartado e
+  54      zf        valor objetivo del apartado f
+  55      zg        valor objetivo del apartado g
+  56      zh        valor objetivo del apartado h;
+  57   
+  58  positive variables
+  59      x(obj,ce) toneladas enviadas a la poblacion obj desde el centro de distribucion ce;
+  60   
+  61  binary variable
+  62      construir(ce) vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+  63      disy(obj,ce)  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+  64      beta(obj,ce)      vale 1 si se manda de ce a obj y 0 en caso contrario;
+  65   
+  66  Equations
+  67      a          limite de presupuesto
+  68      disp     disponibilidad de ayuda
+  69      b1         maximo de  centros establecidos
+  70      b2(obj,ce) solo enviaremos ayuda desde centros establecidos
+  71      c1(obj,ce) no se puede acudir a poblaciones demasiado lejanas
+  72      c2(obj,ce)
+  73      d          hay que suplir un minimo de la demanda global
+  74      e          fobj para minimizar la demanda no satisfecha
+  75      f          fobj para minimizar el coste total de la operacion
+  76      g          fobj para minimizar la distancia cubierta por la carga de ce a obj
+  77      g1(obj,ce)
+  78      h          fobj para realizar un reparto equitativo entre poblaciones objetivo
+  79      h1(obj,obj1);
+  80   
+  81      a..          sum((obj,ce), x(obj,ce)*c(ce)) + sum(ce, cfix*construir(ce)) =L= ppto;
+  82      disp..       sum((obj,ce), x(obj,ce)) =L= ayuda;
+  83      b1..         sum(ce, construir(ce)) =L= cemax;
+  84      b2(obj,ce).. construir(ce)*dem(obj) =G= x(obj,ce);
+  85      c1(obj,ce).. dist(obj,ce) - dmax =L= dist(obj,ce)*disy(obj,ce);
+  86      c2(obj,ce).. x(obj,ce) =L= dem(obj)*(1 - disy(obj,ce));
+  87      d..          sum((obj,ce), x(obj,ce)) =G= sum(obj, dem(obj))*demmin;
+  88      e..          sum(obj, dem(obj)) - sum((obj,ce), x(obj,ce)) =E= ze;
+  89      f..          sum((obj,ce), x(obj,ce)*c(ce)) + sum(ce, construir(ce)*cfix) =E= zf;
+  90      g..          sum((obj,ce), dist(obj,ce)*x(obj,ce)) =E= zg;
+  91      g1(obj,ce).. x(obj,ce) =L= dem(obj)*beta(obj,ce);
+  92      h(obj,obj1)..          zh =E= t(obj,obj1) ;
+  93      h1(obj,obj1)$(ord(obj)<>ord(obj1)).. t(obj,obj1) =G= (dem(obj)-sum(ce, x(obj,ce)))/dem(obj) - (dem(obj1)-sum(ce, x(obj1,ce)))/dem(obj1);
+  94   
+  95  model apartadoe /a,disp,b1,b2,c1,c2,d,e/;
+  96  solve apartadoe using mip minimizing ze ;
+  97  display ze.l,x.l;
+  98   
+  99  model apartadof /a,disp,b1,b2,c1,c2,d,f/;
+ 100  solve apartadof using mip minimizing zf ;
+ 101  display zf.l,x.l,construir.l;
+ 102   
+ 103  model apartadog /a,disp,b1,b2,c1,c2,d,g,g1/;
+ 104  solve apartadog using mip minimizing zg ;
+ 105  display zg.l,x.l,beta.l;
+ 106   
+ 107  model apartadoh /a,disp,b1,b2,c1,c2,d,h,h1/;
+ 108  solve apartadoh using mip minimizing zh ;
+ 109  display zh.l,x.l,t.l;
+ 110   
+ 111   
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 2
+Practica 1: Emergencia en Niger.
+Equation Listing    SOLVE apartadoe Using MIP From line 96
+
+
+---- a  =L=  limite de presupuesto
+
+a..  70*x(In-Gall,Tanaut) + 50*x(In-Gall,Zinder) + 30*x(In-Gall,Agadez) + 90*x(In-Gall,Maradi) + 70*x(Aderbissinat,Tanaut) + 50*x(Aderbissinat,Zinder) + 30*x(Aderbissinat,Agadez) + 90*x(Aderbissinat,Maradi) + 70*x(Tessaoua,Tanaut) + 50*x(Tessaoua,Zinder) + 30*x(Tessaoua,Agadez) + 90*x(Tessaoua,Maradi) + 70*x(Dakoro,Tanaut) + 50*x(Dakoro,Zinder) + 30*x(Dakoro,Agadez) + 90*x(Dakoro,Maradi) + 70*x(Tatokou,Tanaut) + 50*x(Tatokou,Zinder) + 30*x(Tatokou,Agadez) + 90*x(Tatokou,Maradi) + 70*x(Bakatchiraba,Tanaut) + 50*x(Bakatchiraba,Zinder) + 30*x(Bakatchiraba,Agadez) + 90*x(Bakatchiraba,Maradi) + 70*x(Mayahi,Tanaut) + 50*x(Mayahi,Zinder) + 30*x(Mayahi,Agadez) + 90*x(Mayahi,Maradi) + 70*x(Koundoumaoua,Tanaut) + 50*x(Koundoumaoua,Zinder) + 30*x(Koundoumaoua,Agadez) + 90*x(Koundoumaoua,Maradi) + 70*x(Sabon-Kafi,Tanaut) + 50*x(Sabon-Kafi,Zinder) + 30*x(Sabon-Kafi,Agadez) + 90*x(Sabon-Kafi,Maradi) + 1000*construir(Tanaut) + 1000*construir(Zinder) + 1000*construir(Agadez) + 1000*construir(Maradi) =L= 40000 ; (LHS = 0)
+     
+
+---- disp  =L=  disponibilidad de ayuda
+
+disp..  x(In-Gall,Tanaut) + x(In-Gall,Zinder) + x(In-Gall,Agadez) + x(In-Gall,Maradi) + x(Aderbissinat,Tanaut) + x(Aderbissinat,Zinder) + x(Aderbissinat,Agadez) + x(Aderbissinat,Maradi) + x(Tessaoua,Tanaut) + x(Tessaoua,Zinder) + x(Tessaoua,Agadez) + x(Tessaoua,Maradi) + x(Dakoro,Tanaut) + x(Dakoro,Zinder) + x(Dakoro,Agadez) + x(Dakoro,Maradi) + x(Tatokou,Tanaut) + x(Tatokou,Zinder) + x(Tatokou,Agadez) + x(Tatokou,Maradi) + x(Bakatchiraba,Tanaut) + x(Bakatchiraba,Zinder) + x(Bakatchiraba,Agadez) + x(Bakatchiraba,Maradi) + x(Mayahi,Tanaut) + x(Mayahi,Zinder) + x(Mayahi,Agadez) + x(Mayahi,Maradi) + x(Koundoumaoua,Tanaut) + x(Koundoumaoua,Zinder) + x(Koundoumaoua,Agadez) + x(Koundoumaoua,Maradi) + x(Sabon-Kafi,Tanaut) + x(Sabon-Kafi,Zinder) + x(Sabon-Kafi,Agadez) + x(Sabon-Kafi,Maradi) =L= 850 ; (LHS = 0)
+     
+
+---- b1  =L=  maximo de  centros establecidos
+
+b1..  construir(Tanaut) + construir(Zinder) + construir(Agadez) + construir(Maradi) =L= 3 ; (LHS = 0)
+     
+
+---- b2  =G=  solo enviaremos ayuda desde centros establecidos
+
+b2(In-Gall,Tanaut)..  - x(In-Gall,Tanaut) + 156*construir(Tanaut) =G= 0 ; (LHS = 0)
+     
+b2(In-Gall,Zinder)..  - x(In-Gall,Zinder) + 156*construir(Zinder) =G= 0 ; (LHS = 0)
+     
+b2(In-Gall,Agadez)..  - x(In-Gall,Agadez) + 156*construir(Agadez) =G= 0 ; (LHS = 0)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- c1  =L=  no se puede acudir a poblaciones demasiado lejanas
+
+c1(In-Gall,Tanaut)..  - 396*disy(In-Gall,Tanaut) =L= -196 ; (LHS = 0, INFES = 196 ****)
+     
+c1(In-Gall,Zinder)..  - 119*disy(In-Gall,Zinder) =L= 81 ; (LHS = 0)
+     
+c1(In-Gall,Agadez)..  - 541*disy(In-Gall,Agadez) =L= -341 ; (LHS = 0, INFES = 341 ****)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- c2  =L=  
+
+c2(In-Gall,Tanaut)..  x(In-Gall,Tanaut) + 156*disy(In-Gall,Tanaut) =L= 156 ; (LHS = 0)
+     
+c2(In-Gall,Zinder)..  x(In-Gall,Zinder) + 156*disy(In-Gall,Zinder) =L= 156 ; (LHS = 0)
+     
+c2(In-Gall,Agadez)..  x(In-Gall,Agadez) + 156*disy(In-Gall,Agadez) =L= 156 ; (LHS = 0)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- d  =G=  hay que suplir un minimo de la demanda global
+
+d..  x(In-Gall,Tanaut) + x(In-Gall,Zinder) + x(In-Gall,Agadez) + x(In-Gall,Maradi) + x(Aderbissinat,Tanaut) + x(Aderbissinat,Zinder) + x(Aderbissinat,Agadez) + x(Aderbissinat,Maradi) + x(Tessaoua,Tanaut) + x(Tessaoua,Zinder) + x(Tessaoua,Agadez) + x(Tessaoua,Maradi) + x(Dakoro,Tanaut) + x(Dakoro,Zinder) + x(Dakoro,Agadez) + x(Dakoro,Maradi) + x(Tatokou,Tanaut) + x(Tatokou,Zinder) + x(Tatokou,Agadez) + x(Tatokou,Maradi) + x(Bakatchiraba,Tanaut) + x(Bakatchiraba,Zinder) + x(Bakatchiraba,Agadez) + x(Bakatchiraba,Maradi) + x(Mayahi,Tanaut) + x(Mayahi,Zinder) + x(Mayahi,Agadez) + x(Mayahi,Maradi) + x(Koundoumaoua,Tanaut) + x(Koundoumaoua,Zinder) + x(Koundoumaoua,Agadez) + x(Koundoumaoua,Maradi) + x(Sabon-Kafi,Tanaut) + x(Sabon-Kafi,Zinder) + x(Sabon-Kafi,Agadez) + x(Sabon-Kafi,Maradi) =G= 581.4 ; (LHS = 0, INFES = 581.4 ****)
+     
+
+---- e  =E=  fobj para minimizar la demanda no satisfecha
+
+e..  - ze - x(In-Gall,Tanaut) - x(In-Gall,Zinder) - x(In-Gall,Agadez) - x(In-Gall,Maradi) - x(Aderbissinat,Tanaut) - x(Aderbissinat,Zinder) - x(Aderbissinat,Agadez) - x(Aderbissinat,Maradi) - x(Tessaoua,Tanaut) - x(Tessaoua,Zinder) - x(Tessaoua,Agadez) - x(Tessaoua,Maradi) - x(Dakoro,Tanaut) - x(Dakoro,Zinder) - x(Dakoro,Agadez) - x(Dakoro,Maradi) - x(Tatokou,Tanaut) - x(Tatokou,Zinder) - x(Tatokou,Agadez) - x(Tatokou,Maradi) - x(Bakatchiraba,Tanaut) - x(Bakatchiraba,Zinder) - x(Bakatchiraba,Agadez) - x(Bakatchiraba,Maradi) - x(Mayahi,Tanaut) - x(Mayahi,Zinder) - x(Mayahi,Agadez) - x(Mayahi,Maradi) - x(Koundoumaoua,Tanaut) - x(Koundoumaoua,Zinder) - x(Koundoumaoua,Agadez) - x(Koundoumaoua,Maradi) - x(Sabon-Kafi,Tanaut) - x(Sabon-Kafi,Zinder) - x(Sabon-Kafi,Agadez) - x(Sabon-Kafi,Maradi) =E= -969 ; (LHS = 0, INFES = 969 ****)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 3
+Practica 1: Emergencia en Niger.
+Column Listing      SOLVE apartadoe Using MIP From line 96
+
+
+---- ze  valor objetivo del apartado e
+
+ze
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -1       e
+
+
+---- x  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+x(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       70       a
+        1       disp
+       -1       b2(In-Gall,Tanaut)
+        1       c2(In-Gall,Tanaut)
+        1       d
+       -1       e
+
+x(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       50       a
+        1       disp
+       -1       b2(In-Gall,Zinder)
+        1       c2(In-Gall,Zinder)
+        1       d
+       -1       e
+
+x(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       30       a
+        1       disp
+       -1       b2(In-Gall,Agadez)
+        1       c2(In-Gall,Agadez)
+        1       d
+       -1       e
+
+REMAINING 33 ENTRIES SKIPPED
+
+---- construir  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+construir(Tanaut)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Tanaut)
+       81       b2(Aderbissinat,Tanaut)
+      129       b2(Tessaoua,Tanaut)
+      213       b2(Dakoro,Tanaut)
+       39       b2(Tatokou,Tanaut)
+       30       b2(Bakatchiraba,Tanaut)
+      273       b2(Mayahi,Tanaut)
+       30       b2(Koundoumaoua,Tanaut)
+       18       b2(Sabon-Kafi,Tanaut)
+
+construir(Zinder)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Zinder)
+       81       b2(Aderbissinat,Zinder)
+      129       b2(Tessaoua,Zinder)
+      213       b2(Dakoro,Zinder)
+       39       b2(Tatokou,Zinder)
+       30       b2(Bakatchiraba,Zinder)
+      273       b2(Mayahi,Zinder)
+       30       b2(Koundoumaoua,Zinder)
+       18       b2(Sabon-Kafi,Zinder)
+
+construir(Agadez)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Agadez)
+       81       b2(Aderbissinat,Agadez)
+      129       b2(Tessaoua,Agadez)
+      213       b2(Dakoro,Agadez)
+       39       b2(Tatokou,Agadez)
+       30       b2(Bakatchiraba,Agadez)
+      273       b2(Mayahi,Agadez)
+       30       b2(Koundoumaoua,Agadez)
+       18       b2(Sabon-Kafi,Agadez)
+
+REMAINING ENTRY SKIPPED
+
+---- disy  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+
+disy(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     -396       c1(In-Gall,Tanaut)
+      156       c2(In-Gall,Tanaut)
+
+disy(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     -119       c1(In-Gall,Zinder)
+      156       c2(In-Gall,Zinder)
+
+disy(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     -541       c1(In-Gall,Agadez)
+      156       c2(In-Gall,Agadez)
+
+REMAINING 33 ENTRIES SKIPPED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 4
+Practica 1: Emergencia en Niger.
+Model Statistics    SOLVE apartadoe Using MIP From line 96
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           8     SINGLE EQUATIONS          113
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           77
+NON ZERO ELEMENTS           333     DISCRETE VARIABLES         40
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 5
+Practica 1: Emergencia en Niger.
+Solution Report     SOLVE apartadoe Using MIP From line 96
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   apartadoe           OBJECTIVE  ze
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  96
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE              119.0000
+
+ RESOURCE USAGE, LIMIT          0.015 10000000000.000
+ ITERATION COUNT, LIMIT        24    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.52 Mb (peak 0.52 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.01 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.33 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.10 ticks)
+
+
+Proven optimal solution
+MIP Solution:          119.000000    (24 iterations, 0 nodes)
+Final Solve:           119.000000    (2 iterations)
+
+Best possible:         119.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU a                 -INF        40000.0000     40000.0000         EPS         
+---- EQU disp              -INF          850.0000       850.0000        -1.0000      
+---- EQU b1                -INF            3.0000         3.0000          .          
+
+  a  limite de presupuesto
+  disp  disponibilidad de ayuda
+  b1  maximo de  centros establecidos
+
+---- EQU b2  solo enviaremos ayuda desde centros establecidos
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .           156.0000        +INF             .          
+In-Gall     .Zinder          .           150.0000        +INF             .          
+In-Gall     .Agadez          .           156.0000        +INF             .          
+In-Gall     .Maradi          .              .            +INF             .          
+Aderbissinat.Tanaut          .              .            +INF            EPS         
+Aderbissinat.Zinder          .              .            +INF            EPS         
+Aderbissinat.Agadez          .            81.0000        +INF             .          
+Aderbissinat.Maradi          .              .            +INF             .          
+Tessaoua    .Tanaut          .            35.0000        +INF             .          
+Tessaoua    .Zinder          .           129.0000        +INF             .          
+Tessaoua    .Agadez          .              .            +INF            EPS         
+Tessaoua    .Maradi          .              .            +INF             .          
+Dakoro      .Tanaut          .           213.0000        +INF             .          
+Dakoro      .Zinder          .           213.0000        +INF             .          
+Dakoro      .Agadez          .           213.0000        +INF             .          
+Dakoro      .Maradi          .              .            +INF             .          
+Tatokou     .Tanaut          .              .            +INF            EPS         
+Tatokou     .Zinder          .            39.0000        +INF             .          
+Tatokou     .Agadez          .              .            +INF            EPS         
+Tatokou     .Maradi          .              .            +INF             .          
+Bakatchiraba.Tanaut          .              .            +INF            EPS         
+Bakatchiraba.Zinder          .            30.0000        +INF             .          
+Bakatchiraba.Agadez          .              .            +INF            EPS         
+Bakatchiraba.Maradi          .              .            +INF             .          
+Mayahi      .Tanaut          .           273.0000        +INF             .          
+Mayahi      .Zinder          .           273.0000        +INF             .          
+Mayahi      .Agadez          .              .            +INF            EPS         
+Mayahi      .Maradi          .              .            +INF             .          
+Koundoumaoua.Tanaut          .            30.0000        +INF             .          
+Koundoumaoua.Zinder          .            30.0000        +INF             .          
+Koundoumaoua.Agadez          .              .            +INF            EPS         
+Koundoumaoua.Maradi          .              .            +INF             .          
+Sabon-Kafi  .Tanaut          .            18.0000        +INF             .          
+Sabon-Kafi  .Zinder          .            18.0000        +INF             .          
+Sabon-Kafi  .Agadez          .              .            +INF            EPS         
+Sabon-Kafi  .Maradi          .              .            +INF             .          
+
+---- EQU c1  no se puede acudir a poblaciones demasiado lejanas
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF         -396.0000      -196.0000          .          
+In-Gall     .Zinder        -INF             .            81.0000          .          
+In-Gall     .Agadez        -INF         -541.0000      -341.0000          .          
+In-Gall     .Maradi        -INF         -625.0000      -425.0000          .          
+Aderbissinat.Tanaut        -INF             .            53.0000          .          
+Aderbissinat.Zinder        -INF             .            39.0000          .          
+Aderbissinat.Agadez        -INF         -286.0000       -86.0000          .          
+Aderbissinat.Maradi        -INF         -454.0000      -254.0000          .          
+Tessaoua    .Tanaut        -INF             .             9.0000          .          
+Tessaoua    .Zinder        -INF         -492.0000      -292.0000          .          
+Tessaoua    .Agadez        -INF             .            86.0000          .          
+Tessaoua    .Maradi        -INF             .            78.0000          .          
+Dakoro      .Tanaut        -INF         -244.0000       -44.0000          .          
+Dakoro      .Zinder        -INF         -562.0000      -362.0000          .          
+Dakoro      .Agadez        -INF         -300.0000      -100.0000          .          
+Dakoro      .Maradi        -INF             .            76.0000          .          
+Tatokou     .Tanaut        -INF             .           157.0000          .          
+Tatokou     .Zinder        -INF         -258.0000       -58.0000          .          
+Tatokou     .Agadez        -INF             .            12.0000          .          
+Tatokou     .Maradi        -INF         -355.0000      -155.0000          .          
+Bakatchiraba.Tanaut        -INF             .           192.0000          .          
+Bakatchiraba.Zinder        -INF         -306.0000      -106.0000          .          
+Bakatchiraba.Agadez        -INF             .            48.0000          .          
+Bakatchiraba.Maradi        -INF         -320.0000      -120.0000          .          
+Mayahi      .Tanaut        -INF         -252.0000       -52.0000          .          
+Mayahi      .Zinder        -INF         -553.0000      -353.0000          .          
+Mayahi      .Agadez        -INF             .            44.0000          .          
+Mayahi      .Maradi        -INF             .           105.0000          .          
+Koundoumaoua.Tanaut        -INF             .             3.0000          .          
+Koundoumaoua.Zinder        -INF         -490.0000      -290.0000          .          
+Koundoumaoua.Agadez        -INF             .           129.0000          .          
+Koundoumaoua.Maradi        -INF             .            17.0000          .          
+Sabon-Kafi  .Tanaut        -INF             .           157.0000          .          
+Sabon-Kafi  .Zinder        -INF         -336.0000      -136.0000          .          
+Sabon-Kafi  .Agadez        -INF             .            98.0000          .          
+Sabon-Kafi  .Maradi        -INF         -269.0000       -69.0000          .          
+
+---- EQU c2  
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF          156.0000       156.0000          .          
+In-Gall     .Zinder        -INF            6.0000       156.0000          .          
+In-Gall     .Agadez        -INF          156.0000       156.0000          .          
+In-Gall     .Maradi        -INF          156.0000       156.0000          .          
+Aderbissinat.Tanaut        -INF           81.0000        81.0000          .          
+Aderbissinat.Zinder        -INF           81.0000        81.0000          .          
+Aderbissinat.Agadez        -INF           81.0000        81.0000          .          
+Aderbissinat.Maradi        -INF           81.0000        81.0000          .          
+Tessaoua    .Tanaut        -INF           94.0000       129.0000          .          
+Tessaoua    .Zinder        -INF          129.0000       129.0000          .          
+Tessaoua    .Agadez        -INF          129.0000       129.0000          .          
+Tessaoua    .Maradi        -INF             .           129.0000          .          
+Dakoro      .Tanaut        -INF          213.0000       213.0000          .          
+Dakoro      .Zinder        -INF          213.0000       213.0000          .          
+Dakoro      .Agadez        -INF          213.0000       213.0000          .          
+Dakoro      .Maradi        -INF             .           213.0000          .          
+Tatokou     .Tanaut        -INF           39.0000        39.0000          .          
+Tatokou     .Zinder        -INF           39.0000        39.0000          .          
+Tatokou     .Agadez        -INF           39.0000        39.0000          .          
+Tatokou     .Maradi        -INF           39.0000        39.0000          .          
+Bakatchiraba.Tanaut        -INF           30.0000        30.0000          .          
+Bakatchiraba.Zinder        -INF           30.0000        30.0000          .          
+Bakatchiraba.Agadez        -INF           30.0000        30.0000          .          
+Bakatchiraba.Maradi        -INF           30.0000        30.0000          .          
+Mayahi      .Tanaut        -INF          273.0000       273.0000          .          
+Mayahi      .Zinder        -INF          273.0000       273.0000          .          
+Mayahi      .Agadez        -INF          273.0000       273.0000          .          
+Mayahi      .Maradi        -INF             .           273.0000          .          
+Koundoumaoua.Tanaut        -INF             .            30.0000          .          
+Koundoumaoua.Zinder        -INF           30.0000        30.0000          .          
+Koundoumaoua.Agadez        -INF           30.0000        30.0000          .          
+Koundoumaoua.Maradi        -INF             .            30.0000          .          
+Sabon-Kafi  .Tanaut        -INF             .            18.0000          .          
+Sabon-Kafi  .Zinder        -INF           18.0000        18.0000          .          
+Sabon-Kafi  .Agadez        -INF           18.0000        18.0000          .          
+Sabon-Kafi  .Maradi        -INF           18.0000        18.0000          .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU d                581.4000       850.0000        +INF             .          
+---- EQU e               -969.0000      -969.0000      -969.0000        -1.0000      
+
+  d  hay que suplir un minimo de la demanda global
+  e  fobj para minimizar la demanda no satisfecha
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR ze                -INF          119.0000        +INF             .          
+
+  ze  valor objetivo del apartado e
+
+---- VAR x  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .              .            +INF            EPS         
+In-Gall     .Zinder          .             6.0000        +INF             .          
+In-Gall     .Agadez          .              .            +INF            EPS         
+In-Gall     .Maradi          .              .            +INF            EPS         
+Aderbissinat.Tanaut          .            81.0000        +INF             .          
+Aderbissinat.Zinder          .            81.0000        +INF             .          
+Aderbissinat.Agadez          .              .            +INF            EPS         
+Aderbissinat.Maradi          .              .            +INF            EPS         
+Tessaoua    .Tanaut          .            94.0000        +INF             .          
+Tessaoua    .Zinder          .              .            +INF            EPS         
+Tessaoua    .Agadez          .           129.0000        +INF             .          
+Tessaoua    .Maradi          .              .            +INF            EPS         
+Dakoro      .Tanaut          .              .            +INF            EPS         
+Dakoro      .Zinder          .              .            +INF            EPS         
+Dakoro      .Agadez          .              .            +INF            EPS         
+Dakoro      .Maradi          .              .            +INF            EPS         
+Tatokou     .Tanaut          .            39.0000        +INF             .          
+Tatokou     .Zinder          .              .            +INF            EPS         
+Tatokou     .Agadez          .            39.0000        +INF             .          
+Tatokou     .Maradi          .              .            +INF            EPS         
+Bakatchiraba.Tanaut          .            30.0000        +INF             .          
+Bakatchiraba.Zinder          .              .            +INF            EPS         
+Bakatchiraba.Agadez          .            30.0000        +INF             .          
+Bakatchiraba.Maradi          .              .            +INF            EPS         
+Mayahi      .Tanaut          .              .            +INF            EPS         
+Mayahi      .Zinder          .              .            +INF            EPS         
+Mayahi      .Agadez          .           273.0000        +INF             .          
+Mayahi      .Maradi          .              .            +INF            EPS         
+Koundoumaoua.Tanaut          .              .            +INF            EPS         
+Koundoumaoua.Zinder          .              .            +INF            EPS         
+Koundoumaoua.Agadez          .            30.0000        +INF             .          
+Koundoumaoua.Maradi          .              .            +INF            EPS         
+Sabon-Kafi  .Tanaut          .              .            +INF            EPS         
+Sabon-Kafi  .Zinder          .              .            +INF            EPS         
+Sabon-Kafi  .Agadez          .            18.0000        +INF             .          
+Sabon-Kafi  .Maradi          .              .            +INF            EPS         
+
+---- VAR construir  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+              LOWER          LEVEL          UPPER         MARGINAL
+
+Tanaut          .             1.0000         1.0000         EPS         
+Zinder          .             1.0000         1.0000         EPS         
+Agadez          .             1.0000         1.0000         EPS         
+Maradi          .              .             1.0000         EPS         
+
+---- VAR disy  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .             1.0000         1.0000         EPS         
+In-Gall     .Zinder          .              .             1.0000         EPS         
+In-Gall     .Agadez          .             1.0000         1.0000         EPS         
+In-Gall     .Maradi          .             1.0000         1.0000         EPS         
+Aderbissinat.Tanaut          .              .             1.0000         EPS         
+Aderbissinat.Zinder          .              .             1.0000         EPS         
+Aderbissinat.Agadez          .             1.0000         1.0000         EPS         
+Aderbissinat.Maradi          .             1.0000         1.0000         EPS         
+Tessaoua    .Tanaut          .              .             1.0000         EPS         
+Tessaoua    .Zinder          .             1.0000         1.0000         EPS         
+Tessaoua    .Agadez          .              .             1.0000         EPS         
+Tessaoua    .Maradi          .              .             1.0000         EPS         
+Dakoro      .Tanaut          .             1.0000         1.0000         EPS         
+Dakoro      .Zinder          .             1.0000         1.0000         EPS         
+Dakoro      .Agadez          .             1.0000         1.0000         EPS         
+Dakoro      .Maradi          .              .             1.0000         EPS         
+Tatokou     .Tanaut          .              .             1.0000         EPS         
+Tatokou     .Zinder          .             1.0000         1.0000         EPS         
+Tatokou     .Agadez          .              .             1.0000         EPS         
+Tatokou     .Maradi          .             1.0000         1.0000         EPS         
+Bakatchiraba.Tanaut          .              .             1.0000         EPS         
+Bakatchiraba.Zinder          .             1.0000         1.0000         EPS         
+Bakatchiraba.Agadez          .              .             1.0000         EPS         
+Bakatchiraba.Maradi          .             1.0000         1.0000         EPS         
+Mayahi      .Tanaut          .             1.0000         1.0000         EPS         
+Mayahi      .Zinder          .             1.0000         1.0000         EPS         
+Mayahi      .Agadez          .              .             1.0000         EPS         
+Mayahi      .Maradi          .              .             1.0000         EPS         
+Koundoumaoua.Tanaut          .              .             1.0000         EPS         
+Koundoumaoua.Zinder          .             1.0000         1.0000         EPS         
+Koundoumaoua.Agadez          .              .             1.0000         EPS         
+Koundoumaoua.Maradi          .              .             1.0000         EPS         
+Sabon-Kafi  .Tanaut          .              .             1.0000         EPS         
+Sabon-Kafi  .Zinder          .             1.0000         1.0000         EPS         
+Sabon-Kafi  .Agadez          .              .             1.0000         EPS         
+Sabon-Kafi  .Maradi          .             1.0000         1.0000         EPS         
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 6
+Practica 1: Emergencia en Niger.
+E x e c u t i o n
+
+
+----     97 VARIABLE ze.L                  =      119.000  valor objetivo del apartado e
+
+----     97 VARIABLE x.L  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+                  Tanaut      Zinder      Agadez
+
+In-Gall                        6.000
+Aderbissinat      81.000      81.000
+Tessaoua          94.000                 129.000
+Tatokou           39.000                  39.000
+Bakatchiraba      30.000                  30.000
+Mayahi                                   273.000
+Koundoumaoua                              30.000
+Sabon-Kafi                                18.000
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 7
+Practica 1: Emergencia en Niger.
+Equation Listing    SOLVE apartadof Using MIP From line 100
+
+
+---- a  =L=  limite de presupuesto
+
+a..  70*x(In-Gall,Tanaut) + 50*x(In-Gall,Zinder) + 30*x(In-Gall,Agadez) + 90*x(In-Gall,Maradi) + 70*x(Aderbissinat,Tanaut) + 50*x(Aderbissinat,Zinder) + 30*x(Aderbissinat,Agadez) + 90*x(Aderbissinat,Maradi) + 70*x(Tessaoua,Tanaut) + 50*x(Tessaoua,Zinder) + 30*x(Tessaoua,Agadez) + 90*x(Tessaoua,Maradi) + 70*x(Dakoro,Tanaut) + 50*x(Dakoro,Zinder) + 30*x(Dakoro,Agadez) + 90*x(Dakoro,Maradi) + 70*x(Tatokou,Tanaut) + 50*x(Tatokou,Zinder) + 30*x(Tatokou,Agadez) + 90*x(Tatokou,Maradi) + 70*x(Bakatchiraba,Tanaut) + 50*x(Bakatchiraba,Zinder) + 30*x(Bakatchiraba,Agadez) + 90*x(Bakatchiraba,Maradi) + 70*x(Mayahi,Tanaut) + 50*x(Mayahi,Zinder) + 30*x(Mayahi,Agadez) + 90*x(Mayahi,Maradi) + 70*x(Koundoumaoua,Tanaut) + 50*x(Koundoumaoua,Zinder) + 30*x(Koundoumaoua,Agadez) + 90*x(Koundoumaoua,Maradi) + 70*x(Sabon-Kafi,Tanaut) + 50*x(Sabon-Kafi,Zinder) + 30*x(Sabon-Kafi,Agadez) + 90*x(Sabon-Kafi,Maradi) + 1000*construir(Tanaut) + 1000*construir(Zinder) + 1000*construir(Agadez) + 1000*construir(Maradi) =L= 40000 ; (LHS = 40000)
+     
+
+---- disp  =L=  disponibilidad de ayuda
+
+disp..  x(In-Gall,Tanaut) + x(In-Gall,Zinder) + x(In-Gall,Agadez) + x(In-Gall,Maradi) + x(Aderbissinat,Tanaut) + x(Aderbissinat,Zinder) + x(Aderbissinat,Agadez) + x(Aderbissinat,Maradi) + x(Tessaoua,Tanaut) + x(Tessaoua,Zinder) + x(Tessaoua,Agadez) + x(Tessaoua,Maradi) + x(Dakoro,Tanaut) + x(Dakoro,Zinder) + x(Dakoro,Agadez) + x(Dakoro,Maradi) + x(Tatokou,Tanaut) + x(Tatokou,Zinder) + x(Tatokou,Agadez) + x(Tatokou,Maradi) + x(Bakatchiraba,Tanaut) + x(Bakatchiraba,Zinder) + x(Bakatchiraba,Agadez) + x(Bakatchiraba,Maradi) + x(Mayahi,Tanaut) + x(Mayahi,Zinder) + x(Mayahi,Agadez) + x(Mayahi,Maradi) + x(Koundoumaoua,Tanaut) + x(Koundoumaoua,Zinder) + x(Koundoumaoua,Agadez) + x(Koundoumaoua,Maradi) + x(Sabon-Kafi,Tanaut) + x(Sabon-Kafi,Zinder) + x(Sabon-Kafi,Agadez) + x(Sabon-Kafi,Maradi) =L= 850 ; (LHS = 850)
+     
+
+---- b1  =L=  maximo de  centros establecidos
+
+b1..  construir(Tanaut) + construir(Zinder) + construir(Agadez) + construir(Maradi) =L= 3 ; (LHS = 3)
+     
+
+---- b2  =G=  solo enviaremos ayuda desde centros establecidos
+
+b2(In-Gall,Tanaut)..  - x(In-Gall,Tanaut) + 156*construir(Tanaut) =G= 0 ; (LHS = 156)
+     
+b2(In-Gall,Zinder)..  - x(In-Gall,Zinder) + 156*construir(Zinder) =G= 0 ; (LHS = 150)
+     
+b2(In-Gall,Agadez)..  - x(In-Gall,Agadez) + 156*construir(Agadez) =G= 0 ; (LHS = 156)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- c1  =L=  no se puede acudir a poblaciones demasiado lejanas
+
+c1(In-Gall,Tanaut)..  - 396*disy(In-Gall,Tanaut) =L= -196 ; (LHS = -396)
+     
+c1(In-Gall,Zinder)..  - 119*disy(In-Gall,Zinder) =L= 81 ; (LHS = 0)
+     
+c1(In-Gall,Agadez)..  - 541*disy(In-Gall,Agadez) =L= -341 ; (LHS = -541)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- c2  =L=  
+
+c2(In-Gall,Tanaut)..  x(In-Gall,Tanaut) + 156*disy(In-Gall,Tanaut) =L= 156 ; (LHS = 156)
+     
+c2(In-Gall,Zinder)..  x(In-Gall,Zinder) + 156*disy(In-Gall,Zinder) =L= 156 ; (LHS = 6)
+     
+c2(In-Gall,Agadez)..  x(In-Gall,Agadez) + 156*disy(In-Gall,Agadez) =L= 156 ; (LHS = 156)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- d  =G=  hay que suplir un minimo de la demanda global
+
+d..  x(In-Gall,Tanaut) + x(In-Gall,Zinder) + x(In-Gall,Agadez) + x(In-Gall,Maradi) + x(Aderbissinat,Tanaut) + x(Aderbissinat,Zinder) + x(Aderbissinat,Agadez) + x(Aderbissinat,Maradi) + x(Tessaoua,Tanaut) + x(Tessaoua,Zinder) + x(Tessaoua,Agadez) + x(Tessaoua,Maradi) + x(Dakoro,Tanaut) + x(Dakoro,Zinder) + x(Dakoro,Agadez) + x(Dakoro,Maradi) + x(Tatokou,Tanaut) + x(Tatokou,Zinder) + x(Tatokou,Agadez) + x(Tatokou,Maradi) + x(Bakatchiraba,Tanaut) + x(Bakatchiraba,Zinder) + x(Bakatchiraba,Agadez) + x(Bakatchiraba,Maradi) + x(Mayahi,Tanaut) + x(Mayahi,Zinder) + x(Mayahi,Agadez) + x(Mayahi,Maradi) + x(Koundoumaoua,Tanaut) + x(Koundoumaoua,Zinder) + x(Koundoumaoua,Agadez) + x(Koundoumaoua,Maradi) + x(Sabon-Kafi,Tanaut) + x(Sabon-Kafi,Zinder) + x(Sabon-Kafi,Agadez) + x(Sabon-Kafi,Maradi) =G= 581.4 ; (LHS = 850)
+     
+
+---- f  =E=  fobj para minimizar el coste total de la operacion
+
+f..  - zf + 70*x(In-Gall,Tanaut) + 50*x(In-Gall,Zinder) + 30*x(In-Gall,Agadez) + 90*x(In-Gall,Maradi) + 70*x(Aderbissinat,Tanaut) + 50*x(Aderbissinat,Zinder) + 30*x(Aderbissinat,Agadez) + 90*x(Aderbissinat,Maradi) + 70*x(Tessaoua,Tanaut) + 50*x(Tessaoua,Zinder) + 30*x(Tessaoua,Agadez) + 90*x(Tessaoua,Maradi) + 70*x(Dakoro,Tanaut) + 50*x(Dakoro,Zinder) + 30*x(Dakoro,Agadez) + 90*x(Dakoro,Maradi) + 70*x(Tatokou,Tanaut) + 50*x(Tatokou,Zinder) + 30*x(Tatokou,Agadez) + 90*x(Tatokou,Maradi) + 70*x(Bakatchiraba,Tanaut) + 50*x(Bakatchiraba,Zinder) + 30*x(Bakatchiraba,Agadez) + 90*x(Bakatchiraba,Maradi) + 70*x(Mayahi,Tanaut) + 50*x(Mayahi,Zinder) + 30*x(Mayahi,Agadez) + 90*x(Mayahi,Maradi) + 70*x(Koundoumaoua,Tanaut) + 50*x(Koundoumaoua,Zinder) + 30*x(Koundoumaoua,Agadez) + 90*x(Koundoumaoua,Maradi) + 70*x(Sabon-Kafi,Tanaut) + 50*x(Sabon-Kafi,Zinder) + 30*x(Sabon-Kafi,Agadez) + 90*x(Sabon-Kafi,Maradi) + 1000*construir(Tanaut) + 1000*construir(Zinder) + 1000*construir(Agadez) + 1000*construir(Maradi) =E= 0 ; (LHS = 40000, INFES = 40000 ****)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 8
+Practica 1: Emergencia en Niger.
+Column Listing      SOLVE apartadof Using MIP From line 100
+
+
+---- zf  valor objetivo del apartado f
+
+zf
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -1       f
+
+
+---- x  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+x(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 0, +INF, EPS)
+       70       a
+        1       disp
+       -1       b2(In-Gall,Tanaut)
+        1       c2(In-Gall,Tanaut)
+        1       d
+       70       f
+
+x(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 6, +INF, 0)
+       50       a
+        1       disp
+       -1       b2(In-Gall,Zinder)
+        1       c2(In-Gall,Zinder)
+        1       d
+       50       f
+
+x(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 0, +INF, EPS)
+       30       a
+        1       disp
+       -1       b2(In-Gall,Agadez)
+        1       c2(In-Gall,Agadez)
+        1       d
+       30       f
+
+REMAINING 33 ENTRIES SKIPPED
+
+---- construir  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+construir(Tanaut)
+                (.LO, .L, .UP, .M = 0, 1, 1, EPS)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Tanaut)
+       81       b2(Aderbissinat,Tanaut)
+      129       b2(Tessaoua,Tanaut)
+      213       b2(Dakoro,Tanaut)
+       39       b2(Tatokou,Tanaut)
+       30       b2(Bakatchiraba,Tanaut)
+      273       b2(Mayahi,Tanaut)
+       30       b2(Koundoumaoua,Tanaut)
+       18       b2(Sabon-Kafi,Tanaut)
+     1000       f
+
+construir(Zinder)
+                (.LO, .L, .UP, .M = 0, 1, 1, EPS)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Zinder)
+       81       b2(Aderbissinat,Zinder)
+      129       b2(Tessaoua,Zinder)
+      213       b2(Dakoro,Zinder)
+       39       b2(Tatokou,Zinder)
+       30       b2(Bakatchiraba,Zinder)
+      273       b2(Mayahi,Zinder)
+       30       b2(Koundoumaoua,Zinder)
+       18       b2(Sabon-Kafi,Zinder)
+     1000       f
+
+construir(Agadez)
+                (.LO, .L, .UP, .M = 0, 1, 1, EPS)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Agadez)
+       81       b2(Aderbissinat,Agadez)
+      129       b2(Tessaoua,Agadez)
+      213       b2(Dakoro,Agadez)
+       39       b2(Tatokou,Agadez)
+       30       b2(Bakatchiraba,Agadez)
+      273       b2(Mayahi,Agadez)
+       30       b2(Koundoumaoua,Agadez)
+       18       b2(Sabon-Kafi,Agadez)
+     1000       f
+
+REMAINING ENTRY SKIPPED
+
+---- disy  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+
+disy(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 1, 1, EPS)
+     -396       c1(In-Gall,Tanaut)
+      156       c2(In-Gall,Tanaut)
+
+disy(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 0, 1, EPS)
+     -119       c1(In-Gall,Zinder)
+      156       c2(In-Gall,Zinder)
+
+disy(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 1, 1, EPS)
+     -541       c1(In-Gall,Agadez)
+      156       c2(In-Gall,Agadez)
+
+REMAINING 33 ENTRIES SKIPPED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 9
+Practica 1: Emergencia en Niger.
+Model Statistics    SOLVE apartadof Using MIP From line 100
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           8     SINGLE EQUATIONS          113
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           77
+NON ZERO ELEMENTS           337     DISCRETE VARIABLES         40
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 10
+Practica 1: Emergencia en Niger.
+Solution Report     SOLVE apartadof Using MIP From line 100
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   apartadof           OBJECTIVE  zf
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  100
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE            20690.0000
+
+ RESOURCE USAGE, LIMIT          0.016 10000000000.000
+ ITERATION COUNT, LIMIT         5    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.52 Mb (peak 0.52 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.01 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.32 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.09 ticks)
+
+
+Proven optimal solution
+MIP Solution:        20690.000000    (5 iterations, 0 nodes)
+Final Solve:         20690.000000    (0 iterations)
+
+Best possible:       20690.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU a                 -INF        20690.0000     40000.0000          .          
+---- EQU disp              -INF          581.4000       850.0000          .          
+---- EQU b1                -INF            2.0000         3.0000          .          
+
+  a  limite de presupuesto
+  disp  disponibilidad de ayuda
+  b1  maximo de  centros establecidos
+
+---- EQU b2  solo enviaremos ayuda desde centros establecidos
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .              .            +INF             .          
+In-Gall     .Zinder          .            93.6000        +INF             .          
+In-Gall     .Agadez          .           156.0000        +INF             .          
+In-Gall     .Maradi          .              .            +INF             .          
+Aderbissinat.Tanaut          .              .            +INF             .          
+Aderbissinat.Zinder          .            81.0000        +INF             .          
+Aderbissinat.Agadez          .            81.0000        +INF             .          
+Aderbissinat.Maradi          .              .            +INF             .          
+Tessaoua    .Tanaut          .              .            +INF             .          
+Tessaoua    .Zinder          .           129.0000        +INF             .          
+Tessaoua    .Agadez          .              .            +INF           20.0000      
+Tessaoua    .Maradi          .              .            +INF             .          
+Dakoro      .Tanaut          .              .            +INF             .          
+Dakoro      .Zinder          .           213.0000        +INF             .          
+Dakoro      .Agadez          .           213.0000        +INF             .          
+Dakoro      .Maradi          .              .            +INF             .          
+Tatokou     .Tanaut          .              .            +INF             .          
+Tatokou     .Zinder          .            39.0000        +INF             .          
+Tatokou     .Agadez          .              .            +INF           20.0000      
+Tatokou     .Maradi          .              .            +INF             .          
+Bakatchiraba.Tanaut          .              .            +INF             .          
+Bakatchiraba.Zinder          .            30.0000        +INF             .          
+Bakatchiraba.Agadez          .              .            +INF           20.0000      
+Bakatchiraba.Maradi          .              .            +INF             .          
+Mayahi      .Tanaut          .              .            +INF             .          
+Mayahi      .Zinder          .           273.0000        +INF             .          
+Mayahi      .Agadez          .              .            +INF           20.0000      
+Mayahi      .Maradi          .              .            +INF             .          
+Koundoumaoua.Tanaut          .              .            +INF             .          
+Koundoumaoua.Zinder          .            30.0000        +INF             .          
+Koundoumaoua.Agadez          .              .            +INF           20.0000      
+Koundoumaoua.Maradi          .              .            +INF             .          
+Sabon-Kafi  .Tanaut          .              .            +INF             .          
+Sabon-Kafi  .Zinder          .            18.0000        +INF             .          
+Sabon-Kafi  .Agadez          .              .            +INF           20.0000      
+Sabon-Kafi  .Maradi          .              .            +INF             .          
+
+---- EQU c1  no se puede acudir a poblaciones demasiado lejanas
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF         -396.0000      -196.0000          .          
+In-Gall     .Zinder        -INF             .            81.0000          .          
+In-Gall     .Agadez        -INF         -541.0000      -341.0000          .          
+In-Gall     .Maradi        -INF         -625.0000      -425.0000          .          
+Aderbissinat.Tanaut        -INF             .            53.0000          .          
+Aderbissinat.Zinder        -INF             .            39.0000          .          
+Aderbissinat.Agadez        -INF         -286.0000       -86.0000          .          
+Aderbissinat.Maradi        -INF         -454.0000      -254.0000          .          
+Tessaoua    .Tanaut        -INF             .             9.0000          .          
+Tessaoua    .Zinder        -INF         -492.0000      -292.0000          .          
+Tessaoua    .Agadez        -INF             .            86.0000          .          
+Tessaoua    .Maradi        -INF             .            78.0000          .          
+Dakoro      .Tanaut        -INF         -244.0000       -44.0000          .          
+Dakoro      .Zinder        -INF         -562.0000      -362.0000          .          
+Dakoro      .Agadez        -INF         -300.0000      -100.0000          .          
+Dakoro      .Maradi        -INF             .            76.0000          .          
+Tatokou     .Tanaut        -INF             .           157.0000          .          
+Tatokou     .Zinder        -INF         -258.0000       -58.0000          .          
+Tatokou     .Agadez        -INF             .            12.0000          .          
+Tatokou     .Maradi        -INF         -355.0000      -155.0000          .          
+Bakatchiraba.Tanaut        -INF             .           192.0000          .          
+Bakatchiraba.Zinder        -INF         -306.0000      -106.0000          .          
+Bakatchiraba.Agadez        -INF             .            48.0000          .          
+Bakatchiraba.Maradi        -INF         -320.0000      -120.0000          .          
+Mayahi      .Tanaut        -INF         -252.0000       -52.0000          .          
+Mayahi      .Zinder        -INF         -553.0000      -353.0000          .          
+Mayahi      .Agadez        -INF             .            44.0000          .          
+Mayahi      .Maradi        -INF             .           105.0000          .          
+Koundoumaoua.Tanaut        -INF             .             3.0000          .          
+Koundoumaoua.Zinder        -INF         -490.0000      -290.0000          .          
+Koundoumaoua.Agadez        -INF             .           129.0000          .          
+Koundoumaoua.Maradi        -INF             .            17.0000          .          
+Sabon-Kafi  .Tanaut        -INF             .           157.0000          .          
+Sabon-Kafi  .Zinder        -INF         -336.0000      -136.0000          .          
+Sabon-Kafi  .Agadez        -INF             .            98.0000          .          
+Sabon-Kafi  .Maradi        -INF         -269.0000       -69.0000          .          
+
+---- EQU c2  
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF          156.0000       156.0000          .          
+In-Gall     .Zinder        -INF           62.4000       156.0000          .          
+In-Gall     .Agadez        -INF          156.0000       156.0000       -20.0000      
+In-Gall     .Maradi        -INF          156.0000       156.0000          .          
+Aderbissinat.Tanaut        -INF             .            81.0000          .          
+Aderbissinat.Zinder        -INF             .            81.0000          .          
+Aderbissinat.Agadez        -INF           81.0000        81.0000       -20.0000      
+Aderbissinat.Maradi        -INF           81.0000        81.0000          .          
+Tessaoua    .Tanaut        -INF             .           129.0000          .          
+Tessaoua    .Zinder        -INF          129.0000       129.0000          .          
+Tessaoua    .Agadez        -INF          129.0000       129.0000          .          
+Tessaoua    .Maradi        -INF             .           129.0000          .          
+Dakoro      .Tanaut        -INF          213.0000       213.0000          .          
+Dakoro      .Zinder        -INF          213.0000       213.0000          .          
+Dakoro      .Agadez        -INF          213.0000       213.0000       -20.0000      
+Dakoro      .Maradi        -INF             .           213.0000          .          
+Tatokou     .Tanaut        -INF             .            39.0000          .          
+Tatokou     .Zinder        -INF           39.0000        39.0000          .          
+Tatokou     .Agadez        -INF           39.0000        39.0000          .          
+Tatokou     .Maradi        -INF           39.0000        39.0000          .          
+Bakatchiraba.Tanaut        -INF             .            30.0000          .          
+Bakatchiraba.Zinder        -INF           30.0000        30.0000          .          
+Bakatchiraba.Agadez        -INF           30.0000        30.0000          .          
+Bakatchiraba.Maradi        -INF           30.0000        30.0000          .          
+Mayahi      .Tanaut        -INF          273.0000       273.0000          .          
+Mayahi      .Zinder        -INF          273.0000       273.0000          .          
+Mayahi      .Agadez        -INF          273.0000       273.0000          .          
+Mayahi      .Maradi        -INF             .           273.0000          .          
+Koundoumaoua.Tanaut        -INF             .            30.0000          .          
+Koundoumaoua.Zinder        -INF           30.0000        30.0000          .          
+Koundoumaoua.Agadez        -INF           30.0000        30.0000          .          
+Koundoumaoua.Maradi        -INF             .            30.0000          .          
+Sabon-Kafi  .Tanaut        -INF             .            18.0000          .          
+Sabon-Kafi  .Zinder        -INF           18.0000        18.0000          .          
+Sabon-Kafi  .Agadez        -INF           18.0000        18.0000          .          
+Sabon-Kafi  .Maradi        -INF           18.0000        18.0000          .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU d                581.4000       581.4000        +INF           50.0000      
+---- EQU f                   .              .              .            -1.0000      
+
+  d  hay que suplir un minimo de la demanda global
+  f  fobj para minimizar el coste total de la operacion
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR zf                -INF        20690.0000        +INF             .          
+
+  zf  valor objetivo del apartado f
+
+---- VAR x  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .              .            +INF           20.0000      
+In-Gall     .Zinder          .            62.4000        +INF             .          
+In-Gall     .Agadez          .              .            +INF             .          
+In-Gall     .Maradi          .              .            +INF           40.0000      
+Aderbissinat.Tanaut          .              .            +INF           20.0000      
+Aderbissinat.Zinder          .              .            +INF            EPS         
+Aderbissinat.Agadez          .              .            +INF             .          
+Aderbissinat.Maradi          .              .            +INF           40.0000      
+Tessaoua    .Tanaut          .              .            +INF           20.0000      
+Tessaoua    .Zinder          .              .            +INF            EPS         
+Tessaoua    .Agadez          .           129.0000        +INF             .          
+Tessaoua    .Maradi          .              .            +INF           40.0000      
+Dakoro      .Tanaut          .              .            +INF           20.0000      
+Dakoro      .Zinder          .              .            +INF            EPS         
+Dakoro      .Agadez          .              .            +INF             .          
+Dakoro      .Maradi          .              .            +INF           40.0000      
+Tatokou     .Tanaut          .              .            +INF           20.0000      
+Tatokou     .Zinder          .              .            +INF            EPS         
+Tatokou     .Agadez          .            39.0000        +INF             .          
+Tatokou     .Maradi          .              .            +INF           40.0000      
+Bakatchiraba.Tanaut          .              .            +INF           20.0000      
+Bakatchiraba.Zinder          .              .            +INF            EPS         
+Bakatchiraba.Agadez          .            30.0000        +INF             .          
+Bakatchiraba.Maradi          .              .            +INF           40.0000      
+Mayahi      .Tanaut          .              .            +INF           20.0000      
+Mayahi      .Zinder          .              .            +INF            EPS         
+Mayahi      .Agadez          .           273.0000        +INF             .          
+Mayahi      .Maradi          .              .            +INF           40.0000      
+Koundoumaoua.Tanaut          .              .            +INF           20.0000      
+Koundoumaoua.Zinder          .              .            +INF            EPS         
+Koundoumaoua.Agadez          .            30.0000        +INF             .          
+Koundoumaoua.Maradi          .              .            +INF           40.0000      
+Sabon-Kafi  .Tanaut          .              .            +INF           20.0000      
+Sabon-Kafi  .Zinder          .              .            +INF            EPS         
+Sabon-Kafi  .Agadez          .            18.0000        +INF             .          
+Sabon-Kafi  .Maradi          .              .            +INF           40.0000      
+
+---- VAR construir  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+              LOWER          LEVEL          UPPER         MARGINAL
+
+Tanaut          .              .             1.0000      1000.0000      
+Zinder          .             1.0000         1.0000      1000.0000      
+Agadez          .             1.0000         1.0000     -9380.0000      
+Maradi          .              .             1.0000      1000.0000      
+
+---- VAR disy  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .             1.0000         1.0000         EPS         
+In-Gall     .Zinder          .              .             1.0000         EPS         
+In-Gall     .Agadez          .             1.0000         1.0000      3120.0000      
+In-Gall     .Maradi          .             1.0000         1.0000         EPS         
+Aderbissinat.Tanaut          .              .             1.0000         EPS         
+Aderbissinat.Zinder          .              .             1.0000         EPS         
+Aderbissinat.Agadez          .             1.0000         1.0000      1620.0000      
+Aderbissinat.Maradi          .             1.0000         1.0000         EPS         
+Tessaoua    .Tanaut          .              .             1.0000         EPS         
+Tessaoua    .Zinder          .             1.0000         1.0000         EPS         
+Tessaoua    .Agadez          .              .             1.0000         EPS         
+Tessaoua    .Maradi          .              .             1.0000         EPS         
+Dakoro      .Tanaut          .             1.0000         1.0000         EPS         
+Dakoro      .Zinder          .             1.0000         1.0000         EPS         
+Dakoro      .Agadez          .             1.0000         1.0000      4260.0000      
+Dakoro      .Maradi          .              .             1.0000         EPS         
+Tatokou     .Tanaut          .              .             1.0000         EPS         
+Tatokou     .Zinder          .             1.0000         1.0000         EPS         
+Tatokou     .Agadez          .              .             1.0000         EPS         
+Tatokou     .Maradi          .             1.0000         1.0000         EPS         
+Bakatchiraba.Tanaut          .              .             1.0000         EPS         
+Bakatchiraba.Zinder          .             1.0000         1.0000         EPS         
+Bakatchiraba.Agadez          .              .             1.0000         EPS         
+Bakatchiraba.Maradi          .             1.0000         1.0000         EPS         
+Mayahi      .Tanaut          .             1.0000         1.0000         EPS         
+Mayahi      .Zinder          .             1.0000         1.0000         EPS         
+Mayahi      .Agadez          .              .             1.0000         EPS         
+Mayahi      .Maradi          .              .             1.0000         EPS         
+Koundoumaoua.Tanaut          .              .             1.0000         EPS         
+Koundoumaoua.Zinder          .             1.0000         1.0000         EPS         
+Koundoumaoua.Agadez          .              .             1.0000         EPS         
+Koundoumaoua.Maradi          .              .             1.0000         EPS         
+Sabon-Kafi  .Tanaut          .              .             1.0000         EPS         
+Sabon-Kafi  .Zinder          .             1.0000         1.0000         EPS         
+Sabon-Kafi  .Agadez          .              .             1.0000         EPS         
+Sabon-Kafi  .Maradi          .             1.0000         1.0000         EPS         
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 11
+Practica 1: Emergencia en Niger.
+E x e c u t i o n
+
+
+----    101 VARIABLE zf.L                  =    20690.000  valor objetivo del apartado f
+
+----    101 VARIABLE x.L  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+                  Zinder      Agadez
+
+In-Gall           62.400
+Tessaoua                     129.000
+Tatokou                       39.000
+Bakatchiraba                  30.000
+Mayahi                       273.000
+Koundoumaoua                  30.000
+Sabon-Kafi                    18.000
+
+
+----    101 VARIABLE construir.L  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+Zinder 1.000,    Agadez 1.000
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 12
+Practica 1: Emergencia en Niger.
+Equation Listing    SOLVE apartadog Using MIP From line 104
+
+
+---- a  =L=  limite de presupuesto
+
+a..  70*x(In-Gall,Tanaut) + 50*x(In-Gall,Zinder) + 30*x(In-Gall,Agadez) + 90*x(In-Gall,Maradi) + 70*x(Aderbissinat,Tanaut) + 50*x(Aderbissinat,Zinder) + 30*x(Aderbissinat,Agadez) + 90*x(Aderbissinat,Maradi) + 70*x(Tessaoua,Tanaut) + 50*x(Tessaoua,Zinder) + 30*x(Tessaoua,Agadez) + 90*x(Tessaoua,Maradi) + 70*x(Dakoro,Tanaut) + 50*x(Dakoro,Zinder) + 30*x(Dakoro,Agadez) + 90*x(Dakoro,Maradi) + 70*x(Tatokou,Tanaut) + 50*x(Tatokou,Zinder) + 30*x(Tatokou,Agadez) + 90*x(Tatokou,Maradi) + 70*x(Bakatchiraba,Tanaut) + 50*x(Bakatchiraba,Zinder) + 30*x(Bakatchiraba,Agadez) + 90*x(Bakatchiraba,Maradi) + 70*x(Mayahi,Tanaut) + 50*x(Mayahi,Zinder) + 30*x(Mayahi,Agadez) + 90*x(Mayahi,Maradi) + 70*x(Koundoumaoua,Tanaut) + 50*x(Koundoumaoua,Zinder) + 30*x(Koundoumaoua,Agadez) + 90*x(Koundoumaoua,Maradi) + 70*x(Sabon-Kafi,Tanaut) + 50*x(Sabon-Kafi,Zinder) + 30*x(Sabon-Kafi,Agadez) + 90*x(Sabon-Kafi,Maradi) + 1000*construir(Tanaut) + 1000*construir(Zinder) + 1000*construir(Agadez) + 1000*construir(Maradi) =L= 40000 ; (LHS = 20690)
+     
+
+---- disp  =L=  disponibilidad de ayuda
+
+disp..  x(In-Gall,Tanaut) + x(In-Gall,Zinder) + x(In-Gall,Agadez) + x(In-Gall,Maradi) + x(Aderbissinat,Tanaut) + x(Aderbissinat,Zinder) + x(Aderbissinat,Agadez) + x(Aderbissinat,Maradi) + x(Tessaoua,Tanaut) + x(Tessaoua,Zinder) + x(Tessaoua,Agadez) + x(Tessaoua,Maradi) + x(Dakoro,Tanaut) + x(Dakoro,Zinder) + x(Dakoro,Agadez) + x(Dakoro,Maradi) + x(Tatokou,Tanaut) + x(Tatokou,Zinder) + x(Tatokou,Agadez) + x(Tatokou,Maradi) + x(Bakatchiraba,Tanaut) + x(Bakatchiraba,Zinder) + x(Bakatchiraba,Agadez) + x(Bakatchiraba,Maradi) + x(Mayahi,Tanaut) + x(Mayahi,Zinder) + x(Mayahi,Agadez) + x(Mayahi,Maradi) + x(Koundoumaoua,Tanaut) + x(Koundoumaoua,Zinder) + x(Koundoumaoua,Agadez) + x(Koundoumaoua,Maradi) + x(Sabon-Kafi,Tanaut) + x(Sabon-Kafi,Zinder) + x(Sabon-Kafi,Agadez) + x(Sabon-Kafi,Maradi) =L= 850 ; (LHS = 581.4)
+     
+
+---- b1  =L=  maximo de  centros establecidos
+
+b1..  construir(Tanaut) + construir(Zinder) + construir(Agadez) + construir(Maradi) =L= 3 ; (LHS = 2)
+     
+
+---- b2  =G=  solo enviaremos ayuda desde centros establecidos
+
+b2(In-Gall,Tanaut)..  - x(In-Gall,Tanaut) + 156*construir(Tanaut) =G= 0 ; (LHS = 0)
+     
+b2(In-Gall,Zinder)..  - x(In-Gall,Zinder) + 156*construir(Zinder) =G= 0 ; (LHS = 93.6)
+     
+b2(In-Gall,Agadez)..  - x(In-Gall,Agadez) + 156*construir(Agadez) =G= 0 ; (LHS = 156)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- c1  =L=  no se puede acudir a poblaciones demasiado lejanas
+
+c1(In-Gall,Tanaut)..  - 396*disy(In-Gall,Tanaut) =L= -196 ; (LHS = -396)
+     
+c1(In-Gall,Zinder)..  - 119*disy(In-Gall,Zinder) =L= 81 ; (LHS = 0)
+     
+c1(In-Gall,Agadez)..  - 541*disy(In-Gall,Agadez) =L= -341 ; (LHS = -541)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- c2  =L=  
+
+c2(In-Gall,Tanaut)..  x(In-Gall,Tanaut) + 156*disy(In-Gall,Tanaut) =L= 156 ; (LHS = 156)
+     
+c2(In-Gall,Zinder)..  x(In-Gall,Zinder) + 156*disy(In-Gall,Zinder) =L= 156 ; (LHS = 62.4)
+     
+c2(In-Gall,Agadez)..  x(In-Gall,Agadez) + 156*disy(In-Gall,Agadez) =L= 156 ; (LHS = 156)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- d  =G=  hay que suplir un minimo de la demanda global
+
+d..  x(In-Gall,Tanaut) + x(In-Gall,Zinder) + x(In-Gall,Agadez) + x(In-Gall,Maradi) + x(Aderbissinat,Tanaut) + x(Aderbissinat,Zinder) + x(Aderbissinat,Agadez) + x(Aderbissinat,Maradi) + x(Tessaoua,Tanaut) + x(Tessaoua,Zinder) + x(Tessaoua,Agadez) + x(Tessaoua,Maradi) + x(Dakoro,Tanaut) + x(Dakoro,Zinder) + x(Dakoro,Agadez) + x(Dakoro,Maradi) + x(Tatokou,Tanaut) + x(Tatokou,Zinder) + x(Tatokou,Agadez) + x(Tatokou,Maradi) + x(Bakatchiraba,Tanaut) + x(Bakatchiraba,Zinder) + x(Bakatchiraba,Agadez) + x(Bakatchiraba,Maradi) + x(Mayahi,Tanaut) + x(Mayahi,Zinder) + x(Mayahi,Agadez) + x(Mayahi,Maradi) + x(Koundoumaoua,Tanaut) + x(Koundoumaoua,Zinder) + x(Koundoumaoua,Agadez) + x(Koundoumaoua,Maradi) + x(Sabon-Kafi,Tanaut) + x(Sabon-Kafi,Zinder) + x(Sabon-Kafi,Agadez) + x(Sabon-Kafi,Maradi) =G= 581.4 ; (LHS = 581.4)
+     
+
+---- g  =E=  fobj para minimizar la distancia cubierta por la carga de ce a obj
+
+g..  - zg + 396*x(In-Gall,Tanaut) + 119*x(In-Gall,Zinder) + 541*x(In-Gall,Agadez) + 625*x(In-Gall,Maradi) + 147*x(Aderbissinat,Tanaut) + 161*x(Aderbissinat,Zinder) + 286*x(Aderbissinat,Agadez) + 454*x(Aderbissinat,Maradi) + 191*x(Tessaoua,Tanaut) + 492*x(Tessaoua,Zinder) + 114*x(Tessaoua,Agadez) + 122*x(Tessaoua,Maradi) + 244*x(Dakoro,Tanaut) + 562*x(Dakoro,Zinder) + 300*x(Dakoro,Agadez) + 124*x(Dakoro,Maradi) + 43*x(Tatokou,Tanaut) + 258*x(Tatokou,Zinder) + 188*x(Tatokou,Agadez) + 355*x(Tatokou,Maradi) + 8*x(Bakatchiraba,Tanaut) + 306*x(Bakatchiraba,Zinder) + 152*x(Bakatchiraba,Agadez) + 320*x(Bakatchiraba,Maradi) + 252*x(Mayahi,Tanaut) + 553*x(Mayahi,Zinder) + 156*x(Mayahi,Agadez) + 95*x(Mayahi,Maradi) + 197*x(Koundoumaoua,Tanaut) + 490*x(Koundoumaoua,Zinder) + 71*x(Koundoumaoua,Agadez) + 183*x(Koundoumaoua,Maradi) + 43*x(Sabon-Kafi,Tanaut) + 336*x(Sabon-Kafi,Zinder) + 102*x(Sabon-Kafi,Agadez) + 269*x(Sabon-Kafi,Maradi) =E= 0 ; (LHS = 80577.6, INFES = 80577.6 ****)
+     
+
+---- g1  =L=  
+
+g1(In-Gall,Tanaut)..  x(In-Gall,Tanaut) - 156*beta(In-Gall,Tanaut) =L= 0 ; (LHS = 0)
+     
+g1(In-Gall,Zinder)..  x(In-Gall,Zinder) - 156*beta(In-Gall,Zinder) =L= 0 ; (LHS = 62.4, INFES = 62.4 ****)
+     
+g1(In-Gall,Agadez)..  x(In-Gall,Agadez) - 156*beta(In-Gall,Agadez) =L= 0 ; (LHS = 0)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 13
+Practica 1: Emergencia en Niger.
+Column Listing      SOLVE apartadog Using MIP From line 104
+
+
+---- zg  valor objetivo del apartado g
+
+zg
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -1       g
+
+
+---- x  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+x(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 20)
+       70       a
+        1       disp
+       -1       b2(In-Gall,Tanaut)
+        1       c2(In-Gall,Tanaut)
+        1       d
+      396       g
+        1       g1(In-Gall,Tanaut)
+
+x(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 62.4, +INF, 0)
+       50       a
+        1       disp
+       -1       b2(In-Gall,Zinder)
+        1       c2(In-Gall,Zinder)
+        1       d
+      119       g
+        1       g1(In-Gall,Zinder)
+
+x(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       30       a
+        1       disp
+       -1       b2(In-Gall,Agadez)
+        1       c2(In-Gall,Agadez)
+        1       d
+      541       g
+        1       g1(In-Gall,Agadez)
+
+REMAINING 33 ENTRIES SKIPPED
+
+---- construir  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+construir(Tanaut)
+                (.LO, .L, .UP, .M = 0, 0, 1, 1000)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Tanaut)
+       81       b2(Aderbissinat,Tanaut)
+      129       b2(Tessaoua,Tanaut)
+      213       b2(Dakoro,Tanaut)
+       39       b2(Tatokou,Tanaut)
+       30       b2(Bakatchiraba,Tanaut)
+      273       b2(Mayahi,Tanaut)
+       30       b2(Koundoumaoua,Tanaut)
+       18       b2(Sabon-Kafi,Tanaut)
+
+construir(Zinder)
+                (.LO, .L, .UP, .M = 0, 1, 1, 1000)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Zinder)
+       81       b2(Aderbissinat,Zinder)
+      129       b2(Tessaoua,Zinder)
+      213       b2(Dakoro,Zinder)
+       39       b2(Tatokou,Zinder)
+       30       b2(Bakatchiraba,Zinder)
+      273       b2(Mayahi,Zinder)
+       30       b2(Koundoumaoua,Zinder)
+       18       b2(Sabon-Kafi,Zinder)
+
+construir(Agadez)
+                (.LO, .L, .UP, .M = 0, 1, 1, -9380)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Agadez)
+       81       b2(Aderbissinat,Agadez)
+      129       b2(Tessaoua,Agadez)
+      213       b2(Dakoro,Agadez)
+       39       b2(Tatokou,Agadez)
+       30       b2(Bakatchiraba,Agadez)
+      273       b2(Mayahi,Agadez)
+       30       b2(Koundoumaoua,Agadez)
+       18       b2(Sabon-Kafi,Agadez)
+
+REMAINING ENTRY SKIPPED
+
+---- disy  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+
+disy(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 1, 1, EPS)
+     -396       c1(In-Gall,Tanaut)
+      156       c2(In-Gall,Tanaut)
+
+disy(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 0, 1, EPS)
+     -119       c1(In-Gall,Zinder)
+      156       c2(In-Gall,Zinder)
+
+disy(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 1, 1, 3120)
+     -541       c1(In-Gall,Agadez)
+      156       c2(In-Gall,Agadez)
+
+REMAINING 33 ENTRIES SKIPPED
+
+---- beta  vale 1 si se manda de ce a obj y 0 en caso contrario
+
+beta(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     -156       g1(In-Gall,Tanaut)
+
+beta(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     -156       g1(In-Gall,Zinder)
+
+beta(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     -156       g1(In-Gall,Agadez)
+
+REMAINING 33 ENTRIES SKIPPED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 14
+Practica 1: Emergencia en Niger.
+Model Statistics    SOLVE apartadog Using MIP From line 104
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS          149
+BLOCKS OF VARIABLES           5     SINGLE VARIABLES          113
+NON ZERO ELEMENTS           405     DISCRETE VARIABLES         76
+
+
+GENERATION TIME      =        0.015 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 15
+Practica 1: Emergencia en Niger.
+Solution Report     SOLVE apartadog Using MIP From line 104
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   apartadog           OBJECTIVE  zg
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  104
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE            54411.4333
+
+ RESOURCE USAGE, LIMIT          0.016 10000000000.000
+ ITERATION COUNT, LIMIT        11    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.53 Mb (peak 0.53 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.02 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.39 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.15 ticks)
+
+
+Proven optimal solution
+MIP Solution:        54411.433333    (11 iterations, 0 nodes)
+Final Solve:         54411.433333    (3 iterations)
+
+Best possible:       54411.433333
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU a                 -INF        40000.0000     40000.0000        -1.0167      
+---- EQU disp              -INF          581.4000       850.0000          .          
+---- EQU b1                -INF            3.0000         3.0000          .          
+
+  a  limite de presupuesto
+  disp  disponibilidad de ayuda
+  b1  maximo de  centros establecidos
+
+---- EQU b2  solo enviaremos ayuda desde centros establecidos
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .           156.0000        +INF             .          
+In-Gall     .Zinder          .              .            +INF           16.6667      
+In-Gall     .Agadez          .           156.0000        +INF             .          
+In-Gall     .Maradi          .           156.0000        +INF             .          
+Aderbissinat.Tanaut          .            81.0000        +INF             .          
+Aderbissinat.Zinder          .              .            +INF             .          
+Aderbissinat.Agadez          .            81.0000        +INF             .          
+Aderbissinat.Maradi          .            81.0000        +INF             .          
+Tessaoua    .Tanaut          .           129.0000        +INF             .          
+Tessaoua    .Zinder          .              .            +INF             .          
+Tessaoua    .Agadez          .              .            +INF           42.0000      
+Tessaoua    .Maradi          .           129.0000        +INF             .          
+Dakoro      .Tanaut          .           213.0000        +INF             .          
+Dakoro      .Zinder          .              .            +INF             .          
+Dakoro      .Agadez          .           213.0000        +INF             .          
+Dakoro      .Maradi          .           213.0000        +INF             .          
+Tatokou     .Tanaut          .              .            +INF           72.3333      
+Tatokou     .Zinder          .              .            +INF             .          
+Tatokou     .Agadez          .            39.0000        +INF             .          
+Tatokou     .Maradi          .            39.0000        +INF             .          
+Bakatchiraba.Tanaut          .              .            +INF          107.3333      
+Bakatchiraba.Zinder          .              .            +INF             .          
+Bakatchiraba.Agadez          .              .            +INF            4.0000      
+Bakatchiraba.Maradi          .            30.0000        +INF             .          
+Mayahi      .Tanaut          .           273.0000        +INF             .          
+Mayahi      .Zinder          .              .            +INF             .          
+Mayahi      .Agadez          .           253.5667        +INF             .          
+Mayahi      .Maradi          .             5.0333        +INF             .          
+Koundoumaoua.Tanaut          .            30.0000        +INF             .          
+Koundoumaoua.Zinder          .              .            +INF             .          
+Koundoumaoua.Agadez          .              .            +INF           85.0000      
+Koundoumaoua.Maradi          .            30.0000        +INF             .          
+Sabon-Kafi  .Tanaut          .              .            +INF           72.3333      
+Sabon-Kafi  .Zinder          .              .            +INF             .          
+Sabon-Kafi  .Agadez          .              .            +INF           54.0000      
+Sabon-Kafi  .Maradi          .            18.0000        +INF             .          
+
+---- EQU c1  no se puede acudir a poblaciones demasiado lejanas
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF         -396.0000      -196.0000          .          
+In-Gall     .Zinder        -INF             .            81.0000          .          
+In-Gall     .Agadez        -INF         -541.0000      -341.0000          .          
+In-Gall     .Maradi        -INF         -625.0000      -425.0000          .          
+Aderbissinat.Tanaut        -INF             .            53.0000          .          
+Aderbissinat.Zinder        -INF             .            39.0000          .          
+Aderbissinat.Agadez        -INF         -286.0000       -86.0000          .          
+Aderbissinat.Maradi        -INF         -454.0000      -254.0000          .          
+Tessaoua    .Tanaut        -INF             .             9.0000          .          
+Tessaoua    .Zinder        -INF         -492.0000      -292.0000          .          
+Tessaoua    .Agadez        -INF             .            86.0000          .          
+Tessaoua    .Maradi        -INF             .            78.0000          .          
+Dakoro      .Tanaut        -INF         -244.0000       -44.0000          .          
+Dakoro      .Zinder        -INF         -562.0000      -362.0000          .          
+Dakoro      .Agadez        -INF         -300.0000      -100.0000          .          
+Dakoro      .Maradi        -INF             .            76.0000          .          
+Tatokou     .Tanaut        -INF             .           157.0000          .          
+Tatokou     .Zinder        -INF         -258.0000       -58.0000          .          
+Tatokou     .Agadez        -INF             .            12.0000          .          
+Tatokou     .Maradi        -INF         -355.0000      -155.0000          .          
+Bakatchiraba.Tanaut        -INF             .           192.0000          .          
+Bakatchiraba.Zinder        -INF         -306.0000      -106.0000          .          
+Bakatchiraba.Agadez        -INF             .            48.0000          .          
+Bakatchiraba.Maradi        -INF         -320.0000      -120.0000          .          
+Mayahi      .Tanaut        -INF         -252.0000       -52.0000          .          
+Mayahi      .Zinder        -INF         -553.0000      -353.0000          .          
+Mayahi      .Agadez        -INF             .            44.0000          .          
+Mayahi      .Maradi        -INF             .           105.0000          .          
+Koundoumaoua.Tanaut        -INF             .             3.0000          .          
+Koundoumaoua.Zinder        -INF         -490.0000      -290.0000          .          
+Koundoumaoua.Agadez        -INF             .           129.0000          .          
+Koundoumaoua.Maradi        -INF             .            17.0000          .          
+Sabon-Kafi  .Tanaut        -INF             .           157.0000          .          
+Sabon-Kafi  .Zinder        -INF         -336.0000      -136.0000          .          
+Sabon-Kafi  .Agadez        -INF             .            98.0000          .          
+Sabon-Kafi  .Maradi        -INF         -269.0000       -69.0000          .          
+
+---- EQU c2  
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF          156.0000       156.0000          .          
+In-Gall     .Zinder        -INF             .           156.0000          .          
+In-Gall     .Agadez        -INF          156.0000       156.0000          .          
+In-Gall     .Maradi        -INF          156.0000       156.0000          .          
+Aderbissinat.Tanaut        -INF             .            81.0000          .          
+Aderbissinat.Zinder        -INF             .            81.0000          .          
+Aderbissinat.Agadez        -INF           81.0000        81.0000          .          
+Aderbissinat.Maradi        -INF           81.0000        81.0000          .          
+Tessaoua    .Tanaut        -INF             .           129.0000          .          
+Tessaoua    .Zinder        -INF          129.0000       129.0000          .          
+Tessaoua    .Agadez        -INF          129.0000       129.0000          .          
+Tessaoua    .Maradi        -INF             .           129.0000          .          
+Dakoro      .Tanaut        -INF          213.0000       213.0000          .          
+Dakoro      .Zinder        -INF          213.0000       213.0000          .          
+Dakoro      .Agadez        -INF          213.0000       213.0000          .          
+Dakoro      .Maradi        -INF             .           213.0000          .          
+Tatokou     .Tanaut        -INF           39.0000        39.0000          .          
+Tatokou     .Zinder        -INF           39.0000        39.0000          .          
+Tatokou     .Agadez        -INF             .            39.0000          .          
+Tatokou     .Maradi        -INF           39.0000        39.0000          .          
+Bakatchiraba.Tanaut        -INF           30.0000        30.0000          .          
+Bakatchiraba.Zinder        -INF           30.0000        30.0000          .          
+Bakatchiraba.Agadez        -INF           30.0000        30.0000          .          
+Bakatchiraba.Maradi        -INF           30.0000        30.0000          .          
+Mayahi      .Tanaut        -INF          273.0000       273.0000          .          
+Mayahi      .Zinder        -INF          273.0000       273.0000          .          
+Mayahi      .Agadez        -INF           19.4333       273.0000          .          
+Mayahi      .Maradi        -INF          267.9667       273.0000          .          
+Koundoumaoua.Tanaut        -INF             .            30.0000          .          
+Koundoumaoua.Zinder        -INF           30.0000        30.0000          .          
+Koundoumaoua.Agadez        -INF           30.0000        30.0000          .          
+Koundoumaoua.Maradi        -INF             .            30.0000          .          
+Sabon-Kafi  .Tanaut        -INF           18.0000        18.0000          .          
+Sabon-Kafi  .Zinder        -INF           18.0000        18.0000          .          
+Sabon-Kafi  .Agadez        -INF           18.0000        18.0000          .          
+Sabon-Kafi  .Maradi        -INF           18.0000        18.0000          .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU d                581.4000       581.4000        +INF          186.5000      
+---- EQU g                   .              .              .            -1.0000      
+
+  d  hay que suplir un minimo de la demanda global
+  g  fobj para minimizar la distancia cubierta por la carga de ce a obj
+
+---- EQU g1  
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF             .              .              .          
+In-Gall     .Zinder        -INF         -156.0000          .              .          
+In-Gall     .Agadez        -INF             .              .              .          
+In-Gall     .Maradi        -INF             .              .              .          
+Aderbissinat.Tanaut        -INF          -81.0000          .              .          
+Aderbissinat.Zinder        -INF          -81.0000          .              .          
+Aderbissinat.Agadez        -INF             .              .              .          
+Aderbissinat.Maradi        -INF             .              .              .          
+Tessaoua    .Tanaut        -INF         -129.0000          .              .          
+Tessaoua    .Zinder        -INF             .              .              .          
+Tessaoua    .Agadez        -INF             .              .              .          
+Tessaoua    .Maradi        -INF         -129.0000          .              .          
+Dakoro      .Tanaut        -INF             .              .              .          
+Dakoro      .Zinder        -INF             .              .              .          
+Dakoro      .Agadez        -INF             .              .              .          
+Dakoro      .Maradi        -INF         -213.0000          .              .          
+Tatokou     .Tanaut        -INF             .              .              .          
+Tatokou     .Zinder        -INF             .              .              .          
+Tatokou     .Agadez        -INF          -39.0000          .              .          
+Tatokou     .Maradi        -INF             .              .              .          
+Bakatchiraba.Tanaut        -INF             .              .              .          
+Bakatchiraba.Zinder        -INF             .              .              .          
+Bakatchiraba.Agadez        -INF             .              .              .          
+Bakatchiraba.Maradi        -INF             .              .              .          
+Mayahi      .Tanaut        -INF             .              .              .          
+Mayahi      .Zinder        -INF             .              .              .          
+Mayahi      .Agadez        -INF         -253.5667          .              .          
+Mayahi      .Maradi        -INF           -5.0333          .              .          
+Koundoumaoua.Tanaut        -INF          -30.0000          .              .          
+Koundoumaoua.Zinder        -INF             .              .              .          
+Koundoumaoua.Agadez        -INF             .              .              .          
+Koundoumaoua.Maradi        -INF          -30.0000          .              .          
+Sabon-Kafi  .Tanaut        -INF             .              .              .          
+Sabon-Kafi  .Zinder        -INF             .              .              .          
+Sabon-Kafi  .Agadez        -INF             .              .              .          
+Sabon-Kafi  .Maradi        -INF             .              .              .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR zg                -INF        54411.4333        +INF             .          
+
+  zg  valor objetivo del apartado g
+
+---- VAR x  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .              .            +INF          280.6667      
+In-Gall     .Zinder          .              .            +INF             .          
+In-Gall     .Agadez          .              .            +INF          385.0000      
+In-Gall     .Maradi          .              .            +INF          530.0000      
+Aderbissinat.Tanaut          .              .            +INF           31.6667      
+Aderbissinat.Zinder          .              .            +INF           25.3333      
+Aderbissinat.Agadez          .              .            +INF          130.0000      
+Aderbissinat.Maradi          .              .            +INF          359.0000      
+Tessaoua    .Tanaut          .              .            +INF           75.6667      
+Tessaoua    .Zinder          .              .            +INF          356.3333      
+Tessaoua    .Agadez          .           129.0000        +INF             .          
+Tessaoua    .Maradi          .              .            +INF           27.0000      
+Dakoro      .Tanaut          .              .            +INF          128.6667      
+Dakoro      .Zinder          .              .            +INF          426.3333      
+Dakoro      .Agadez          .              .            +INF          144.0000      
+Dakoro      .Maradi          .              .            +INF           29.0000      
+Tatokou     .Tanaut          .            39.0000        +INF             .          
+Tatokou     .Zinder          .              .            +INF          122.3333      
+Tatokou     .Agadez          .              .            +INF           32.0000      
+Tatokou     .Maradi          .              .            +INF          260.0000      
+Bakatchiraba.Tanaut          .            30.0000        +INF             .          
+Bakatchiraba.Zinder          .              .            +INF          170.3333      
+Bakatchiraba.Agadez          .            30.0000        +INF             .          
+Bakatchiraba.Maradi          .              .            +INF          225.0000      
+Mayahi      .Tanaut          .              .            +INF          136.6667      
+Mayahi      .Zinder          .              .            +INF          417.3333      
+Mayahi      .Agadez          .            19.4333        +INF             .          
+Mayahi      .Maradi          .           267.9667        +INF             .          
+Koundoumaoua.Tanaut          .              .            +INF           81.6667      
+Koundoumaoua.Zinder          .              .            +INF          354.3333      
+Koundoumaoua.Agadez          .            30.0000        +INF             .          
+Koundoumaoua.Maradi          .              .            +INF           88.0000      
+Sabon-Kafi  .Tanaut          .            18.0000        +INF             .          
+Sabon-Kafi  .Zinder          .              .            +INF          200.3333      
+Sabon-Kafi  .Agadez          .            18.0000        +INF             .          
+Sabon-Kafi  .Maradi          .              .            +INF          174.0000      
+
+---- VAR construir  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+              LOWER          LEVEL          UPPER         MARGINAL
+
+Tanaut          .             1.0000         1.0000     -6326.3333      
+Zinder          .              .             1.0000     -1583.3333      
+Agadez          .             1.0000         1.0000     -8043.3333      
+Maradi          .             1.0000         1.0000      1016.6667      
+
+---- VAR disy  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .             1.0000         1.0000         EPS         
+In-Gall     .Zinder          .              .             1.0000         EPS         
+In-Gall     .Agadez          .             1.0000         1.0000         EPS         
+In-Gall     .Maradi          .             1.0000         1.0000         EPS         
+Aderbissinat.Tanaut          .              .             1.0000         EPS         
+Aderbissinat.Zinder          .              .             1.0000         EPS         
+Aderbissinat.Agadez          .             1.0000         1.0000         EPS         
+Aderbissinat.Maradi          .             1.0000         1.0000         EPS         
+Tessaoua    .Tanaut          .              .             1.0000         EPS         
+Tessaoua    .Zinder          .             1.0000         1.0000         EPS         
+Tessaoua    .Agadez          .              .             1.0000         EPS         
+Tessaoua    .Maradi          .              .             1.0000         EPS         
+Dakoro      .Tanaut          .             1.0000         1.0000         EPS         
+Dakoro      .Zinder          .             1.0000         1.0000         EPS         
+Dakoro      .Agadez          .             1.0000         1.0000         EPS         
+Dakoro      .Maradi          .              .             1.0000         EPS         
+Tatokou     .Tanaut          .              .             1.0000         EPS         
+Tatokou     .Zinder          .             1.0000         1.0000         EPS         
+Tatokou     .Agadez          .              .             1.0000         EPS         
+Tatokou     .Maradi          .             1.0000         1.0000         EPS         
+Bakatchiraba.Tanaut          .              .             1.0000         EPS         
+Bakatchiraba.Zinder          .             1.0000         1.0000         EPS         
+Bakatchiraba.Agadez          .              .             1.0000         EPS         
+Bakatchiraba.Maradi          .             1.0000         1.0000         EPS         
+Mayahi      .Tanaut          .             1.0000         1.0000         EPS         
+Mayahi      .Zinder          .             1.0000         1.0000         EPS         
+Mayahi      .Agadez          .              .             1.0000         EPS         
+Mayahi      .Maradi          .              .             1.0000         EPS         
+Koundoumaoua.Tanaut          .              .             1.0000         EPS         
+Koundoumaoua.Zinder          .             1.0000         1.0000         EPS         
+Koundoumaoua.Agadez          .              .             1.0000         EPS         
+Koundoumaoua.Maradi          .              .             1.0000         EPS         
+Sabon-Kafi  .Tanaut          .              .             1.0000         EPS         
+Sabon-Kafi  .Zinder          .             1.0000         1.0000         EPS         
+Sabon-Kafi  .Agadez          .              .             1.0000         EPS         
+Sabon-Kafi  .Maradi          .             1.0000         1.0000         EPS         
+
+---- VAR beta  vale 1 si se manda de ce a obj y 0 en caso contrario
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .              .             1.0000         EPS         
+In-Gall     .Zinder          .             1.0000         1.0000         EPS         
+In-Gall     .Agadez          .              .             1.0000         EPS         
+In-Gall     .Maradi          .              .             1.0000         EPS         
+Aderbissinat.Tanaut          .             1.0000         1.0000         EPS         
+Aderbissinat.Zinder          .             1.0000         1.0000         EPS         
+Aderbissinat.Agadez          .              .             1.0000         EPS         
+Aderbissinat.Maradi          .              .             1.0000         EPS         
+Tessaoua    .Tanaut          .             1.0000         1.0000         EPS         
+Tessaoua    .Zinder          .              .             1.0000         EPS         
+Tessaoua    .Agadez          .             1.0000         1.0000         EPS         
+Tessaoua    .Maradi          .             1.0000         1.0000         EPS         
+Dakoro      .Tanaut          .              .             1.0000         EPS         
+Dakoro      .Zinder          .              .             1.0000         EPS         
+Dakoro      .Agadez          .              .             1.0000         EPS         
+Dakoro      .Maradi          .             1.0000         1.0000         EPS         
+Tatokou     .Tanaut          .             1.0000         1.0000         EPS         
+Tatokou     .Zinder          .              .             1.0000         EPS         
+Tatokou     .Agadez          .             1.0000         1.0000         EPS         
+Tatokou     .Maradi          .              .             1.0000         EPS         
+Bakatchiraba.Tanaut          .             1.0000         1.0000         EPS         
+Bakatchiraba.Zinder          .              .             1.0000         EPS         
+Bakatchiraba.Agadez          .             1.0000         1.0000         EPS         
+Bakatchiraba.Maradi          .              .             1.0000         EPS         
+Mayahi      .Tanaut          .              .             1.0000         EPS         
+Mayahi      .Zinder          .              .             1.0000         EPS         
+Mayahi      .Agadez          .             1.0000         1.0000         EPS         
+Mayahi      .Maradi          .             1.0000         1.0000         EPS         
+Koundoumaoua.Tanaut          .             1.0000         1.0000         EPS         
+Koundoumaoua.Zinder          .              .             1.0000         EPS         
+Koundoumaoua.Agadez          .             1.0000         1.0000         EPS         
+Koundoumaoua.Maradi          .             1.0000         1.0000         EPS         
+Sabon-Kafi  .Tanaut          .             1.0000         1.0000         EPS         
+Sabon-Kafi  .Zinder          .              .             1.0000         EPS         
+Sabon-Kafi  .Agadez          .             1.0000         1.0000         EPS         
+Sabon-Kafi  .Maradi          .              .             1.0000         EPS         
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 16
+Practica 1: Emergencia en Niger.
+E x e c u t i o n
+
+
+----    105 VARIABLE zg.L                  =    54411.433  valor objetivo del apartado g
+
+----    105 VARIABLE x.L  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+                  Tanaut      Agadez      Maradi
+
+Tessaoua                     129.000
+Tatokou           39.000
+Bakatchiraba      30.000      30.000
+Mayahi                        19.433     267.967
+Koundoumaoua                  30.000
+Sabon-Kafi        18.000      18.000
+
+
+----    105 VARIABLE beta.L  vale 1 si se manda de ce a obj y 0 en caso contrario
+
+                  Tanaut      Zinder      Agadez      Maradi
+
+In-Gall                        1.000
+Aderbissinat       1.000       1.000
+Tessaoua           1.000                   1.000       1.000
+Dakoro                                                 1.000
+Tatokou            1.000                   1.000
+Bakatchiraba       1.000                   1.000
+Mayahi                                     1.000       1.000
+Koundoumaoua       1.000                   1.000       1.000
+Sabon-Kafi         1.000                   1.000
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 17
+Practica 1: Emergencia en Niger.
+Equation Listing    SOLVE apartadoh Using MIP From line 108
+
+
+---- a  =L=  limite de presupuesto
+
+a..  70*x(In-Gall,Tanaut) + 50*x(In-Gall,Zinder) + 30*x(In-Gall,Agadez) + 90*x(In-Gall,Maradi) + 70*x(Aderbissinat,Tanaut) + 50*x(Aderbissinat,Zinder) + 30*x(Aderbissinat,Agadez) + 90*x(Aderbissinat,Maradi) + 70*x(Tessaoua,Tanaut) + 50*x(Tessaoua,Zinder) + 30*x(Tessaoua,Agadez) + 90*x(Tessaoua,Maradi) + 70*x(Dakoro,Tanaut) + 50*x(Dakoro,Zinder) + 30*x(Dakoro,Agadez) + 90*x(Dakoro,Maradi) + 70*x(Tatokou,Tanaut) + 50*x(Tatokou,Zinder) + 30*x(Tatokou,Agadez) + 90*x(Tatokou,Maradi) + 70*x(Bakatchiraba,Tanaut) + 50*x(Bakatchiraba,Zinder) + 30*x(Bakatchiraba,Agadez) + 90*x(Bakatchiraba,Maradi) + 70*x(Mayahi,Tanaut) + 50*x(Mayahi,Zinder) + 30*x(Mayahi,Agadez) + 90*x(Mayahi,Maradi) + 70*x(Koundoumaoua,Tanaut) + 50*x(Koundoumaoua,Zinder) + 30*x(Koundoumaoua,Agadez) + 90*x(Koundoumaoua,Maradi) + 70*x(Sabon-Kafi,Tanaut) + 50*x(Sabon-Kafi,Zinder) + 30*x(Sabon-Kafi,Agadez) + 90*x(Sabon-Kafi,Maradi) + 1000*construir(Tanaut) + 1000*construir(Zinder) + 1000*construir(Agadez) + 1000*construir(Maradi) =L= 40000 ; (LHS = 40000)
+     
+
+---- disp  =L=  disponibilidad de ayuda
+
+disp..  x(In-Gall,Tanaut) + x(In-Gall,Zinder) + x(In-Gall,Agadez) + x(In-Gall,Maradi) + x(Aderbissinat,Tanaut) + x(Aderbissinat,Zinder) + x(Aderbissinat,Agadez) + x(Aderbissinat,Maradi) + x(Tessaoua,Tanaut) + x(Tessaoua,Zinder) + x(Tessaoua,Agadez) + x(Tessaoua,Maradi) + x(Dakoro,Tanaut) + x(Dakoro,Zinder) + x(Dakoro,Agadez) + x(Dakoro,Maradi) + x(Tatokou,Tanaut) + x(Tatokou,Zinder) + x(Tatokou,Agadez) + x(Tatokou,Maradi) + x(Bakatchiraba,Tanaut) + x(Bakatchiraba,Zinder) + x(Bakatchiraba,Agadez) + x(Bakatchiraba,Maradi) + x(Mayahi,Tanaut) + x(Mayahi,Zinder) + x(Mayahi,Agadez) + x(Mayahi,Maradi) + x(Koundoumaoua,Tanaut) + x(Koundoumaoua,Zinder) + x(Koundoumaoua,Agadez) + x(Koundoumaoua,Maradi) + x(Sabon-Kafi,Tanaut) + x(Sabon-Kafi,Zinder) + x(Sabon-Kafi,Agadez) + x(Sabon-Kafi,Maradi) =L= 850 ; (LHS = 581.4)
+     
+
+---- b1  =L=  maximo de  centros establecidos
+
+b1..  construir(Tanaut) + construir(Zinder) + construir(Agadez) + construir(Maradi) =L= 3 ; (LHS = 3)
+     
+
+---- b2  =G=  solo enviaremos ayuda desde centros establecidos
+
+b2(In-Gall,Tanaut)..  - x(In-Gall,Tanaut) + 156*construir(Tanaut) =G= 0 ; (LHS = 156)
+     
+b2(In-Gall,Zinder)..  - x(In-Gall,Zinder) + 156*construir(Zinder) =G= 0 ; (LHS = 0)
+     
+b2(In-Gall,Agadez)..  - x(In-Gall,Agadez) + 156*construir(Agadez) =G= 0 ; (LHS = 156)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- c1  =L=  no se puede acudir a poblaciones demasiado lejanas
+
+c1(In-Gall,Tanaut)..  - 396*disy(In-Gall,Tanaut) =L= -196 ; (LHS = -396)
+     
+c1(In-Gall,Zinder)..  - 119*disy(In-Gall,Zinder) =L= 81 ; (LHS = 0)
+     
+c1(In-Gall,Agadez)..  - 541*disy(In-Gall,Agadez) =L= -341 ; (LHS = -541)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- c2  =L=  
+
+c2(In-Gall,Tanaut)..  x(In-Gall,Tanaut) + 156*disy(In-Gall,Tanaut) =L= 156 ; (LHS = 156)
+     
+c2(In-Gall,Zinder)..  x(In-Gall,Zinder) + 156*disy(In-Gall,Zinder) =L= 156 ; (LHS = 0)
+     
+c2(In-Gall,Agadez)..  x(In-Gall,Agadez) + 156*disy(In-Gall,Agadez) =L= 156 ; (LHS = 156)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- d  =G=  hay que suplir un minimo de la demanda global
+
+d..  x(In-Gall,Tanaut) + x(In-Gall,Zinder) + x(In-Gall,Agadez) + x(In-Gall,Maradi) + x(Aderbissinat,Tanaut) + x(Aderbissinat,Zinder) + x(Aderbissinat,Agadez) + x(Aderbissinat,Maradi) + x(Tessaoua,Tanaut) + x(Tessaoua,Zinder) + x(Tessaoua,Agadez) + x(Tessaoua,Maradi) + x(Dakoro,Tanaut) + x(Dakoro,Zinder) + x(Dakoro,Agadez) + x(Dakoro,Maradi) + x(Tatokou,Tanaut) + x(Tatokou,Zinder) + x(Tatokou,Agadez) + x(Tatokou,Maradi) + x(Bakatchiraba,Tanaut) + x(Bakatchiraba,Zinder) + x(Bakatchiraba,Agadez) + x(Bakatchiraba,Maradi) + x(Mayahi,Tanaut) + x(Mayahi,Zinder) + x(Mayahi,Agadez) + x(Mayahi,Maradi) + x(Koundoumaoua,Tanaut) + x(Koundoumaoua,Zinder) + x(Koundoumaoua,Agadez) + x(Koundoumaoua,Maradi) + x(Sabon-Kafi,Tanaut) + x(Sabon-Kafi,Zinder) + x(Sabon-Kafi,Agadez) + x(Sabon-Kafi,Maradi) =G= 581.4 ; (LHS = 581.4)
+     
+
+---- h  =E=  fobj para realizar un reparto equitativo entre poblaciones objetivo
+
+h(In-Gall,In-Gall)..  - t(In-Gall,In-Gall) + zh =E= 0 ; (LHS = 0)
+     
+h(In-Gall,Aderbissinat)..  - t(In-Gall,Aderbissinat) + zh =E= 0 ; (LHS = 0)
+     
+h(In-Gall,Tessaoua)..  - t(In-Gall,Tessaoua) + zh =E= 0 ; (LHS = 0)
+     
+REMAINING 78 ENTRIES SKIPPED
+
+
+---- h1  =G=  
+
+h1(In-Gall,Aderbissinat)..  t(In-Gall,Aderbissinat) + 0.00641025641025641*x(In-Gall,Tanaut) + 0.00641025641025641*x(In-Gall,Zinder) + 0.00641025641025641*x(In-Gall,Agadez) + 0.00641025641025641*x(In-Gall,Maradi) - 0.0123456790123457*x(Aderbissinat,Tanaut) - 0.0123456790123457*x(Aderbissinat,Zinder) - 0.0123456790123457*x(Aderbissinat,Agadez) - 0.0123456790123457*x(Aderbissinat,Maradi) =G= 0 ; (LHS = 0)
+     
+h1(In-Gall,Tessaoua)..  t(In-Gall,Tessaoua) + 0.00641025641025641*x(In-Gall,Tanaut) + 0.00641025641025641*x(In-Gall,Zinder) + 0.00641025641025641*x(In-Gall,Agadez) + 0.00641025641025641*x(In-Gall,Maradi) - 0.00775193798449612*x(Tessaoua,Tanaut) - 0.00775193798449612*x(Tessaoua,Zinder) - 0.00775193798449612*x(Tessaoua,Agadez) - 0.00775193798449612*x(Tessaoua,Maradi) =G= 0 ; (LHS = -1, INFES = 1 ****)
+     
+h1(In-Gall,Dakoro)..  t(In-Gall,Dakoro) + 0.00641025641025641*x(In-Gall,Tanaut) + 0.00641025641025641*x(In-Gall,Zinder) + 0.00641025641025641*x(In-Gall,Agadez) + 0.00641025641025641*x(In-Gall,Maradi) - 0.00469483568075117*x(Dakoro,Tanaut) - 0.00469483568075117*x(Dakoro,Zinder) - 0.00469483568075117*x(Dakoro,Agadez) - 0.00469483568075117*x(Dakoro,Maradi) =G= 0 ; (LHS = 0)
+     
+REMAINING 69 ENTRIES SKIPPED
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 18
+Practica 1: Emergencia en Niger.
+Column Listing      SOLVE apartadoh Using MIP From line 108
+
+
+---- t  
+
+t(In-Gall,In-Gall)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -1       h(In-Gall,In-Gall)
+
+t(In-Gall,Aderbissinat)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -1       h(In-Gall,Aderbissinat)
+        1       h1(In-Gall,Aderbissinat)
+
+t(In-Gall,Tessaoua)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+       -1       h(In-Gall,Tessaoua)
+        1       h1(In-Gall,Tessaoua)
+
+REMAINING 78 ENTRIES SKIPPED
+
+---- zh  valor objetivo del apartado h
+
+zh
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       h(In-Gall,In-Gall)
+        1       h(In-Gall,Aderbissinat)
+        1       h(In-Gall,Tessaoua)
+        1       h(In-Gall,Dakoro)
+        1       h(In-Gall,Tatokou)
+        1       h(In-Gall,Bakatchiraba)
+        1       h(In-Gall,Mayahi)
+        1       h(In-Gall,Koundoumaoua)
+        1       h(In-Gall,Sabon-Kafi)
+        1       h(Aderbissinat,In-Gall)
+        1       h(Aderbissinat,Aderbissinat)
+        1       h(Aderbissinat,Tessaoua)
+        1       h(Aderbissinat,Dakoro)
+        1       h(Aderbissinat,Tatokou)
+        1       h(Aderbissinat,Bakatchiraba)
+        1       h(Aderbissinat,Mayahi)
+        1       h(Aderbissinat,Koundoumaoua)
+        1       h(Aderbissinat,Sabon-Kafi)
+        1       h(Tessaoua,In-Gall)
+        1       h(Tessaoua,Aderbissinat)
+        1       h(Tessaoua,Tessaoua)
+        1       h(Tessaoua,Dakoro)
+        1       h(Tessaoua,Tatokou)
+        1       h(Tessaoua,Bakatchiraba)
+        1       h(Tessaoua,Mayahi)
+        1       h(Tessaoua,Koundoumaoua)
+        1       h(Tessaoua,Sabon-Kafi)
+        1       h(Dakoro,In-Gall)
+        1       h(Dakoro,Aderbissinat)
+        1       h(Dakoro,Tessaoua)
+        1       h(Dakoro,Dakoro)
+        1       h(Dakoro,Tatokou)
+        1       h(Dakoro,Bakatchiraba)
+        1       h(Dakoro,Mayahi)
+        1       h(Dakoro,Koundoumaoua)
+        1       h(Dakoro,Sabon-Kafi)
+        1       h(Tatokou,In-Gall)
+        1       h(Tatokou,Aderbissinat)
+        1       h(Tatokou,Tessaoua)
+        1       h(Tatokou,Dakoro)
+        1       h(Tatokou,Tatokou)
+        1       h(Tatokou,Bakatchiraba)
+        1       h(Tatokou,Mayahi)
+        1       h(Tatokou,Koundoumaoua)
+        1       h(Tatokou,Sabon-Kafi)
+        1       h(Bakatchiraba,In-Gall)
+        1       h(Bakatchiraba,Aderbissinat)
+        1       h(Bakatchiraba,Tessaoua)
+        1       h(Bakatchiraba,Dakoro)
+        1       h(Bakatchiraba,Tatokou)
+        1       h(Bakatchiraba,Bakatchiraba)
+        1       h(Bakatchiraba,Mayahi)
+        1       h(Bakatchiraba,Koundoumaoua)
+        1       h(Bakatchiraba,Sabon-Kafi)
+        1       h(Mayahi,In-Gall)
+        1       h(Mayahi,Aderbissinat)
+        1       h(Mayahi,Tessaoua)
+        1       h(Mayahi,Dakoro)
+        1       h(Mayahi,Tatokou)
+        1       h(Mayahi,Bakatchiraba)
+        1       h(Mayahi,Mayahi)
+        1       h(Mayahi,Koundoumaoua)
+        1       h(Mayahi,Sabon-Kafi)
+        1       h(Koundoumaoua,In-Gall)
+        1       h(Koundoumaoua,Aderbissinat)
+        1       h(Koundoumaoua,Tessaoua)
+        1       h(Koundoumaoua,Dakoro)
+        1       h(Koundoumaoua,Tatokou)
+        1       h(Koundoumaoua,Bakatchiraba)
+        1       h(Koundoumaoua,Mayahi)
+        1       h(Koundoumaoua,Koundoumaoua)
+        1       h(Koundoumaoua,Sabon-Kafi)
+        1       h(Sabon-Kafi,In-Gall)
+        1       h(Sabon-Kafi,Aderbissinat)
+        1       h(Sabon-Kafi,Tessaoua)
+        1       h(Sabon-Kafi,Dakoro)
+        1       h(Sabon-Kafi,Tatokou)
+        1       h(Sabon-Kafi,Bakatchiraba)
+        1       h(Sabon-Kafi,Mayahi)
+        1       h(Sabon-Kafi,Koundoumaoua)
+        1       h(Sabon-Kafi,Sabon-Kafi)
+
+
+---- x  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+x(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 280.666666666667)
+       70       a
+        1       disp
+       -1       b2(In-Gall,Tanaut)
+        1       c2(In-Gall,Tanaut)
+        1       d
+        0.0064  h1(In-Gall,Aderbissinat)
+        0.0064  h1(In-Gall,Tessaoua)
+        0.0064  h1(In-Gall,Dakoro)
+        0.0064  h1(In-Gall,Tatokou)
+        0.0064  h1(In-Gall,Bakatchiraba)
+        0.0064  h1(In-Gall,Mayahi)
+        0.0064  h1(In-Gall,Koundoumaoua)
+        0.0064  h1(In-Gall,Sabon-Kafi)
+       -0.0064  h1(Aderbissinat,In-Gall)
+       -0.0064  h1(Tessaoua,In-Gall)
+       -0.0064  h1(Dakoro,In-Gall)
+       -0.0064  h1(Tatokou,In-Gall)
+       -0.0064  h1(Bakatchiraba,In-Gall)
+       -0.0064  h1(Mayahi,In-Gall)
+       -0.0064  h1(Koundoumaoua,In-Gall)
+       -0.0064  h1(Sabon-Kafi,In-Gall)
+
+x(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       50       a
+        1       disp
+       -1       b2(In-Gall,Zinder)
+        1       c2(In-Gall,Zinder)
+        1       d
+        0.0064  h1(In-Gall,Aderbissinat)
+        0.0064  h1(In-Gall,Tessaoua)
+        0.0064  h1(In-Gall,Dakoro)
+        0.0064  h1(In-Gall,Tatokou)
+        0.0064  h1(In-Gall,Bakatchiraba)
+        0.0064  h1(In-Gall,Mayahi)
+        0.0064  h1(In-Gall,Koundoumaoua)
+        0.0064  h1(In-Gall,Sabon-Kafi)
+       -0.0064  h1(Aderbissinat,In-Gall)
+       -0.0064  h1(Tessaoua,In-Gall)
+       -0.0064  h1(Dakoro,In-Gall)
+       -0.0064  h1(Tatokou,In-Gall)
+       -0.0064  h1(Bakatchiraba,In-Gall)
+       -0.0064  h1(Mayahi,In-Gall)
+       -0.0064  h1(Koundoumaoua,In-Gall)
+       -0.0064  h1(Sabon-Kafi,In-Gall)
+
+x(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 385)
+       30       a
+        1       disp
+       -1       b2(In-Gall,Agadez)
+        1       c2(In-Gall,Agadez)
+        1       d
+        0.0064  h1(In-Gall,Aderbissinat)
+        0.0064  h1(In-Gall,Tessaoua)
+        0.0064  h1(In-Gall,Dakoro)
+        0.0064  h1(In-Gall,Tatokou)
+        0.0064  h1(In-Gall,Bakatchiraba)
+        0.0064  h1(In-Gall,Mayahi)
+        0.0064  h1(In-Gall,Koundoumaoua)
+        0.0064  h1(In-Gall,Sabon-Kafi)
+       -0.0064  h1(Aderbissinat,In-Gall)
+       -0.0064  h1(Tessaoua,In-Gall)
+       -0.0064  h1(Dakoro,In-Gall)
+       -0.0064  h1(Tatokou,In-Gall)
+       -0.0064  h1(Bakatchiraba,In-Gall)
+       -0.0064  h1(Mayahi,In-Gall)
+       -0.0064  h1(Koundoumaoua,In-Gall)
+       -0.0064  h1(Sabon-Kafi,In-Gall)
+
+REMAINING 33 ENTRIES SKIPPED
+
+---- construir  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+construir(Tanaut)
+                (.LO, .L, .UP, .M = 0, 1, 1, -6326.33333333333)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Tanaut)
+       81       b2(Aderbissinat,Tanaut)
+      129       b2(Tessaoua,Tanaut)
+      213       b2(Dakoro,Tanaut)
+       39       b2(Tatokou,Tanaut)
+       30       b2(Bakatchiraba,Tanaut)
+      273       b2(Mayahi,Tanaut)
+       30       b2(Koundoumaoua,Tanaut)
+       18       b2(Sabon-Kafi,Tanaut)
+
+construir(Zinder)
+                (.LO, .L, .UP, .M = 0, 0, 1, -1583.33333333334)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Zinder)
+       81       b2(Aderbissinat,Zinder)
+      129       b2(Tessaoua,Zinder)
+      213       b2(Dakoro,Zinder)
+       39       b2(Tatokou,Zinder)
+       30       b2(Bakatchiraba,Zinder)
+      273       b2(Mayahi,Zinder)
+       30       b2(Koundoumaoua,Zinder)
+       18       b2(Sabon-Kafi,Zinder)
+
+construir(Agadez)
+                (.LO, .L, .UP, .M = 0, 1, 1, -8043.33333333333)
+     1000       a
+        1       b1
+      156       b2(In-Gall,Agadez)
+       81       b2(Aderbissinat,Agadez)
+      129       b2(Tessaoua,Agadez)
+      213       b2(Dakoro,Agadez)
+       39       b2(Tatokou,Agadez)
+       30       b2(Bakatchiraba,Agadez)
+      273       b2(Mayahi,Agadez)
+       30       b2(Koundoumaoua,Agadez)
+       18       b2(Sabon-Kafi,Agadez)
+
+REMAINING ENTRY SKIPPED
+
+---- disy  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+
+disy(In-Gall,Tanaut)
+                (.LO, .L, .UP, .M = 0, 1, 1, EPS)
+     -396       c1(In-Gall,Tanaut)
+      156       c2(In-Gall,Tanaut)
+
+disy(In-Gall,Zinder)
+                (.LO, .L, .UP, .M = 0, 0, 1, EPS)
+     -119       c1(In-Gall,Zinder)
+      156       c2(In-Gall,Zinder)
+
+disy(In-Gall,Agadez)
+                (.LO, .L, .UP, .M = 0, 1, 1, EPS)
+     -541       c1(In-Gall,Agadez)
+      156       c2(In-Gall,Agadez)
+
+REMAINING 33 ENTRIES SKIPPED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 19
+Practica 1: Emergencia en Niger.
+Model Statistics    SOLVE apartadoh Using MIP From line 108
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS          265
+BLOCKS OF VARIABLES           5     SINGLE VARIABLES          158
+NON ZERO ELEMENTS         1,106     DISCRETE VARIABLES         40
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 20
+Practica 1: Emergencia en Niger.
+Solution Report     SOLVE apartadoh Using MIP From line 108
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   apartadoh           OBJECTIVE  zh
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  108
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.0000
+
+ RESOURCE USAGE, LIMIT          0.016 10000000000.000
+ ITERATION COUNT, LIMIT        48    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- Space for names approximately 0.01 Mb
+--- Use option 'names no' to turn use of names off
+--- GMO memory 0.55 Mb (peak 0.55 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.01 Mb (peak 0.04 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.02sec (det. 1.99 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.48 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.000000    (48 iterations, 0 nodes)
+Final Solve:             0.000000    (23 iterations)
+
+Best possible:           0.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU a                 -INF        40000.0000     40000.0000         EPS         
+---- EQU disp              -INF          638.7493       850.0000          .          
+---- EQU b1                -INF            3.0000         3.0000          .          
+
+  a  limite de presupuesto
+  disp  disponibilidad de ayuda
+  b1  maximo de  centros establecidos
+
+---- EQU b2  solo enviaremos ayuda desde centros establecidos
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .              .            +INF             .          
+In-Gall     .Zinder          .            53.1673        +INF             .          
+In-Gall     .Agadez          .           156.0000        +INF             .          
+In-Gall     .Maradi          .           156.0000        +INF             .          
+Aderbissinat.Tanaut          .              .            +INF             .          
+Aderbissinat.Zinder          .            27.6061        +INF             .          
+Aderbissinat.Agadez          .            81.0000        +INF             .          
+Aderbissinat.Maradi          .            81.0000        +INF             .          
+Tessaoua    .Tanaut          .              .            +INF             .          
+Tessaoua    .Zinder          .           129.0000        +INF             .          
+Tessaoua    .Agadez          .           129.0000        +INF             .          
+Tessaoua    .Maradi          .            43.9653        +INF             .          
+Dakoro      .Tanaut          .              .            +INF             .          
+Dakoro      .Zinder          .           213.0000        +INF             .          
+Dakoro      .Agadez          .           213.0000        +INF             .          
+Dakoro      .Maradi          .            72.5938        +INF             .          
+Tatokou     .Tanaut          .              .            +INF             .          
+Tatokou     .Zinder          .            39.0000        +INF             .          
+Tatokou     .Agadez          .            13.2918        +INF             .          
+Tatokou     .Maradi          .            39.0000        +INF             .          
+Bakatchiraba.Tanaut          .              .            +INF             .          
+Bakatchiraba.Zinder          .            30.0000        +INF             .          
+Bakatchiraba.Agadez          .            10.2245        +INF             .          
+Bakatchiraba.Maradi          .            30.0000        +INF             .          
+Mayahi      .Tanaut          .              .            +INF             .          
+Mayahi      .Zinder          .           273.0000        +INF             .          
+Mayahi      .Agadez          .            93.0428        +INF             .          
+Mayahi      .Maradi          .           273.0000        +INF             .          
+Koundoumaoua.Tanaut          .              .            +INF             .          
+Koundoumaoua.Zinder          .            30.0000        +INF             .          
+Koundoumaoua.Agadez          .            30.0000        +INF             .          
+Koundoumaoua.Maradi          .            10.2245        +INF             .          
+Sabon-Kafi  .Tanaut          .              .            +INF             .          
+Sabon-Kafi  .Zinder          .            18.0000        +INF             .          
+Sabon-Kafi  .Agadez          .             6.1347        +INF             .          
+Sabon-Kafi  .Maradi          .            18.0000        +INF             .          
+
+---- EQU c1  no se puede acudir a poblaciones demasiado lejanas
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF         -396.0000      -196.0000          .          
+In-Gall     .Zinder        -INF             .            81.0000          .          
+In-Gall     .Agadez        -INF         -541.0000      -341.0000          .          
+In-Gall     .Maradi        -INF         -625.0000      -425.0000          .          
+Aderbissinat.Tanaut        -INF             .            53.0000          .          
+Aderbissinat.Zinder        -INF             .            39.0000          .          
+Aderbissinat.Agadez        -INF         -286.0000       -86.0000          .          
+Aderbissinat.Maradi        -INF         -454.0000      -254.0000          .          
+Tessaoua    .Tanaut        -INF             .             9.0000          .          
+Tessaoua    .Zinder        -INF         -492.0000      -292.0000          .          
+Tessaoua    .Agadez        -INF             .            86.0000          .          
+Tessaoua    .Maradi        -INF             .            78.0000          .          
+Dakoro      .Tanaut        -INF         -244.0000       -44.0000          .          
+Dakoro      .Zinder        -INF         -562.0000      -362.0000          .          
+Dakoro      .Agadez        -INF         -300.0000      -100.0000          .          
+Dakoro      .Maradi        -INF             .            76.0000          .          
+Tatokou     .Tanaut        -INF             .           157.0000          .          
+Tatokou     .Zinder        -INF         -258.0000       -58.0000          .          
+Tatokou     .Agadez        -INF             .            12.0000          .          
+Tatokou     .Maradi        -INF         -355.0000      -155.0000          .          
+Bakatchiraba.Tanaut        -INF             .           192.0000          .          
+Bakatchiraba.Zinder        -INF         -306.0000      -106.0000          .          
+Bakatchiraba.Agadez        -INF             .            48.0000          .          
+Bakatchiraba.Maradi        -INF         -320.0000      -120.0000          .          
+Mayahi      .Tanaut        -INF         -252.0000       -52.0000          .          
+Mayahi      .Zinder        -INF         -553.0000      -353.0000          .          
+Mayahi      .Agadez        -INF             .            44.0000          .          
+Mayahi      .Maradi        -INF             .           105.0000          .          
+Koundoumaoua.Tanaut        -INF             .             3.0000          .          
+Koundoumaoua.Zinder        -INF         -490.0000      -290.0000          .          
+Koundoumaoua.Agadez        -INF             .           129.0000          .          
+Koundoumaoua.Maradi        -INF             .            17.0000          .          
+Sabon-Kafi  .Tanaut        -INF             .           157.0000          .          
+Sabon-Kafi  .Zinder        -INF         -336.0000      -136.0000          .          
+Sabon-Kafi  .Agadez        -INF             .            98.0000          .          
+Sabon-Kafi  .Maradi        -INF         -269.0000       -69.0000          .          
+
+---- EQU c2  
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut        -INF          156.0000       156.0000          .          
+In-Gall     .Zinder        -INF          102.8327       156.0000          .          
+In-Gall     .Agadez        -INF          156.0000       156.0000          .          
+In-Gall     .Maradi        -INF          156.0000       156.0000          .          
+Aderbissinat.Tanaut        -INF             .            81.0000          .          
+Aderbissinat.Zinder        -INF           53.3939        81.0000          .          
+Aderbissinat.Agadez        -INF           81.0000        81.0000          .          
+Aderbissinat.Maradi        -INF           81.0000        81.0000          .          
+Tessaoua    .Tanaut        -INF             .           129.0000          .          
+Tessaoua    .Zinder        -INF          129.0000       129.0000          .          
+Tessaoua    .Agadez        -INF             .           129.0000          .          
+Tessaoua    .Maradi        -INF           85.0347       129.0000          .          
+Dakoro      .Tanaut        -INF          213.0000       213.0000          .          
+Dakoro      .Zinder        -INF          213.0000       213.0000          .          
+Dakoro      .Agadez        -INF          213.0000       213.0000          .          
+Dakoro      .Maradi        -INF          140.4062       213.0000          .          
+Tatokou     .Tanaut        -INF             .            39.0000          .          
+Tatokou     .Zinder        -INF           39.0000        39.0000          .          
+Tatokou     .Agadez        -INF           25.7082        39.0000          .          
+Tatokou     .Maradi        -INF           39.0000        39.0000          .          
+Bakatchiraba.Tanaut        -INF             .            30.0000          .          
+Bakatchiraba.Zinder        -INF           30.0000        30.0000          .          
+Bakatchiraba.Agadez        -INF           19.7755        30.0000          .          
+Bakatchiraba.Maradi        -INF           30.0000        30.0000          .          
+Mayahi      .Tanaut        -INF          273.0000       273.0000          .          
+Mayahi      .Zinder        -INF          273.0000       273.0000          .          
+Mayahi      .Agadez        -INF          179.9572       273.0000          .          
+Mayahi      .Maradi        -INF             .           273.0000          .          
+Koundoumaoua.Tanaut        -INF             .            30.0000          .          
+Koundoumaoua.Zinder        -INF           30.0000        30.0000          .          
+Koundoumaoua.Agadez        -INF             .            30.0000          .          
+Koundoumaoua.Maradi        -INF           19.7755        30.0000          .          
+Sabon-Kafi  .Tanaut        -INF             .            18.0000          .          
+Sabon-Kafi  .Zinder        -INF           18.0000        18.0000          .          
+Sabon-Kafi  .Agadez        -INF           11.8653        18.0000          .          
+Sabon-Kafi  .Maradi        -INF           18.0000        18.0000          .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU d                581.4000       638.7493        +INF             .          
+
+  d  hay que suplir un minimo de la demanda global
+
+---- EQU h  fobj para realizar un reparto equitativo entre poblaciones objetivo
+
+                                 LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .In-Gall               .              .              .             EPS         
+In-Gall     .Aderbissinat          .              .              .             0.3333      
+In-Gall     .Tessaoua              .              .              .             EPS         
+In-Gall     .Dakoro                .              .              .             EPS         
+In-Gall     .Tatokou               .              .              .             EPS         
+In-Gall     .Bakatchiraba          .              .              .             EPS         
+In-Gall     .Mayahi                .              .              .             EPS         
+In-Gall     .Koundoumaoua          .              .              .             EPS         
+In-Gall     .Sabon-Kafi            .              .              .             EPS         
+Aderbissinat.In-Gall               .              .              .             EPS         
+Aderbissinat.Aderbissinat          .              .              .             EPS         
+Aderbissinat.Tessaoua              .              .              .             0.3333      
+Aderbissinat.Dakoro                .              .              .             EPS         
+Aderbissinat.Tatokou               .              .              .             EPS         
+Aderbissinat.Bakatchiraba          .              .              .             EPS         
+Aderbissinat.Mayahi                .              .              .             EPS         
+Aderbissinat.Koundoumaoua          .              .              .             EPS         
+Aderbissinat.Sabon-Kafi            .              .              .             EPS         
+Tessaoua    .In-Gall               .              .              .             0.3333      
+Tessaoua    .Aderbissinat          .              .              .             EPS         
+Tessaoua    .Tessaoua              .              .              .             EPS         
+Tessaoua    .Dakoro                .              .              .             EPS         
+Tessaoua    .Tatokou               .              .              .             EPS         
+Tessaoua    .Bakatchiraba          .              .              .             EPS         
+Tessaoua    .Mayahi                .              .              .             EPS         
+Tessaoua    .Koundoumaoua          .              .              .             EPS         
+Tessaoua    .Sabon-Kafi            .              .              .             EPS         
+Dakoro      .In-Gall               .              .              .             EPS         
+Dakoro      .Aderbissinat          .              .              .             EPS         
+Dakoro      .Tessaoua              .              .              .             EPS         
+Dakoro      .Dakoro                .              .              .             EPS         
+Dakoro      .Tatokou               .              .              .             EPS         
+Dakoro      .Bakatchiraba          .              .              .             EPS         
+Dakoro      .Mayahi                .              .              .             EPS         
+Dakoro      .Koundoumaoua          .              .              .             EPS         
+Dakoro      .Sabon-Kafi            .              .              .             EPS         
+Tatokou     .In-Gall               .              .              .             EPS         
+Tatokou     .Aderbissinat          .              .              .             EPS         
+Tatokou     .Tessaoua              .              .              .             EPS         
+Tatokou     .Dakoro                .              .              .             EPS         
+Tatokou     .Tatokou               .              .              .             EPS         
+Tatokou     .Bakatchiraba          .              .              .             EPS         
+Tatokou     .Mayahi                .              .              .             EPS         
+Tatokou     .Koundoumaoua          .              .              .             EPS         
+Tatokou     .Sabon-Kafi            .              .              .             EPS         
+Bakatchiraba.In-Gall               .              .              .             EPS         
+Bakatchiraba.Aderbissinat          .              .              .             EPS         
+Bakatchiraba.Tessaoua              .              .              .             EPS         
+Bakatchiraba.Dakoro                .              .              .             EPS         
+Bakatchiraba.Tatokou               .              .              .             EPS         
+Bakatchiraba.Bakatchiraba          .              .              .             EPS         
+Bakatchiraba.Mayahi                .              .              .             EPS         
+Bakatchiraba.Koundoumaoua          .              .              .             EPS         
+Bakatchiraba.Sabon-Kafi            .              .              .             EPS         
+Mayahi      .In-Gall               .              .              .             EPS         
+Mayahi      .Aderbissinat          .              .              .             EPS         
+Mayahi      .Tessaoua              .              .              .             EPS         
+Mayahi      .Dakoro                .              .              .             EPS         
+Mayahi      .Tatokou               .              .              .             EPS         
+Mayahi      .Bakatchiraba          .              .              .             EPS         
+Mayahi      .Mayahi                .              .              .             EPS         
+Mayahi      .Koundoumaoua          .              .              .             EPS         
+Mayahi      .Sabon-Kafi            .              .              .             EPS         
+Koundoumaoua.In-Gall               .              .              .             EPS         
+Koundoumaoua.Aderbissinat          .              .              .             EPS         
+Koundoumaoua.Tessaoua              .              .              .             EPS         
+Koundoumaoua.Dakoro                .              .              .             EPS         
+Koundoumaoua.Tatokou               .              .              .             EPS         
+Koundoumaoua.Bakatchiraba          .              .              .             EPS         
+Koundoumaoua.Mayahi                .              .              .             EPS         
+Koundoumaoua.Koundoumaoua          .              .              .             EPS         
+Koundoumaoua.Sabon-Kafi            .              .              .             EPS         
+Sabon-Kafi  .In-Gall               .              .              .             EPS         
+Sabon-Kafi  .Aderbissinat          .              .              .             EPS         
+Sabon-Kafi  .Tessaoua              .              .              .             EPS         
+Sabon-Kafi  .Dakoro                .              .              .             EPS         
+Sabon-Kafi  .Tatokou               .              .              .             EPS         
+Sabon-Kafi  .Bakatchiraba          .              .              .             EPS         
+Sabon-Kafi  .Mayahi                .              .              .             EPS         
+Sabon-Kafi  .Koundoumaoua          .              .              .             EPS         
+Sabon-Kafi  .Sabon-Kafi            .              .              .             EPS         
+
+---- EQU h1  
+
+                                 LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Aderbissinat          .              .            +INF            0.3333      
+In-Gall     .Tessaoua              .              .            +INF             .          
+In-Gall     .Dakoro                .              .            +INF             .          
+In-Gall     .Tatokou               .              .            +INF             .          
+In-Gall     .Bakatchiraba          .              .            +INF             .          
+In-Gall     .Mayahi                .              .            +INF             .          
+In-Gall     .Koundoumaoua          .              .            +INF             .          
+In-Gall     .Sabon-Kafi            .              .            +INF             .          
+Aderbissinat.In-Gall               .              .            +INF             .          
+Aderbissinat.Tessaoua              .              .            +INF            0.3333      
+Aderbissinat.Dakoro                .              .            +INF             .          
+Aderbissinat.Tatokou               .              .            +INF             .          
+Aderbissinat.Bakatchiraba          .              .            +INF             .          
+Aderbissinat.Mayahi                .              .            +INF             .          
+Aderbissinat.Koundoumaoua          .              .            +INF             .          
+Aderbissinat.Sabon-Kafi            .              .            +INF             .          
+Tessaoua    .In-Gall               .              .            +INF            0.3333      
+Tessaoua    .Aderbissinat          .              .            +INF             .          
+Tessaoua    .Dakoro                .              .            +INF            EPS         
+Tessaoua    .Tatokou               .              .            +INF             .          
+Tessaoua    .Bakatchiraba          .              .            +INF             .          
+Tessaoua    .Mayahi                .              .            +INF             .          
+Tessaoua    .Koundoumaoua          .              .            +INF             .          
+Tessaoua    .Sabon-Kafi            .              .            +INF             .          
+Dakoro      .In-Gall               .              .            +INF             .          
+Dakoro      .Aderbissinat          .              .            +INF             .          
+Dakoro      .Tessaoua              .              .            +INF             .          
+Dakoro      .Tatokou               .              .            +INF             .          
+Dakoro      .Bakatchiraba          .              .            +INF             .          
+Dakoro      .Mayahi                .              .            +INF             .          
+Dakoro      .Koundoumaoua          .              .            +INF             .          
+Dakoro      .Sabon-Kafi            .              .            +INF             .          
+Tatokou     .In-Gall               .              .            +INF            EPS         
+Tatokou     .Aderbissinat          .              .            +INF             .          
+Tatokou     .Tessaoua              .              .            +INF             .          
+Tatokou     .Dakoro                .              .            +INF             .          
+Tatokou     .Bakatchiraba          .              .            +INF             .          
+Tatokou     .Mayahi                .              .            +INF             .          
+Tatokou     .Koundoumaoua          .              .            +INF             .          
+Tatokou     .Sabon-Kafi            .              .            +INF             .          
+Bakatchiraba.In-Gall               .              .            +INF            EPS         
+Bakatchiraba.Aderbissinat          .              .            +INF             .          
+Bakatchiraba.Tessaoua              .              .            +INF             .          
+Bakatchiraba.Dakoro                .              .            +INF             .          
+Bakatchiraba.Tatokou               .              .            +INF             .          
+Bakatchiraba.Mayahi                .              .            +INF             .          
+Bakatchiraba.Koundoumaoua          .              .            +INF             .          
+Bakatchiraba.Sabon-Kafi            .              .            +INF             .          
+Mayahi      .In-Gall               .              .            +INF             .          
+Mayahi      .Aderbissinat          .              .            +INF             .          
+Mayahi      .Tessaoua              .              .            +INF             .          
+Mayahi      .Dakoro                .              .            +INF            EPS         
+Mayahi      .Tatokou               .              .            +INF             .          
+Mayahi      .Bakatchiraba          .              .            +INF             .          
+Mayahi      .Koundoumaoua          .              .            +INF             .          
+Mayahi      .Sabon-Kafi            .              .            +INF             .          
+Koundoumaoua.In-Gall               .              .            +INF             .          
+Koundoumaoua.Aderbissinat          .              .            +INF             .          
+Koundoumaoua.Tessaoua              .              .            +INF             .          
+Koundoumaoua.Dakoro                .              .            +INF            EPS         
+Koundoumaoua.Tatokou               .              .            +INF             .          
+Koundoumaoua.Bakatchiraba          .              .            +INF             .          
+Koundoumaoua.Mayahi                .              .            +INF             .          
+Koundoumaoua.Sabon-Kafi            .              .            +INF             .          
+Sabon-Kafi  .In-Gall               .              .            +INF            EPS         
+Sabon-Kafi  .Aderbissinat          .              .            +INF             .          
+Sabon-Kafi  .Tessaoua              .              .            +INF             .          
+Sabon-Kafi  .Dakoro                .              .            +INF             .          
+Sabon-Kafi  .Tatokou               .              .            +INF             .          
+Sabon-Kafi  .Bakatchiraba          .              .            +INF             .          
+Sabon-Kafi  .Mayahi                .              .            +INF             .          
+Sabon-Kafi  .Koundoumaoua          .              .            +INF             .          
+
+---- VAR t  
+
+                                 LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .In-Gall             -INF             .            +INF             .          
+In-Gall     .Aderbissinat        -INF             .            +INF             .          
+In-Gall     .Tessaoua            -INF             .            +INF             .          
+In-Gall     .Dakoro              -INF             .            +INF             .          
+In-Gall     .Tatokou             -INF             .            +INF             .          
+In-Gall     .Bakatchiraba        -INF             .            +INF             .          
+In-Gall     .Mayahi              -INF             .            +INF             .          
+In-Gall     .Koundoumaoua        -INF             .            +INF             .          
+In-Gall     .Sabon-Kafi          -INF             .            +INF             .          
+Aderbissinat.In-Gall             -INF             .            +INF             .          
+Aderbissinat.Aderbissinat        -INF             .            +INF             .          
+Aderbissinat.Tessaoua            -INF             .            +INF             .          
+Aderbissinat.Dakoro              -INF             .            +INF             .          
+Aderbissinat.Tatokou             -INF             .            +INF             .          
+Aderbissinat.Bakatchiraba        -INF             .            +INF             .          
+Aderbissinat.Mayahi              -INF             .            +INF             .          
+Aderbissinat.Koundoumaoua        -INF             .            +INF             .          
+Aderbissinat.Sabon-Kafi          -INF             .            +INF             .          
+Tessaoua    .In-Gall             -INF             .            +INF             .          
+Tessaoua    .Aderbissinat        -INF             .            +INF             .          
+Tessaoua    .Tessaoua            -INF             .            +INF             .          
+Tessaoua    .Dakoro              -INF             .            +INF             .          
+Tessaoua    .Tatokou             -INF             .            +INF             .          
+Tessaoua    .Bakatchiraba        -INF             .            +INF             .          
+Tessaoua    .Mayahi              -INF             .            +INF             .          
+Tessaoua    .Koundoumaoua        -INF             .            +INF             .          
+Tessaoua    .Sabon-Kafi          -INF             .            +INF             .          
+Dakoro      .In-Gall             -INF             .            +INF             .          
+Dakoro      .Aderbissinat        -INF             .            +INF             .          
+Dakoro      .Tessaoua            -INF             .            +INF             .          
+Dakoro      .Dakoro              -INF             .            +INF             .          
+Dakoro      .Tatokou             -INF             .            +INF             .          
+Dakoro      .Bakatchiraba        -INF             .            +INF             .          
+Dakoro      .Mayahi              -INF             .            +INF             .          
+Dakoro      .Koundoumaoua        -INF             .            +INF             .          
+Dakoro      .Sabon-Kafi          -INF             .            +INF             .          
+Tatokou     .In-Gall             -INF             .            +INF             .          
+Tatokou     .Aderbissinat        -INF             .            +INF             .          
+Tatokou     .Tessaoua            -INF             .            +INF             .          
+Tatokou     .Dakoro              -INF             .            +INF             .          
+Tatokou     .Tatokou             -INF             .            +INF             .          
+Tatokou     .Bakatchiraba        -INF             .            +INF             .          
+Tatokou     .Mayahi              -INF             .            +INF             .          
+Tatokou     .Koundoumaoua        -INF             .            +INF             .          
+Tatokou     .Sabon-Kafi          -INF             .            +INF             .          
+Bakatchiraba.In-Gall             -INF             .            +INF             .          
+Bakatchiraba.Aderbissinat        -INF             .            +INF             .          
+Bakatchiraba.Tessaoua            -INF             .            +INF             .          
+Bakatchiraba.Dakoro              -INF             .            +INF             .          
+Bakatchiraba.Tatokou             -INF             .            +INF             .          
+Bakatchiraba.Bakatchiraba        -INF             .            +INF             .          
+Bakatchiraba.Mayahi              -INF             .            +INF             .          
+Bakatchiraba.Koundoumaoua        -INF             .            +INF             .          
+Bakatchiraba.Sabon-Kafi          -INF             .            +INF             .          
+Mayahi      .In-Gall             -INF             .            +INF             .          
+Mayahi      .Aderbissinat        -INF             .            +INF             .          
+Mayahi      .Tessaoua            -INF             .            +INF             .          
+Mayahi      .Dakoro              -INF             .            +INF             .          
+Mayahi      .Tatokou             -INF             .            +INF             .          
+Mayahi      .Bakatchiraba        -INF             .            +INF             .          
+Mayahi      .Mayahi              -INF             .            +INF             .          
+Mayahi      .Koundoumaoua        -INF             .            +INF             .          
+Mayahi      .Sabon-Kafi          -INF             .            +INF             .          
+Koundoumaoua.In-Gall             -INF             .            +INF             .          
+Koundoumaoua.Aderbissinat        -INF             .            +INF             .          
+Koundoumaoua.Tessaoua            -INF             .            +INF             .          
+Koundoumaoua.Dakoro              -INF             .            +INF             .          
+Koundoumaoua.Tatokou             -INF             .            +INF             .          
+Koundoumaoua.Bakatchiraba        -INF             .            +INF             .          
+Koundoumaoua.Mayahi              -INF             .            +INF             .          
+Koundoumaoua.Koundoumaoua        -INF             .            +INF             .          
+Koundoumaoua.Sabon-Kafi          -INF             .            +INF             .          
+Sabon-Kafi  .In-Gall             -INF             .            +INF             .          
+Sabon-Kafi  .Aderbissinat        -INF             .            +INF             .          
+Sabon-Kafi  .Tessaoua            -INF             .            +INF             .          
+Sabon-Kafi  .Dakoro              -INF             .            +INF             .          
+Sabon-Kafi  .Tatokou             -INF             .            +INF             .          
+Sabon-Kafi  .Bakatchiraba        -INF             .            +INF             .          
+Sabon-Kafi  .Mayahi              -INF             .            +INF             .          
+Sabon-Kafi  .Koundoumaoua        -INF             .            +INF             .          
+Sabon-Kafi  .Sabon-Kafi          -INF             .            +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR zh                -INF             .            +INF             .          
+
+  zh  valor objetivo del apartado h
+
+---- VAR x  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .              .            +INF            EPS         
+In-Gall     .Zinder          .           102.8327        +INF             .          
+In-Gall     .Agadez          .              .            +INF            EPS         
+In-Gall     .Maradi          .              .            +INF            EPS         
+Aderbissinat.Tanaut          .              .            +INF            EPS         
+Aderbissinat.Zinder          .            53.3939        +INF             .          
+Aderbissinat.Agadez          .              .            +INF            EPS         
+Aderbissinat.Maradi          .              .            +INF            EPS         
+Tessaoua    .Tanaut          .              .            +INF            EPS         
+Tessaoua    .Zinder          .              .            +INF            EPS         
+Tessaoua    .Agadez          .              .            +INF            EPS         
+Tessaoua    .Maradi          .            85.0347        +INF             .          
+Dakoro      .Tanaut          .              .            +INF            EPS         
+Dakoro      .Zinder          .              .            +INF            EPS         
+Dakoro      .Agadez          .              .            +INF            EPS         
+Dakoro      .Maradi          .           140.4062        +INF             .          
+Tatokou     .Tanaut          .              .            +INF            EPS         
+Tatokou     .Zinder          .              .            +INF            EPS         
+Tatokou     .Agadez          .            25.7082        +INF             .          
+Tatokou     .Maradi          .              .            +INF            EPS         
+Bakatchiraba.Tanaut          .              .            +INF            EPS         
+Bakatchiraba.Zinder          .              .            +INF            EPS         
+Bakatchiraba.Agadez          .            19.7755        +INF             .          
+Bakatchiraba.Maradi          .              .            +INF            EPS         
+Mayahi      .Tanaut          .              .            +INF            EPS         
+Mayahi      .Zinder          .              .            +INF            EPS         
+Mayahi      .Agadez          .           179.9572        +INF             .          
+Mayahi      .Maradi          .              .            +INF            EPS         
+Koundoumaoua.Tanaut          .              .            +INF            EPS         
+Koundoumaoua.Zinder          .              .            +INF            EPS         
+Koundoumaoua.Agadez          .              .            +INF            EPS         
+Koundoumaoua.Maradi          .            19.7755        +INF             .          
+Sabon-Kafi  .Tanaut          .              .            +INF            EPS         
+Sabon-Kafi  .Zinder          .              .            +INF            EPS         
+Sabon-Kafi  .Agadez          .            11.8653        +INF             .          
+Sabon-Kafi  .Maradi          .              .            +INF            EPS         
+
+---- VAR construir  vale 1 si se construye el centro de reparto ce y 0 en caso contrario
+
+              LOWER          LEVEL          UPPER         MARGINAL
+
+Tanaut          .              .             1.0000         EPS         
+Zinder          .             1.0000         1.0000         EPS         
+Agadez          .             1.0000         1.0000         EPS         
+Maradi          .             1.0000         1.0000         EPS         
+
+---- VAR disy  vale 1 si obj se encuentra a mas de 200km de ce y 0 en caso contrario
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+In-Gall     .Tanaut          .             1.0000         1.0000         EPS         
+In-Gall     .Zinder          .              .             1.0000         EPS         
+In-Gall     .Agadez          .             1.0000         1.0000         EPS         
+In-Gall     .Maradi          .             1.0000         1.0000         EPS         
+Aderbissinat.Tanaut          .              .             1.0000         EPS         
+Aderbissinat.Zinder          .              .             1.0000         EPS         
+Aderbissinat.Agadez          .             1.0000         1.0000         EPS         
+Aderbissinat.Maradi          .             1.0000         1.0000         EPS         
+Tessaoua    .Tanaut          .              .             1.0000         EPS         
+Tessaoua    .Zinder          .             1.0000         1.0000         EPS         
+Tessaoua    .Agadez          .              .             1.0000         EPS         
+Tessaoua    .Maradi          .              .             1.0000         EPS         
+Dakoro      .Tanaut          .             1.0000         1.0000         EPS         
+Dakoro      .Zinder          .             1.0000         1.0000         EPS         
+Dakoro      .Agadez          .             1.0000         1.0000         EPS         
+Dakoro      .Maradi          .              .             1.0000         EPS         
+Tatokou     .Tanaut          .              .             1.0000         EPS         
+Tatokou     .Zinder          .             1.0000         1.0000         EPS         
+Tatokou     .Agadez          .              .             1.0000         EPS         
+Tatokou     .Maradi          .             1.0000         1.0000         EPS         
+Bakatchiraba.Tanaut          .              .             1.0000         EPS         
+Bakatchiraba.Zinder          .             1.0000         1.0000         EPS         
+Bakatchiraba.Agadez          .              .             1.0000         EPS         
+Bakatchiraba.Maradi          .             1.0000         1.0000         EPS         
+Mayahi      .Tanaut          .             1.0000         1.0000         EPS         
+Mayahi      .Zinder          .             1.0000         1.0000         EPS         
+Mayahi      .Agadez          .              .             1.0000         EPS         
+Mayahi      .Maradi          .              .             1.0000         EPS         
+Koundoumaoua.Tanaut          .              .             1.0000         EPS         
+Koundoumaoua.Zinder          .             1.0000         1.0000         EPS         
+Koundoumaoua.Agadez          .              .             1.0000         EPS         
+Koundoumaoua.Maradi          .              .             1.0000         EPS         
+Sabon-Kafi  .Tanaut          .              .             1.0000         EPS         
+Sabon-Kafi  .Zinder          .             1.0000         1.0000         EPS         
+Sabon-Kafi  .Agadez          .              .             1.0000         EPS         
+Sabon-Kafi  .Maradi          .             1.0000         1.0000         EPS         
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+                            50  PROJECTED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 04/12/21 12:56:22 Page 21
+Practica 1: Emergencia en Niger.
+E x e c u t i o n
+
+
+----    109 VARIABLE zh.L                  =        0.000  valor objetivo del apartado h
+
+----    109 VARIABLE x.L  toneladas enviadas a la poblacion obj desde el centro de distribucion ce
+
+                  Zinder      Agadez      Maradi
+
+In-Gall          102.833
+Aderbissinat      53.394
+Tessaoua                                  85.035
+Dakoro                                   140.406
+Tatokou                       25.708
+Bakatchiraba                  19.776
+Mayahi                       179.957
+Koundoumaoua                              19.776
+Sabon-Kafi                    11.865
+
+
+----    109 VARIABLE t.L  
+
+                      ( ALL       0.000 )
+
+
+
+EXECUTION TIME       =        0.125 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoAÒo\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoAÒo\SegundoCuatri\TECO\Programacion\Hoja1\EMERGENCIA EN NIGER.lst

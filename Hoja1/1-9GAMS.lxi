@@ -1,0 +1,19 @@
+B 3 C o m p i l a t i o n
+B 45 Equation Listing    SOLVE concesionario Using MIP From line 35
+D 48 fobj
+D 53 ac
+D 58 tr
+D 63 producimos
+B 73 Column Listing      SOLVE concesionario Using MIP From line 35
+E 76 Produc
+E 91 uds
+E 115 z
+B 123 Model Statistics    SOLVE concesionario Using MIP From line 35
+B 136 Solution Report     SOLVE concesionario Using MIP From line 35
+F 179 fobj
+F 180 ac
+F 181 tr
+F 187 producimos
+G 195 Produc
+G 203 uds
+G 213 z

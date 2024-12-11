@@ -1,0 +1,560 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 1
+Hoja 2 problema 5
+C o m p i l a t i o n
+
+
+   2   
+   3  sets
+   4      i mina /1*4/;
+   5   
+   6  parameters
+   7      c(i) coste (en euros por hora) de explotacion de la mina i
+   8              /   1  3000
+   9                  2  1700
+  10                  3  2600
+  11                  4  3200 /
+  12   
+  13      t(i) tasa de extraccion de oro (kilos por hora)
+  14              /   1   0.2
+  15                  2   0.1
+  16                  3   0.12
+  17                  4   0.15   /
+  18   
+  19      d(i) disponibilidad de oro (en kilos)
+  20              /   1   60
+  21                  2   40
+  22                  3   60
+  23                  4   50  /;
+  24   
+  25  scalars
+  26      venta  euros recibidos por kilo de oro vendido              / 35000 /
+  27      ventah euros pagados por hora de derechos de tabajo vendida /  3000 /;
+  28   
+  29  positive variable
+  30      x(i)  kilos extraidos de la mina i
+  31      h     numero de horas de derecho de explotacion vendidas;
+  32  h.up = 100
+  33   
+  34  variables
+  35      za    funcion objetivo del apartado a
+  36      zb    funcion objetivo del apartado b;
+  37   
+  38  binary variable
+  39      incompatibles variable que vale 1 si utilizamos la mina 1 y 0 si utilizamos la mina 2;
+  40   
+  41  equations
+  42      fobja    funcion objetivo del apartado a
+  43      max(i)   maximo numero de kilos extraidos de la mina i
+  44      htotala  maximo de horas disponibles para trabajar en las minas
+  45   
+  46      fobjb    funcion objetivo del apartado b
+  47      maxh     maximo numero de horas de derecho de explotacion vendidas
+  48      htotalb  max horas explotando las minas + horas vendidas
+  49   
+  50      maxc(i)  maximo numero de kilos extraidos de la mina i (las que no presentan incompatibilidades)
+  51      incomp1  añadimos la variable binaria que solo nos permite elegir mina 1 -
+  52      incomp2  - ó mina 2 para explotar;
+  53   
+  54      fobja..              za =E= sum(i, (venta - c(i)/t(i))*x(i));
+  55      max(i)..             x(i) =L= d(i);
+  56      htotala..            sum(i, x(i)/t(i)) =L= 1000;
+  57   
+  58      fobjb..              zb =E= sum(i, (venta - c(i)/t(i))*x(i)) + h*ventah;
+  59      htotalb..            sum(i, x(i)/t(i)) + h =L= 1000;
+  60   
+  61      maxc(i)$(ord(i)>2).. x(i) =L= d(i);
+  62      incomp1..            x('1') =L= d('1')*incompatibles;
+  63      incomp2..            x('2') =L= d('2')*(1-incompatibles);
+  64   
+  65  model apartadoa /fobja,max,htotala/;
+  66  solve apartadoa using lp maximizing za;
+  67   
+  68  model apartadob /fobjb,max,htotalb/;
+  69  solve apartadob using lp maximizing zb;
+  70   
+  71  model apartadoc /fobja,htotala,maxc,incomp1,incomp2/;
+  72  solve apartadoc using mip maximizing za;
+
+
+COMPILATION TIME     =        0.015 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 2
+Hoja 2 problema 5
+Equation Listing    SOLVE apartadoa Using LP From line 66
+
+
+---- fobja  =E=  funcion objetivo del apartado a
+
+fobja..  - 20000*x(1) - 18000*x(2) - 13333.3333333333*x(3) - 13666.6666666667*x(4) + za =E= 0 ; (LHS = 0)
+     
+
+---- max  =L=  maximo numero de kilos extraidos de la mina i
+
+max(1)..  x(1) =L= 60 ; (LHS = 0)
+     
+max(2)..  x(2) =L= 40 ; (LHS = 0)
+     
+max(3)..  x(3) =L= 60 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- htotala  =L=  maximo de horas disponibles para trabajar en las minas
+
+htotala..  5*x(1) + 10*x(2) + 8.33333333333333*x(3) + 6.66666666666667*x(4) =L= 1000 ; (LHS = 0)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 3
+Hoja 2 problema 5
+Column Listing      SOLVE apartadoa Using LP From line 66
+
+
+---- x  kilos extraidos de la mina i
+
+x(1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   -20000       fobja
+        1       max(1)
+        5       htotala
+
+x(2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   -18000       fobja
+        1       max(2)
+       10       htotala
+
+x(3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   -13333.3333  fobja
+        1       max(3)
+        8.3333  htotala
+
+REMAINING ENTRY SKIPPED
+
+---- za  funcion objetivo del apartado a
+
+za
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobja
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 4
+Hoja 2 problema 5
+Model Statistics    SOLVE apartadoa Using LP From line 66
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS            6
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            13
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 5
+Hoja 2 problema 5
+Solution Report     SOLVE apartadoa Using LP From line 66
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   apartadoa           OBJECTIVE  za
+     TYPE    LP                  DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  66
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE          2543333.3333
+
+ RESOURCE USAGE, LIMIT          0.016 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:      2543333.333333
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobja               .              .              .             1.0000      
+
+  fobja  funcion objetivo del apartado a
+
+---- EQU max  maximo numero de kilos extraidos de la mina i
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1        -INF           60.0000        60.0000     11000.0000      
+2        -INF           36.6667        40.0000          .          
+3        -INF             .            60.0000          .          
+4        -INF           50.0000        50.0000      1666.6667      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU htotala           -INF         1000.0000      1000.0000      1800.0000      
+
+  htotala  maximo de horas disponibles para trabajar en las minas
+
+---- VAR x  kilos extraidos de la mina i
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1          .            60.0000        +INF             .          
+2          .            36.6667        +INF             .          
+3          .              .            +INF        -1666.6667      
+4          .            50.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR za                -INF      2543333.3333        +INF             .          
+
+  za  funcion objetivo del apartado a
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 6
+Hoja 2 problema 5
+Equation Listing    SOLVE apartadob Using LP From line 69
+
+
+---- fobjb  =E=  funcion objetivo del apartado b
+
+fobjb..  - 20000*x(1) - 18000*x(2) - 13333.3333333333*x(3) - 13666.6666666667*x(4) - 3000*h + zb =E= 0 ; (LHS = -2543333.33333333, INFES = 2543333.33333333 ****)
+     
+
+---- max  =L=  maximo numero de kilos extraidos de la mina i
+
+max(1)..  x(1) =L= 60 ; (LHS = 60)
+     
+max(2)..  x(2) =L= 40 ; (LHS = 36.6666666666667)
+     
+max(3)..  x(3) =L= 60 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- htotalb  =L=  max horas explotando las minas + horas vendidas
+
+htotalb..  5*x(1) + 10*x(2) + 8.33333333333333*x(3) + 6.66666666666667*x(4) + h =L= 1000 ; (LHS = 1000)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 7
+Hoja 2 problema 5
+Column Listing      SOLVE apartadob Using LP From line 69
+
+
+---- x  kilos extraidos de la mina i
+
+x(1)
+                (.LO, .L, .UP, .M = 0, 60, +INF, 0)
+   -20000       fobjb
+        1       max(1)
+        5       htotalb
+
+x(2)
+                (.LO, .L, .UP, .M = 0, 36.6666666666667, +INF, 0)
+   -18000       fobjb
+        1       max(2)
+       10       htotalb
+
+x(3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, -1666.66666666667)
+   -13333.3333  fobjb
+        1       max(3)
+        8.3333  htotalb
+
+REMAINING ENTRY SKIPPED
+
+---- h  numero de horas de derecho de explotacion vendidas
+
+h
+                (.LO, .L, .UP, .M = 0, 0, 100, 0)
+    -3000       fobjb
+        1       htotalb
+
+
+---- zb  funcion objetivo del apartado b
+
+zb
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobjb
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 8
+Hoja 2 problema 5
+Model Statistics    SOLVE apartadob Using LP From line 69
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS            6
+BLOCKS OF VARIABLES           3     SINGLE VARIABLES            6
+NON ZERO ELEMENTS            15
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 9
+Hoja 2 problema 5
+Solution Report     SOLVE apartadob Using LP From line 69
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   apartadob           OBJECTIVE  zb
+     TYPE    LP                  DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  69
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE          2663333.3333
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:      2663333.333333
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjb               .              .              .             1.0000      
+
+  fobjb  funcion objetivo del apartado b
+
+---- EQU max  maximo numero de kilos extraidos de la mina i
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1        -INF           60.0000        60.0000     11000.0000      
+2        -INF           26.6667        40.0000          .          
+3        -INF             .            60.0000          .          
+4        -INF           50.0000        50.0000      1666.6667      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU htotalb           -INF         1000.0000      1000.0000      1800.0000      
+
+  htotalb  max horas explotando las minas + horas vendidas
+
+---- VAR x  kilos extraidos de la mina i
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1          .            60.0000        +INF             .          
+2          .            26.6667        +INF             .          
+3          .              .            +INF        -1666.6667      
+4          .            50.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR h                   .           100.0000       100.0000      1200.0000      
+---- VAR zb                -INF      2663333.3333        +INF             .          
+
+  h  numero de horas de derecho de explotacion vendidas
+  zb  funcion objetivo del apartado b
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 10
+Hoja 2 problema 5
+Equation Listing    SOLVE apartadoc Using MIP From line 72
+
+
+---- fobja  =E=  funcion objetivo del apartado a
+
+fobja..  - 20000*x(1) - 18000*x(2) - 13333.3333333333*x(3) - 13666.6666666667*x(4) + za =E= 0 ; (LHS = 180000, INFES = 180000 ****)
+     
+
+---- htotala  =L=  maximo de horas disponibles para trabajar en las minas
+
+htotala..  5*x(1) + 10*x(2) + 8.33333333333333*x(3) + 6.66666666666667*x(4) =L= 1000 ; (LHS = 900)
+     
+
+---- maxc  =L=  maximo numero de kilos extraidos de la mina i (las que no presentan incompatibilidades)
+
+maxc(3)..  x(3) =L= 60 ; (LHS = 0)
+     
+maxc(4)..  x(4) =L= 50 ; (LHS = 50)
+     
+
+---- incomp1  =L=  añadimos la variable binaria que solo nos permite elegir mina 1 -
+
+incomp1..  x(1) - 60*incompatibles =L= 0 ; (LHS = 60, INFES = 60 ****)
+     
+
+---- incomp2  =L=  - ó mina 2 para explotar
+
+incomp2..  x(2) + 40*incompatibles =L= 40 ; (LHS = 26.6666666666667)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 11
+Hoja 2 problema 5
+Column Listing      SOLVE apartadoc Using MIP From line 72
+
+
+---- x  kilos extraidos de la mina i
+
+x(1)
+                (.LO, .L, .UP, .M = 0, 60, +INF, 0)
+   -20000       fobja
+        5       htotala
+        1       incomp1
+
+x(2)
+                (.LO, .L, .UP, .M = 0, 26.6666666666667, +INF, 0)
+   -18000       fobja
+       10       htotala
+        1       incomp2
+
+x(3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, -1666.66666666667)
+   -13333.3333  fobja
+        8.3333  htotala
+        1       maxc(3)
+
+REMAINING ENTRY SKIPPED
+
+---- za  funcion objetivo del apartado a
+
+za
+                (.LO, .L, .UP, .M = -INF, 2543333.33333333, +INF, 0)
+        1       fobja
+
+
+---- incompatibles  variable que vale 1 si utilizamos la mina 1 y 0 si utilizamos la mina 2
+
+incompatibles
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      -60       incomp1
+       40       incomp2
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 12
+Hoja 2 problema 5
+Model Statistics    SOLVE apartadoc Using MIP From line 72
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            6
+BLOCKS OF VARIABLES           3     SINGLE VARIABLES            6
+NON ZERO ELEMENTS            15     DISCRETE VARIABLES          1
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/31/21 19:19:11 Page 13
+Hoja 2 problema 5
+Solution Report     SOLVE apartadoc Using MIP From line 72
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   apartadoc           OBJECTIVE  za
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  72
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE          2470000.0000
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         2    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.02 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Proven optimal solution
+MIP Solution:      2470000.000000    (2 iterations, 0 nodes)
+Final Solve:       2470000.000000    (1 iterations)
+
+Best possible:     2470000.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobja               .              .              .             1.0000      
+---- EQU htotala           -INF         1000.0000      1000.0000      1600.0000      
+
+  fobja  funcion objetivo del apartado a
+  htotala  maximo de horas disponibles para trabajar en las minas
+
+---- EQU maxc  maximo numero de kilos extraidos de la mina i (las que no presentan incompatibilidades)
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+3        -INF           44.0000        60.0000          .          
+4        -INF           50.0000        50.0000      3000.0000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU incomp1           -INF             .              .         12000.0000      
+---- EQU incomp2           -INF           40.0000        40.0000      2000.0000      
+
+  incomp1  añadimos la variable binaria que solo nos permite elegir mina 1 -
+  incomp2  - ó mina 2 para explotar
+
+---- VAR x  kilos extraidos de la mina i
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1          .            60.0000        +INF             .          
+2          .              .            +INF             .          
+3          .            44.0000        +INF             .          
+4          .            50.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR za                -INF      2470000.0000        +INF             .          
+---- VAR incompati~          .             1.0000         1.0000    640000.0000      
+
+  za  funcion objetivo del apartado a
+  incompatibles  variable que vale 1 si utilizamos la mina 1 y 0 si utilizamos la mina 2
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.094 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\2-5GAMS.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\Hoja1\2-5GAMS.lst

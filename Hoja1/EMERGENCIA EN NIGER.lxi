@@ -1,0 +1,136 @@
+B 3 C o m p i l a t i o n
+B 121 Equation Listing    SOLVE apartadoe Using MIP From line 96
+D 124 a
+D 129 disp
+D 134 b1
+D 139 b2
+D 150 c1
+D 161 c2
+D 172 d
+D 177 e
+B 183 Column Listing      SOLVE apartadoe Using MIP From line 96
+E 186 ze
+E 193 x
+E 224 construir
+E 270 disy
+B 290 Model Statistics    SOLVE apartadoe Using MIP From line 96
+B 303 Solution Report     SOLVE apartadoe Using MIP From line 96
+F 346 a
+F 347 disp
+F 348 b1
+F 354 b2
+F 395 c1
+F 436 c2
+F 479 d
+F 480 e
+G 487 ze
+G 491 x
+G 532 construir
+G 541 disy
+B 588 E x e c u t i o n
+I 590 ze
+I 591 x
+B 608 Equation Listing    SOLVE apartadof Using MIP From line 100
+D 611 a
+D 616 disp
+D 621 b1
+D 626 b2
+D 637 c1
+D 648 c2
+D 659 d
+D 664 f
+B 670 Column Listing      SOLVE apartadof Using MIP From line 100
+E 673 zf
+E 680 x
+E 711 construir
+E 760 disy
+B 780 Model Statistics    SOLVE apartadof Using MIP From line 100
+B 793 Solution Report     SOLVE apartadof Using MIP From line 100
+F 836 a
+F 837 disp
+F 838 b1
+F 844 b2
+F 885 c1
+F 926 c2
+F 969 d
+F 970 f
+G 977 zf
+G 981 x
+G 1022 construir
+G 1031 disy
+B 1078 E x e c u t i o n
+I 1080 zf
+I 1081 x
+I 1094 construir
+B 1102 Equation Listing    SOLVE apartadog Using MIP From line 104
+D 1105 a
+D 1110 disp
+D 1115 b1
+D 1120 b2
+D 1131 c1
+D 1142 c2
+D 1153 d
+D 1158 g
+D 1163 g1
+B 1175 Column Listing      SOLVE apartadog Using MIP From line 104
+E 1178 zg
+E 1185 x
+E 1219 construir
+E 1265 disy
+E 1284 beta
+B 1301 Model Statistics    SOLVE apartadog Using MIP From line 104
+B 1314 Solution Report     SOLVE apartadog Using MIP From line 104
+F 1357 a
+F 1358 disp
+F 1359 b1
+F 1365 b2
+F 1406 c1
+F 1447 c2
+F 1490 d
+F 1491 g
+F 1496 g1
+G 1539 zg
+G 1543 x
+G 1584 construir
+G 1593 disy
+G 1634 beta
+B 1681 E x e c u t i o n
+I 1683 zg
+I 1684 x
+I 1696 beta
+B 1714 Equation Listing    SOLVE apartadoh Using MIP From line 108
+D 1717 a
+D 1722 disp
+D 1727 b1
+D 1732 b2
+D 1743 c1
+D 1754 c2
+D 1765 d
+D 1770 h
+D 1781 h1
+B 1793 Column Listing      SOLVE apartadoh Using MIP From line 108
+E 1796 t
+E 1814 zh
+E 1901 x
+E 1977 construir
+E 2023 disy
+B 2043 Model Statistics    SOLVE apartadoh Using MIP From line 108
+B 2056 Solution Report     SOLVE apartadoh Using MIP From line 108
+F 2101 a
+F 2102 disp
+F 2103 b1
+F 2109 b2
+F 2150 c1
+F 2191 c2
+F 2234 d
+F 2238 h
+F 2324 h1
+G 2401 t
+G 2489 zh
+G 2493 x
+G 2534 construir
+G 2543 disy
+B 2591 E x e c u t i o n
+I 2593 zh
+I 2594 x
+I 2609 t

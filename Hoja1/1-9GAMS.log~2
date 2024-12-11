@@ -1,0 +1,68 @@
+--- Job 1-9GAMS.gms Start 03/06/21 18:34:16 34.3.0 rac355f3 WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\34\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    PageSize 0
+    ScrDir C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\225a\
+    SysDir C:\GAMS\34\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+          Universidad Complutense de Madrid, Spain                 DL033492
+          C:\GAMS\34\gamslice.txt
+          anggil@ucm.es, Angel Amando Gil Alamo                            
+          Demo license for demonstration and instructional purposes only
+GAMS 34.3.0   Copyright (C) 1987-2021 GAMS Development. All rights reserved
+--- Starting compilation
+--- 1-9GAMS.gms(7) 3 Mb 7 Errors
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+*** Error 148 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Dimension different - The symbol is referenced with more/less
+       indices as declared
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+--- 1-9GAMS.gms(8) 3 Mb 13 Errors
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+--- 1-9GAMS.gms(9) 3 Mb 19 Errors
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+*** Error 170 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Domain violation for element
+*** Error 610 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    At least one embedded value required
+--- 1-9GAMS.gms(30) 3 Mb 20 Errors
+*** Error 257 in C:\Users\Angel\Desktop\Uni\4.CuartoA�o\SegundoCuatri\TECO\Programacion\1-9GAMS.gms
+    Solve statement not checked because of previous errors
+--- 1-9GAMS.gms(30) 3 Mb 20 Errors
+*** Status: Compilation error(s)
+--- Job 1-9GAMS.gms Stop 03/06/21 18:34:16 elapsed 0:00:00.011

@@ -1,0 +1,17 @@
+B 3 C o m p i l a t i o n
+B 42 Equation Listing    SOLVE colores Using MIP From line 32
+D 45 fobj
+D 50 sumai
+D 61 sumaj
+D 72 subsec
+B 84 Column Listing      SOLVE colores Using MIP From line 32
+E 87 color
+E 114 z
+B 122 Model Statistics    SOLVE colores Using MIP From line 32
+B 135 Solution Report     SOLVE colores Using MIP From line 32
+F 178 fobj
+F 182 sumai
+F 191 sumaj
+F 200 subsec
+G 221 color
+G 244 z
