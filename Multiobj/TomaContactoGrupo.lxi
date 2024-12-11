@@ -1,0 +1,33 @@
+B 3 C o m p i l a t i o n
+B 47 Equation Listing    SOLVE ejemplo1 Using MIP From line 31
+D 50 fobj1
+D 55 tiempo
+D 60 total
+B 66 Column Listing      SOLVE ejemplo1 Using MIP From line 31
+E 69 x
+E 84 z1
+B 92 Model Statistics    SOLVE ejemplo1 Using MIP From line 31
+B 105 Solution Report     SOLVE ejemplo1 Using MIP From line 31
+F 148 fobj1
+F 149 tiempo
+F 150 total
+G 156 x
+G 165 z1
+B 175 E x e c u t i o n
+I 175 x
+B 184 Equation Listing    SOLVE ejemplo2 Using MIP From line 35
+D 187 fobj2
+D 192 tiempo
+D 197 total
+B 203 Column Listing      SOLVE ejemplo2 Using MIP From line 35
+E 206 x
+E 220 z2
+B 228 Model Statistics    SOLVE ejemplo2 Using MIP From line 35
+B 241 Solution Report     SOLVE ejemplo2 Using MIP From line 35
+F 284 fobj2
+F 285 tiempo
+F 286 total
+G 292 x
+G 301 z2
+B 311 E x e c u t i o n
+I 311 x

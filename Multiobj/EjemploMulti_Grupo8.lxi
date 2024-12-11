@@ -1,0 +1,295 @@
+B 3 C o m p i l a t i o n
+B 68 Equation Listing    SOLVE ejemplo1 Using MIP From line 44
+D 71 fobj1
+D 76 tiempo
+D 81 total
+B 87 Column Listing      SOLVE ejemplo1 Using MIP From line 44
+E 90 x
+E 105 z1
+B 113 Model Statistics    SOLVE ejemplo1 Using MIP From line 44
+B 126 Solution Report     SOLVE ejemplo1 Using MIP From line 44
+F 169 fobj1
+F 170 tiempo
+F 171 total
+G 177 x
+G 186 z1
+B 196 E x e c u t i o n
+I 196 x
+I 203 z1
+B 207 Equation Listing    SOLVE ejemplo2 Using MIP From line 48
+D 210 fobj2
+D 215 tiempo
+D 220 total
+B 226 Column Listing      SOLVE ejemplo2 Using MIP From line 48
+E 229 x
+E 243 z2
+B 251 Model Statistics    SOLVE ejemplo2 Using MIP From line 48
+B 264 Solution Report     SOLVE ejemplo2 Using MIP From line 48
+F 307 fobj2
+F 308 tiempo
+F 309 total
+G 315 x
+G 324 z2
+B 334 E x e c u t i o n
+I 334 x
+I 341 z2
+B 345 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 348 fobjmulti
+D 353 fobj1
+D 358 fobj2
+D 363 tiempo
+D 368 total
+B 374 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 377 x
+E 393 z1
+E 401 z2
+E 409 z3
+B 417 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 435 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 478 fobjmulti
+F 479 fobj1
+F 480 fobj2
+F 481 tiempo
+F 482 total
+G 490 x
+G 499 z1
+G 500 z2
+G 501 z3
+B 513 E x e c u t i o n
+I 515 lambda
+I 516 x
+I 522 z3
+B 526 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 529 fobjmulti
+D 534 fobj1
+D 539 fobj2
+D 544 tiempo
+D 549 total
+B 555 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 558 x
+E 574 z1
+E 582 z2
+E 590 z3
+B 598 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 616 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 659 fobjmulti
+F 660 fobj1
+F 661 fobj2
+F 662 tiempo
+F 663 total
+G 671 x
+G 680 z1
+G 681 z2
+G 682 z3
+B 694 E x e c u t i o n
+I 696 lambda
+I 697 x
+I 703 z3
+B 707 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 710 fobjmulti
+D 715 fobj1
+D 720 fobj2
+D 725 tiempo
+D 730 total
+B 736 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 739 x
+E 755 z1
+E 763 z2
+E 771 z3
+B 779 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 797 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 840 fobjmulti
+F 841 fobj1
+F 842 fobj2
+F 843 tiempo
+F 844 total
+G 852 x
+G 861 z1
+G 862 z2
+G 863 z3
+B 875 E x e c u t i o n
+I 877 lambda
+I 878 x
+I 884 z3
+B 888 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 891 fobjmulti
+D 896 fobj1
+D 901 fobj2
+D 906 tiempo
+D 911 total
+B 917 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 920 x
+E 936 z1
+E 944 z2
+E 952 z3
+B 960 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 978 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 1021 fobjmulti
+F 1022 fobj1
+F 1023 fobj2
+F 1024 tiempo
+F 1025 total
+G 1033 x
+G 1042 z1
+G 1043 z2
+G 1044 z3
+B 1056 E x e c u t i o n
+I 1058 lambda
+I 1059 x
+I 1065 z3
+B 1069 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 1072 fobjmulti
+D 1077 fobj1
+D 1082 fobj2
+D 1087 tiempo
+D 1092 total
+B 1098 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 1101 x
+E 1117 z1
+E 1125 z2
+E 1133 z3
+B 1141 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 1159 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 1202 fobjmulti
+F 1203 fobj1
+F 1204 fobj2
+F 1205 tiempo
+F 1206 total
+G 1214 x
+G 1223 z1
+G 1224 z2
+G 1225 z3
+B 1237 E x e c u t i o n
+I 1239 lambda
+I 1240 x
+I 1246 z3
+B 1250 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 1253 fobjmulti
+D 1258 fobj1
+D 1263 fobj2
+D 1268 tiempo
+D 1273 total
+B 1279 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 1282 x
+E 1298 z1
+E 1306 z2
+E 1314 z3
+B 1322 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 1340 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 1383 fobjmulti
+F 1384 fobj1
+F 1385 fobj2
+F 1386 tiempo
+F 1387 total
+G 1395 x
+G 1404 z1
+G 1405 z2
+G 1406 z3
+B 1418 E x e c u t i o n
+I 1420 lambda
+I 1421 x
+I 1427 z3
+B 1431 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 1434 fobjmulti
+D 1439 fobj1
+D 1444 fobj2
+D 1449 tiempo
+D 1454 total
+B 1460 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 1463 x
+E 1479 z1
+E 1487 z2
+E 1495 z3
+B 1503 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 1521 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 1564 fobjmulti
+F 1565 fobj1
+F 1566 fobj2
+F 1567 tiempo
+F 1568 total
+G 1576 x
+G 1585 z1
+G 1586 z2
+G 1587 z3
+B 1599 E x e c u t i o n
+I 1601 lambda
+I 1602 x
+I 1608 z3
+B 1612 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 1615 fobjmulti
+D 1620 fobj1
+D 1625 fobj2
+D 1630 tiempo
+D 1635 total
+B 1641 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 1644 x
+E 1660 z1
+E 1668 z2
+E 1676 z3
+B 1684 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 1702 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 1745 fobjmulti
+F 1746 fobj1
+F 1747 fobj2
+F 1748 tiempo
+F 1749 total
+G 1757 x
+G 1766 z1
+G 1767 z2
+G 1768 z3
+B 1780 E x e c u t i o n
+I 1782 lambda
+I 1783 x
+I 1789 z3
+B 1793 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 1796 fobjmulti
+D 1801 fobj1
+D 1806 fobj2
+D 1811 tiempo
+D 1816 total
+B 1822 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 1825 x
+E 1841 z1
+E 1849 z2
+E 1857 z3
+B 1865 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 1883 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 1926 fobjmulti
+F 1927 fobj1
+F 1928 fobj2
+F 1929 tiempo
+F 1930 total
+G 1938 x
+G 1947 z1
+G 1948 z2
+G 1949 z3
+B 1961 E x e c u t i o n
+I 1963 lambda
+I 1964 x
+I 1970 z3
+B 1974 Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+D 1977 fobjmulti
+D 1982 fobj1
+D 1987 fobj2
+D 1992 tiempo
+D 1997 total
+B 2003 Column Listing      SOLVE ejemplo3 Using MIP From line 56
+E 2006 x
+E 2022 z1
+E 2030 z2
+E 2037 z3
+B 2045 Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+B 2063 Solution Report     SOLVE ejemplo3 Using MIP From line 56
+F 2106 fobjmulti
+F 2107 fobj1
+F 2108 fobj2
+F 2109 tiempo
+F 2110 total
+G 2118 x
+G 2127 z1
+G 2128 z2
+G 2129 z3
+B 2141 E x e c u t i o n
+I 2143 lambda
+I 2144 x
+I 2150 z3

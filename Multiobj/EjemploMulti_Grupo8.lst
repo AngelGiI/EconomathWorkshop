@@ -1,0 +1,2164 @@
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 1
+Ej Programacion Multiobjetivo Grupo 8
+C o m p i l a t i o n
+
+
+   2   
+   3  set
+   4      i tipo de silla /A,B/
+   5      j bucle /1*10/
+   6  ;
+   7   
+   8  parameter
+   9      b(i) beneficios por vender cada tipo de silla /A 200, B 150/
+  10      lambda parametro para variar la relevancia de cada objetivo
+  11  ;
+  12   
+  13  scalars
+  14      tb  numero de sillas de tipo B que podriamos fabricar en un dia /500/
+  15      t   maximo de sillas totales fabricables en un dia /400/
+  16  ;
+  17   
+  18  variables
+  19      x(i) numero de sillas del tipo i que fabricamos
+  20      z1 valor objetivo 1
+  21      z2 valor objetivo 2
+  22      z3 valor objetivo 3
+  23  ;
+  24   
+  25  integer variables x;
+  26   
+  27  equations
+  28      fobj1 maximizamos beneficios
+  29      fobj2 priorizamos sillas de mayor calidad
+  30      fobjmulti combinacion de funciones obj
+  31      tiempo tenemos en cuenta el tiempo para cada proceso
+  32      total limitamos el numero de sillas que podemos hacer;
+  33   
+  34      fobj1.. z1 =E= sum(i, b(i)*x(i));
+  35      fobj2.. z2 =E= x('A');
+  36  *Tenemos que normalizar, para ello divido por los maximos de cada obj
+  37      fobjmulti.. z3 =E= lambda*z1/65000 + (1-lambda)*z2/250;
+  38      tiempo.. 2*x('A') + x('B') =L= tb;
+  39      total.. sum(i,x(i)) =L= t;
+  40   
+  41  x.up(i)=t;
+  42   
+  43  Model ejemplo1 /fobj1,tiempo,total/;
+  44  solve ejemplo1 using mip maximizing Z1;
+  45  display x.l,z1.l;
+  46   
+  47  Model ejemplo2 /fobj2,tiempo,total/;
+  48  solve ejemplo2 using mip maximizing Z2;
+  49  display x.l,z2.l;
+  50   
+  51  Model ejemplo3 /fobjmulti,fobj1,fobj2,tiempo,total/;
+  52  *solve ejemplo3 using mip maximizing Z3;
+  53  *display x.l,z3.l;
+  54   
+  55  loop(j, lambda = ord(j)/card(j);
+  56  solve ejemplo3 using mip maximizing Z3;
+  57  display lambda,x.l,z3.l);
+  58   
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 2
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo1 Using MIP From line 44
+
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 0)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 0)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 3
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo1 Using MIP From line 44
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0)
+     -200       fobj1
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobj1
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 4
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo1 Using MIP From line 44
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS            3
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES            3
+NON ZERO ELEMENTS             7     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 5
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo1 Using MIP From line 44
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo1            OBJECTIVE  z1
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  44
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE            65000.0000
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         2    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:        65000.000000    (2 iterations, 0 nodes)
+Final Solve:         65000.000000    (0 iterations)
+
+Best possible:       65000.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobj1               .              .              .             1.0000      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          400.0000       400.0000          .          
+
+  fobj1  maximizamos beneficios
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           100.0000       400.0000       200.0000      
+B          .           300.0000       400.0000       150.0000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        65000.0000        +INF             .          
+
+  z1  valor objetivo 1
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 6
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     45 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 100.000,    B 300.000
+
+
+----     45 VARIABLE z1.L                  =    65000.000  valor objetivo 1
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 7
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo2 Using MIP From line 48
+
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = -100, INFES = 100 ****)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 400)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 8
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo2 Using MIP From line 48
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 100, 400, 200)
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 300, 400, 150)
+        1       tiempo
+        1       total
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobj2
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 9
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo2 Using MIP From line 48
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS            3
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES            3
+NON ZERO ELEMENTS             6     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 10
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo2 Using MIP From line 48
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo2            OBJECTIVE  z2
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  48
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE              250.0000
+
+ RESOURCE USAGE, LIMIT          0.015 10000000000.000
+ ITERATION COUNT, LIMIT         0    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:          250.000000    (0 iterations, 0 nodes)
+Final Solve:           250.000000    (0 iterations)
+
+Best possible:         250.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobj2               .              .              .             1.0000      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          250.0000       400.0000          .          
+
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           250.0000       400.0000         1.0000      
+B          .              .           400.0000         EPS         
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z2                -INF          250.0000        +INF             .          
+
+  z2  valor objetivo 2
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 11
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     49 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 250.000
+
+
+----     49 VARIABLE z2.L                  =      250.000  valor objetivo 2
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 12
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 1.53846153846154E-6*z1 - 0.0036*z2 + z3 =E= 0 ; (LHS = -1, INFES = 1 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 15000, INFES = 15000 ****)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 250)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 13
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 250, 400, 1)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, EPS)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 65000, +INF, 0)
+  -1.538462E-6  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 250, +INF, 0)
+       -0.0036  fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 14
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   1
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 1
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 15
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.9769
+
+ RESOURCE USAGE, LIMIT          0.015 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.02sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.976923    (1 iterations, 0 nodes)
+Final Solve:             0.976923    (0 iterations)
+
+Best possible:           0.976923
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       1.5384615E-6      
+---- EQU fobj2               .              .              .             0.0036      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          250.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           250.0000       400.0000         0.0039      
+B          .              .           400.0000         0.0002      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        50000.0000        +INF             .          
+---- VAR z2                -INF          250.0000        +INF             .          
+---- VAR z3                -INF            0.9769        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 16
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.100  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 250.000
+
+
+----     57 VARIABLE z3.L                  =        0.977  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 17
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 3.07692307692308E-6*z1 - 0.0032*z2 + z3 =E= 0 ; (LHS = 0.0230769230769231, INFES = 0.0230769230769231 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 250)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 18
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 250, 400, 0.00390769230769231)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0.000230769230769231)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 50000, +INF, 0)
+  -3.076923E-6  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 250, +INF, 0)
+       -0.0032  fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.976923076923077, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 19
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   2
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 2
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 20
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.9538
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.953846    (1 iterations, 0 nodes)
+Final Solve:             0.953846    (0 iterations)
+
+Best possible:           0.953846
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       3.0769231E-6      
+---- EQU fobj2               .              .              .             0.0032      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          250.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           250.0000       400.0000         0.0038      
+B          .              .           400.0000         0.0005      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        50000.0000        +INF             .          
+---- VAR z2                -INF          250.0000        +INF             .          
+---- VAR z3                -INF            0.9538        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 21
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.200  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 250.000
+
+
+----     57 VARIABLE z3.L                  =        0.954  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 22
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 4.61538461538462E-6*z1 - 0.0028*z2 + z3 =E= 0 ; (LHS = 0.0230769230769231, INFES = 0.0230769230769231 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 250)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 23
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 250, 400, 0.00381538461538462)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0.000461538461538462)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 50000, +INF, 0)
+  -4.615385E-6  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 250, +INF, 0)
+       -0.0028  fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.953846153846154, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 24
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   3
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 3
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 25
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.9308
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.930769    (1 iterations, 0 nodes)
+Final Solve:             0.930769    (0 iterations)
+
+Best possible:           0.930769
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       4.6153846E-6      
+---- EQU fobj2               .              .              .             0.0028      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          250.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           250.0000       400.0000         0.0037      
+B          .              .           400.0000         0.0007      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        50000.0000        +INF             .          
+---- VAR z2                -INF          250.0000        +INF             .          
+---- VAR z3                -INF            0.9308        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 26
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.300  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 250.000
+
+
+----     57 VARIABLE z3.L                  =        0.931  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 27
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 6.15384615384615E-6*z1 - 0.0024*z2 + z3 =E= 0 ; (LHS = 0.0230769230769232, INFES = 0.0230769230769232 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 250)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 28
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 250, 400, 0.00372307692307692)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0.000692307692307692)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 50000, +INF, 0)
+  -6.153846E-6  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 250, +INF, 0)
+       -0.0024  fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.930769230769231, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 29
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   4
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 4
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 30
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.9077
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.907692    (1 iterations, 0 nodes)
+Final Solve:             0.907692    (0 iterations)
+
+Best possible:           0.907692
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       6.1538462E-6      
+---- EQU fobj2               .              .              .             0.0024      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          250.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           250.0000       400.0000         0.0036      
+B          .              .           400.0000         0.0009      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        50000.0000        +INF             .          
+---- VAR z2                -INF          250.0000        +INF             .          
+---- VAR z3                -INF            0.9077        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 31
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.400  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 250.000
+
+
+----     57 VARIABLE z3.L                  =        0.908  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 32
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 7.69230769230769E-6*z1 - 0.002*z2 + z3 =E= 0 ; (LHS = 0.0230769230769231, INFES = 0.0230769230769231 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 250)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 33
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 250, 400, 0.00363076923076923)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0.000923076923076923)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 50000, +INF, 0)
+  -7.692308E-6  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 250, +INF, 0)
+       -0.002   fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.907692307692308, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 34
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   5
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.015 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 5
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 35
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.8846
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.884615    (1 iterations, 0 nodes)
+Final Solve:             0.884615    (0 iterations)
+
+Best possible:           0.884615
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       7.6923077E-6      
+---- EQU fobj2               .              .              .             0.0020      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          250.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           250.0000       400.0000         0.0035      
+B          .              .           400.0000         0.0012      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        50000.0000        +INF             .          
+---- VAR z2                -INF          250.0000        +INF             .          
+---- VAR z3                -INF            0.8846        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 36
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.500  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 250.000
+
+
+----     57 VARIABLE z3.L                  =        0.885  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 37
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 9.23076923076923E-6*z1 - 0.0016*z2 + z3 =E= 0 ; (LHS = 0.023076923076923, INFES = 0.023076923076923 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 250)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 38
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 250, 400, 0.00353846153846154)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0.00115384615384615)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 50000, +INF, 0)
+  -9.230769E-6  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 250, +INF, 0)
+       -0.0016  fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.884615384615385, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 39
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   6
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.015 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 6
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 40
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.8615
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.861538    (1 iterations, 0 nodes)
+Final Solve:             0.861538    (0 iterations)
+
+Best possible:           0.861538
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       9.2307692E-6      
+---- EQU fobj2               .              .              .             0.0016      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          250.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           250.0000       400.0000         0.0034      
+B          .              .           400.0000         0.0014      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        50000.0000        +INF             .          
+---- VAR z2                -INF          250.0000        +INF             .          
+---- VAR z3                -INF            0.8615        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 41
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.600  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 250.000
+
+
+----     57 VARIABLE z3.L                  =        0.862  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 42
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 1.07692307692308E-5*z1 - 0.0012*z2 + z3 =E= 0 ; (LHS = 0.0230769230769231, INFES = 0.0230769230769231 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 250)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 43
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 250, 400, 0.00344615384615385)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0.00138461538461538)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 50000, +INF, 0)
+  -1.076923E-5  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 250, +INF, 0)
+       -0.0012  fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.861538461538462, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 44
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   7
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.015 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 7
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 45
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.8385
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.838462    (1 iterations, 0 nodes)
+Final Solve:             0.838462    (0 iterations)
+
+Best possible:           0.838462
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       1.0769231E-5      
+---- EQU fobj2               .              .              .             0.0012      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          250.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           250.0000       400.0000         0.0034      
+B          .              .           400.0000         0.0016      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        50000.0000        +INF             .          
+---- VAR z2                -INF          250.0000        +INF             .          
+---- VAR z3                -INF            0.8385        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 46
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.700  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 250.000
+
+
+----     57 VARIABLE z3.L                  =        0.838  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 47
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 1.23076923076923E-5*z1 - 0.0008*z2 + z3 =E= 0 ; (LHS = 0.0230769230769232, INFES = 0.0230769230769232 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 250)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 48
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 250, 400, 0.00335384615384615)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 0, 400, 0.00161538461538462)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 50000, +INF, 0)
+  -1.230769E-5  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 250, +INF, 0)
+       -0.0008  fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.838461538461538, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 49
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   8
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 8
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 50
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.8800
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         2    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.880000    (2 iterations, 0 nodes)
+Final Solve:             0.880000    (0 iterations)
+
+Best possible:           0.880000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       1.2307692E-5      
+---- EQU fobj2               .              .              .             0.0008      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          400.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           100.0000       400.0000         0.0033      
+B          .           300.0000       400.0000         0.0018      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        65000.0000        +INF             .          
+---- VAR z2                -INF          100.0000        +INF             .          
+---- VAR z3                -INF            0.8800        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 51
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.800  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 100.000,    B 300.000
+
+
+----     57 VARIABLE z3.L                  =        0.880  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 52
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 1.38461538461538E-5*z1 - 0.0004*z2 + z3 =E= 0 ; (LHS = -0.0599999999999999, INFES = 0.0599999999999999 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 400)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 53
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 100, 400, 0.00326153846153846)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 300, 400, 0.00184615384615385)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 65000, +INF, 0)
+  -1.384615E-5  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 100, +INF, 0)
+       -0.0004  fobjmulti
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.88, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 54
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   9
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 9
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 55
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                0.9400
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         2    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            0.940000    (2 iterations, 0 nodes)
+Final Solve:             0.940000    (0 iterations)
+
+Best possible:           0.940000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       1.3846154E-5      
+---- EQU fobj2               .              .              .             0.0004      
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          400.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           100.0000       400.0000         0.0032      
+B          .           300.0000       400.0000         0.0021      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        65000.0000        +INF             .          
+---- VAR z2                -INF          100.0000        +INF             .          
+---- VAR z3                -INF            0.9400        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 56
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        0.900  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 100.000,    B 300.000
+
+
+----     57 VARIABLE z3.L                  =        0.940  valor objetivo 3
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 57
+Ej Programacion Multiobjetivo Grupo 8
+Equation Listing    SOLVE ejemplo3 Using MIP From line 56
+
+
+---- fobjmulti  =E=  combinacion de funciones obj
+
+fobjmulti..  - 1.53846153846154E-5*z1 + z3 =E= 0 ; (LHS = -0.0600000000000001, INFES = 0.0600000000000001 ****)
+     
+
+---- fobj1  =E=  maximizamos beneficios
+
+fobj1..  - 200*x(A) - 150*x(B) + z1 =E= 0 ; (LHS = 0)
+     
+
+---- fobj2  =E=  priorizamos sillas de mayor calidad
+
+fobj2..  - x(A) + z2 =E= 0 ; (LHS = 0)
+     
+
+---- tiempo  =L=  tenemos en cuenta el tiempo para cada proceso
+
+tiempo..  2*x(A) + x(B) =L= 500 ; (LHS = 500)
+     
+
+---- total  =L=  limitamos el numero de sillas que podemos hacer
+
+total..  x(A) + x(B) =L= 400 ; (LHS = 400)
+     
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 58
+Ej Programacion Multiobjetivo Grupo 8
+Column Listing      SOLVE ejemplo3 Using MIP From line 56
+
+
+---- x  numero de sillas del tipo i que fabricamos
+
+x(A)
+                (.LO, .L, .UP, .M = 0, 100, 400, 0.00316923076923077)
+     -200       fobj1
+       -1       fobj2
+        2       tiempo
+        1       total
+
+x(B)
+                (.LO, .L, .UP, .M = 0, 300, 400, 0.00207692307692308)
+     -150       fobj1
+        1       tiempo
+        1       total
+
+
+---- z1  valor objetivo 1
+
+z1
+                (.LO, .L, .UP, .M = -INF, 65000, +INF, 0)
+  -1.538462E-5  fobjmulti
+        1       fobj1
+
+
+---- z2  valor objetivo 2
+
+z2
+                (.LO, .L, .UP, .M = -INF, 100, +INF, 0)
+        1       fobj2
+
+
+---- z3  valor objetivo 3
+
+z3
+                (.LO, .L, .UP, .M = -INF, 0.94, +INF, 0)
+        1       fobjmulti
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 59
+Ej Programacion Multiobjetivo Grupo 8
+Model Statistics    SOLVE ejemplo3 Using MIP From line 56
+
+
+LOOPS                                    j   10
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           5     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            11     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+               L O O P S                  j 10
+
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 60
+Ej Programacion Multiobjetivo Grupo 8
+Solution Report     SOLVE ejemplo3 Using MIP From line 56
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ejemplo3            OBJECTIVE  z3
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  56
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                1.0000
+
+ RESOURCE USAGE, LIMIT          0.016 10000000000.000
+ ITERATION COUNT, LIMIT         2    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 20.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.02sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Proven optimal solution
+MIP Solution:            1.000000    (2 iterations, 0 nodes)
+Final Solve:             1.000000    (0 iterations)
+
+Best possible:           1.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU fobjmulti           .              .              .             1.0000      
+---- EQU fobj1               .              .              .       1.5384615E-5      
+---- EQU fobj2               .              .              .             EPS         
+---- EQU tiempo            -INF          500.0000       500.0000          .          
+---- EQU total             -INF          400.0000       400.0000          .          
+
+  fobjmulti  combinacion de funciones obj
+  fobj1  maximizamos beneficios
+  fobj2  priorizamos sillas de mayor calidad
+  tiempo  tenemos en cuenta el tiempo para cada proceso
+  total  limitamos el numero de sillas que podemos hacer
+
+---- VAR x  numero de sillas del tipo i que fabricamos
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+A          .           100.0000       400.0000         0.0031      
+B          .           300.0000       400.0000         0.0023      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z1                -INF        65000.0000        +INF             .          
+---- VAR z2                -INF          100.0000        +INF             .          
+---- VAR z3                -INF            1.0000        +INF             .          
+
+  z1  valor objetivo 1
+  z2  valor objetivo 2
+  z3  valor objetivo 3
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 34.3.0  rac355f3 Released Feb 25, 2021 WEX-WEI x86 64bit/MS Windows - 03/16/21 16:27:15 Page 61
+Ej Programacion Multiobjetivo Grupo 8
+E x e c u t i o n
+
+
+----     57 PARAMETER lambda               =        1.000  parametro para variar la relevancia de cada objetivo
+
+----     57 VARIABLE x.L  numero de sillas del tipo i que fabricamos
+
+A 100.000,    B 300.000
+
+
+----     57 VARIABLE z3.L                  =        1.000  valor objetivo 3
+
+
+EXECUTION TIME       =        0.547 SECONDS      4 MB  34.3.0 rac355f3 WEX-WEI
+
+
+USER: GAMS Demo license for Angel Amando Gil Alamo   G210228|0002CO-GEN
+      Universidad Complutense de Madrid, Spain                 DL033492
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\EjemploMulti_Grupo8.gms
+Output     C:\Users\Angel\Desktop\Uni\4.CuartoAño\SegundoCuatri\TECO\Programacion\EjemploMulti_Grupo8.lst
